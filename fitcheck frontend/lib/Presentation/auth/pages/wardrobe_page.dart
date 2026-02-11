@@ -7,33 +7,66 @@ class WardrobePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-	return Scaffold(
-		body: BacklightGradient(
-			colorBg: const Color.fromRGBO(59, 44, 32, 1),
+    return Scaffold(
+      body: BacklightGradient(
+        colorBg: const Color.fromARGB(255, 65, 42, 24),
 
-    light1: const [
-      Color.fromRGBO(255, 255, 255, 1),
-      Color.fromRGBO(59, 44, 32, 1),
-      Color.fromRGBO(91, 91, 91, 0.3),
-    ],
+        light1: const [
+          Color.fromRGBO(125, 124, 124, 1),
+          Color.fromRGBO(59, 44, 32, 1),
+          Color.fromRGBO(91, 91, 91, 0.3),
+        ],
 
-    light1Alignment: const Alignment(0.8, -0.8),
-    light1Radius: 2,
+        light1Alignment: const Alignment(1, -1.5),
+        light1Radius: 2,
 
-    light2: const [
-      Color.fromRGBO(192, 192, 192, 0.2),
-      Color.fromRGBO(59, 44, 32, 0.3),
-      Color.fromRGBO(59, 44, 32, 1),
-    ],
+        light2: const [
+          Color.fromRGBO(106, 106, 106, 0.502),
+          Color.fromRGBO(59, 44, 32, .5),
+          Color.fromRGBO(59, 44, 32, .5),
+        ],
 
-    light2Alignment: const Alignment(-1, 1),
-    light2Radius: 1.5,
+        light2Alignment: const Alignment(-1, 1),
+        light2Radius: 1,
 
-    blur: 90,
+        blur: 100,
 
-    child: Text('Wardrobe Page'),
-  ),
-);
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/images/logo.png',
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: TextField(
+                  decoration: InputDecoration(
+                    hintText: '',
+                    suffixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    
+
+                    
+                  ),
+                ),
+              )
+              ]
+              )
+              )
+              ]
+              )
+              )
+                    )
+    );
+                  
+                
+     
   }
 }
-

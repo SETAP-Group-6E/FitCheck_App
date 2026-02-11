@@ -25,7 +25,7 @@ class BacklightGradient extends StatelessWidget {
     required this.child,
 
     // Background
-    this.colorBg = const Color.fromARGB(255, 40, 29, 18),
+    this.colorBg = const Color.fromARGB(255, 44, 33, 23),
 
     // light 1 (center → edge)
     this.light1 = const [
@@ -33,7 +33,7 @@ class BacklightGradient extends StatelessWidget {
       Color.fromARGB(255, 76, 71, 65), 
       Color.fromARGB(0, 255, 152, 0), 
     ],
-    this.light1Alignment = const Alignment(-0.6, -0.5),
+    this.light1Alignment = const Alignment(-0.5, -0.5),
     this.light1Radius = 1.2,
 
     // light 2
@@ -46,7 +46,7 @@ class BacklightGradient extends StatelessWidget {
     this.light2Radius = 0.9,
 
     // Blur
-    this.blur = 80,
+    this.blur = 50,
   });
 
   @override
@@ -101,7 +101,7 @@ class BacklightGradient extends StatelessWidget {
           radius: radius,
 
           // Important: multi-stop gradient
-          stops: const [0.0, 0.4, 1.0],
+          stops: const [0.0, 0.6, 1.0],
 
           colors: colors,
         ),
