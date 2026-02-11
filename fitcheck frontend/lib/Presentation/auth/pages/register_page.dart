@@ -37,8 +37,10 @@ class RegisterPage extends ConsumerWidget {
                     email: emailController.text.trim(),
                     password: passwordController.text.trim(),
                   );
+                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Success! Check your email.')));
                 } catch (e) {
+                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
                 }
               },

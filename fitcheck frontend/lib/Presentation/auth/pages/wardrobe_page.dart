@@ -40,7 +40,7 @@ class WardrobePage extends StatelessWidget {
                 child: Row(
                   children: [
                     Image.asset(
-                      'assets/images/logo.png',
+                      'Assets/Images/logo_white.png',
                         ),
                         const SizedBox(width: 12),
                         Expanded(child: TextField(
