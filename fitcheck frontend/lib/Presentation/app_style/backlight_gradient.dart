@@ -38,8 +38,8 @@ class BacklightGradient extends StatelessWidget {
 
     // light 2
     this.light2 = const [
-      Color.fromARGB(255, 38, 38, 38),
-      Color.fromARGB(255, 76, 71, 65),
+      Color.fromARGB(255, 0, 0, 0),
+      Color.fromARGB(255, 0, 0, 0),
       Color.fromARGB(0, 255, 152, 0),
     ],
     this.light2Alignment = const Alignment(0.6, 0.4),
