@@ -39,17 +39,24 @@ class WardrobePage extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    Image.asset(
-                      'Assets/Images/logo_white.png',
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(
+                        'assets/logo_white.png',
+                        width: 110,
+                        height: 110,
+                          ),
+                    ),
                         const SizedBox(width: 12),
                         Expanded(child: TextField(
                   decoration: InputDecoration(
+                    filled:true,
+                    fillColor: const Color.fromARGB(55, 0, 0, 0),
                     hintText: '',
-                    suffixIcon: Icon(Icons.search),
+                    suffixIcon: Icon(Icons.search, color: Colors.white,),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide:BorderSide.none,                 ),
                     
 
                     
