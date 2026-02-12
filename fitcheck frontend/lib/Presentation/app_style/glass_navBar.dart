@@ -11,7 +11,7 @@ class GlassNavBar extends StatelessWidget {
   const GlassNavBar({
     super.key,
     required this.items,
-    this.width = 400,
+    this.width = 450,
     this.height = 60,
     this.bottomPadding = 10,
     this.borderRadius = const BorderRadius.all(Radius.circular(15)),
@@ -26,7 +26,8 @@ class GlassNavBar extends StatelessWidget {
       child: Center(
         child: GlassFrame(
           borderRadius: borderRadius,
-          child: SizedBox(
+          child: Container(
+            color: const Color.fromRGBO(0, 0, 0, 0.2),
             width: width,
             height: height,
             child: Row(
