@@ -23,7 +23,7 @@ class WardrobePage extends StatelessWidget {
         light2: const [
           Color.fromRGBO(0, 0, 0, 1),
           Color.fromRGBO(59, 44, 32, .5),
-          Color.fromRGBO(45, 34, 24, 0.502),
+          Color.fromRGBO(35, 22, 10, 0.536),
         ],
 
         light2Alignment: const Alignment(-1, 1),
@@ -42,38 +42,71 @@ class WardrobePage extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Image.asset(
-                        'assets/logo_white.png',
-                        width: 80,
-                        height: 80,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
                       child: GlassFrame(
-                        child: TextField(
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            filled: false,
-                            fillColor: const Color.fromRGBO(0, 0, 0, 0.4),
-                            hintText: '',
-                            suffixIcon: Icon(Icons.search, color: Colors.white, size: 20),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
+                        child: Container(
+                          padding: const EdgeInsets.all(8), 
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(0, 0, 0, 0.2),
+
+                            borderRadius: BorderRadius.circular(
+                              20,
                             ),
+                          ),
+                          child: Icon(
+                            Icons.settings_outlined,
+                            color: Colors.white, 
+                            size: 20,
                           ),
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(Icons.filter_list_outlined, color: Colors.white, size: 20),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(Icons.grid_view, color: Colors.white, size: 20),
-                    ),
+                    const SizedBox(width: 12),
+                    
+                      Padding(
+                        padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.56),
+                        child:GlassFrame(
+                        child:  Container(
+                        padding: const EdgeInsets.all(3), 
+                        decoration: BoxDecoration(
+                          color: Color.fromRGBO(0, 0, 0, 0.2),
+                        
+                          borderRadius: BorderRadius.circular(
+                            20,
+                          ),
+                        ),
+                        child:
+                        Row(
+                          children: [
+                            Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Icon(
+                          Icons.search,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                                            ),
+                                            Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.filter_list_outlined,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                                            ),
+                                            Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.grid_view,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                                            ),
+                          ]
+                        )
+                                             
+                                            ),)
+                      ),
+                    
                   ],
                 ),
               ),
