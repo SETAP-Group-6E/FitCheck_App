@@ -27,4 +27,14 @@ class SupabaseAuthRepository implements AuthRepository {
       });
     }
   }
+  @override
+  Future<void> signIn({
+    required String email, 
+    required String password
+  }) async {
+    await _supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+  }
 }
