@@ -124,6 +124,45 @@ class WardrobePage extends StatelessWidget {
                               ),
                             ),
                           ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GlassFrame(
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width * 0.27,
+                                  height: 65,
+                                  padding: const EdgeInsets.all(30),
+                                  decoration: BoxDecoration(
+                                    color: Color.fromRGBO(0, 0, 0, 0.2),
+                                    borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),),
+                              SizedBox(width: 20),
+                              GlassFrame(
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width * 0.27,
+                                  height: 65,
+                                  padding: const EdgeInsets.all(30),
+                                  decoration: BoxDecoration(
+                                    color: Color.fromRGBO(0, 0, 0, 0.2),
+                                    borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),),
+                              SizedBox(width: 20),
+                              GlassFrame(
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width * 0.27,
+                                  height: 65,
+                                  padding: const EdgeInsets.all(30),
+                                  decoration: BoxDecoration(
+                                    color: Color.fromRGBO(0, 0, 0, 0.2),
+                                    borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),),
+                            ],
+
+                          ),
+                          SizedBox(height: 10),
                           GlassFrame(
                             child: Container(
                               width: MediaQuery.of(context).size.width * 0.9,
