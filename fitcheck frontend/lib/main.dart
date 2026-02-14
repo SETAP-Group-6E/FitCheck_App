@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'Presentation/auth/pages/register_page.dart';
-import 'Presentation/pages_wardrobe/wardrobe_page.dart';
+import 'Presentation/auth/pages/wardrobe_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const WardrobePage(),
+      //home: const RegisterPage(),
     );
   }
 }
