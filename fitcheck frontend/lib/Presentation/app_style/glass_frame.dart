@@ -12,7 +12,7 @@ class GlassFrame extends StatelessWidget {
     required this.child,
     this.blur = 8.0,
     this.opacity = 0.2,
-    this.borderRadius = const BorderRadius.all(Radius.circular(20)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(15)),
   });
 
   @override

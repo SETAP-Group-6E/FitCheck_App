@@ -11,10 +11,10 @@ class GlassNavBar extends StatelessWidget {
   const GlassNavBar({
     super.key,
     required this.items,
-    this.width = 450,
+    this.width = 470,
     this.height = 60,
-    this.bottomPadding = 10,
-    this.borderRadius = const BorderRadius.all(Radius.circular(15)),
+    this.bottomPadding = 20,
+    this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
 
   @override

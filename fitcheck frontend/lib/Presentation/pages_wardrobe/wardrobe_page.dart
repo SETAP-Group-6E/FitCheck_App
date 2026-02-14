@@ -34,165 +34,178 @@ class WardrobePage extends StatelessWidget {
 
             blur: 100,
 
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: GlassFrame(
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Color.fromRGBO(0, 0, 0, 0.2),
+            child: SizedBox(),
+          ),
+          Column(
+            children: [
+             
+              //non scrollable content
 
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Icon(
-                                Icons.settings_outlined,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(child: SizedBox()),
-
-                        Padding(
-                          padding: EdgeInsets.only(left: 10),
-                          child: GlassFrame(
-                            child: Container(
-                              padding: const EdgeInsets.all(3),
-                              decoration: BoxDecoration(
-                                color: Color.fromRGBO(0, 0, 0, 0.2),
-
-                                borderRadius: BorderRadius.circular(20),
-                              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                          children: [
+                            
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
                               child: Row(
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: Icon(
-                                      Icons.search,
-                                      color: Colors.white,
-                                      size: 20,
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GlassFrame(
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Color.fromRGBO(0, 0, 0, 0.2),
+                    
+                                          borderRadius: BorderRadius.circular(1),
+                                        ),
+                                        child: Icon(
+                                          Icons.settings_outlined,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
                                     ),
                                   ),
+                                  Expanded(child: SizedBox()),
+                    
                                   Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Icon(
-                                      Icons.filter_list_outlined,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Icon(
-                                      Icons.grid_view,
-                                      color: Colors.white,
-                                      size: 20,
+                                    padding: EdgeInsets.only(left: 10),
+                                    child: GlassFrame(
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: BoxDecoration(
+                                          color: Color.fromRGBO(0, 0, 0, 0.2),
+                    
+                                          borderRadius: BorderRadius.circular(1),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(5.0),
+                                              child: Icon(
+                                                Icons.search,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Icon(
+                                                Icons.filter_list_outlined,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Icon(
+                                                Icons.grid_view,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Column(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.only(bottom: 30),
+                                      child: Text(
+                                        "WARDROBE",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                          fontFamily: "Oswald",
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        GlassFrame(
+                                          child: Container(
+                                            width: MediaQuery.of(context).size.width * 0.27,
+                                            height: 65,
+                                            padding: const EdgeInsets.all(30),
+                                            decoration: BoxDecoration(
+                                              color: Color.fromRGBO(0, 0, 0, 0.2),
+                                              borderRadius: BorderRadius.circular(1),
+                                          ),
+                                        ),),
+                                        SizedBox(width: 20),
+                                        GlassFrame(
+                                          child: Container(
+                                            width: MediaQuery.of(context).size.width * 0.26,
+                                            height: 65,
+                                            padding: const EdgeInsets.all(30),
+                                            decoration: BoxDecoration(
+                                              color: Color.fromRGBO(0, 0, 0, 0.2),
+                                              borderRadius: BorderRadius.circular(1),
+                                          ),
+                                        ),),
+                                        SizedBox(width: 20),
+                                        GlassFrame(
+                                          child: Container(
+                                            width: MediaQuery.of(context).size.width * 0.27,
+                                            height: 65,
+                                            padding: const EdgeInsets.all(30),
+                                            decoration: BoxDecoration(
+                                              color: Color.fromRGBO(0, 0, 0, 0.2),
+                                              borderRadius: BorderRadius.circular(1),
+                                          ),
+                                        ),),
+                                      ],
+                    
+                                    ),
+                                    SizedBox(height: 10),
+                                    GlassFrame(
+                                      child: Container(
+                                        width: MediaQuery.of(context).size.width * 0.9,
+                                        height: MediaQuery.of(context).size.height * 0.9,
+                                        decoration: BoxDecoration(
+                                          color: Color.fromRGBO(0, 0, 0, 0.2),
+                                          borderRadius: BorderRadius.circular(1),
+                                          
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            "Your wardrobe is empty. Start adding your clothes to create outfits and get personalized recommendations!",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontFamily: "Oswald",
+                                              fontWeight: FontWeight.w300,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 100),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 30),
-                            child: Text(
-                              "WARDROBE",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontFamily: "Oswald",
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GlassFrame(
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width * 0.27,
-                                  height: 65,
-                                  padding: const EdgeInsets.all(30),
-                                  decoration: BoxDecoration(
-                                    color: Color.fromRGBO(0, 0, 0, 0.2),
-                                    borderRadius: BorderRadius.circular(1),
-                                ),
-                              ),),
-                              SizedBox(width: 20),
-                              GlassFrame(
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width * 0.27,
-                                  height: 65,
-                                  padding: const EdgeInsets.all(30),
-                                  decoration: BoxDecoration(
-                                    color: Color.fromRGBO(0, 0, 0, 0.2),
-                                    borderRadius: BorderRadius.circular(1),
-                                ),
-                              ),),
-                              SizedBox(width: 20),
-                              GlassFrame(
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width * 0.27,
-                                  height: 65,
-                                  padding: const EdgeInsets.all(30),
-                                  decoration: BoxDecoration(
-                                    color: Color.fromRGBO(0, 0, 0, 0.2),
-                                    borderRadius: BorderRadius.circular(1),
-                                ),
-                              ),),
-                            ],
-
-                          ),
-                          SizedBox(height: 10),
-                          GlassFrame(
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.9,
-                              height: MediaQuery.of(context).size.height * 0.65,
-                              decoration: BoxDecoration(
-                                color: Color.fromRGBO(0, 0, 0, 0.2),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "Your wardrobe is empty. Start adding your clothes to create outfits and get personalized recommendations!",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontFamily: "Oswald",
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
+              
+          
           GlassNavBar(
             items: [
               Icon(Icons.home, color: Colors.white),
@@ -201,8 +214,9 @@ class WardrobePage extends StatelessWidget {
               ),
             ],
           ),
-        ],
-      ),
-    );
+        ]
+      )
+          
+      );
   }
 }
