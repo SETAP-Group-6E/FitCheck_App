@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'Presentation/auth/pages/register_page.dart';
+//import 'Presentation/auth/pages/register_page.dart';
+import 'Presentation/auth/pages/wardrobe_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'Presentation/auth/pages/login_page.dart';
 
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'FitCheck',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -46,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
