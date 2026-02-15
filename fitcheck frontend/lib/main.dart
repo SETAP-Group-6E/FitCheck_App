@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'Presentation/auth/pages/register_page.dart';
 import 'Presentation/auth/pages/wardrobe_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'Presentation/auth/pages/login_page.dart';
+
 
 Future<void> main() async {
   await Supabase.initialize(
@@ -23,8 +25,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const WardrobePage(),
-      //home: const RegisterPage(),
+      home: const LoginPage(),
+      // home: const RegisterPage(),
     );
   }
 }
