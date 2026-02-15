@@ -10,8 +10,29 @@ class SupabaseAuthRepository implements AuthRepository {
   Future<void> signUp({
     required String email,
     required String password,
+    required String name,
   }) async {
-    await _supabase.auth.signUp(
+    final response = await _supabase.auth.signUp(
+      email: email,
+      password: password,
+    );
+
+    final userId = response.user?.id;
+    if (userId != null) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      await _supabase.from('profiles').insert({
+        'profile_id': userId, 
+        'full_name': name,
+        'email': email,
+      });
+    }
+  }
+  @override
+  Future<void> signIn({
+    required String email, 
+    required String password
+  }) async {
+    await _supabase.auth.signInWithPassword(
       email: email,
       password: password,
     );
