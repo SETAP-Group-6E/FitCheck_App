@@ -208,10 +208,12 @@ class WardrobePage extends StatelessWidget {
           
           GlassNavBar(
             items: [
-              Icon(Icons.home, color: Colors.white),
-              Container(
-                width: 270,
-              ),
+              SizedBox(width: 15,),
+              Icon(Icons.home, size: 30, color: Colors.white),
+              Expanded(child: SizedBox()),
+              
+              Icon(Icons.square_rounded, size: 50, color: const Color.fromARGB(255, 91, 90, 90)),
+              SizedBox(width: 5,),
             ],
           ),
         ]
