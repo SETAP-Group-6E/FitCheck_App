@@ -1,6 +1,6 @@
-import 'package:fitcheck/Presentation/app_style/backlight_gradient.dart';
-import 'package:fitcheck/Presentation/app_style/glass_frame.dart';
-import 'package:fitcheck/Presentation/app_style/glass_navBar.dart';
+import 'package:fitcheck/Presentation/app/app_style/backlight_gradient.dart';
+import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
+import 'package:fitcheck/Presentation/app/app_style/glass_navBar.dart';
 import 'package:flutter/material.dart';
 
 class WardrobePage extends StatelessWidget {
