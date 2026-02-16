@@ -24,7 +24,7 @@ class RegisterPage extends ConsumerWidget {
 
               const SizedBox(height: 40),
 
-              /// 🔵 Logo Circle
+              /// Logo Circle
               Container(
                 height: 120,
                 width: 120,
@@ -43,7 +43,7 @@ class RegisterPage extends ConsumerWidget {
 
               const SizedBox(height: 30),
 
-              /// 🔥 Title
+              ///  Title
               const Text(
                 "Join the community",
                 textAlign: TextAlign.center,
@@ -67,7 +67,7 @@ class RegisterPage extends ConsumerWidget {
 
               const SizedBox(height: 40),
 
-              /// 👤 Username
+              ///  Username
               _buildGoldInput(
                 controller: nameController,
                 hint: "User name",
@@ -75,7 +75,7 @@ class RegisterPage extends ConsumerWidget {
 
               const SizedBox(height: 16),
 
-              /// 📧 Email
+              /// Email
               _buildGoldInput(
                 controller: emailController,
                 hint: "Email",
@@ -83,7 +83,7 @@ class RegisterPage extends ConsumerWidget {
 
               const SizedBox(height: 16),
 
-              /// 🔒 Password
+              /// Password
               _buildGoldInput(
                 controller: passwordController,
                 hint: "Password",
