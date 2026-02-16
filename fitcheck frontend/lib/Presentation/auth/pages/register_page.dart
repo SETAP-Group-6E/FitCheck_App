@@ -92,7 +92,7 @@ class RegisterPage extends ConsumerWidget {
 
               const SizedBox(height: 30),
 
-              /// 🟡 Create Account Button
+              ///  Create Account Button
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -136,7 +136,7 @@ class RegisterPage extends ConsumerWidget {
 
               const SizedBox(height: 30),
 
-              /// 🔘 Social Icons
+              ///  Social Icons
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -148,7 +148,7 @@ class RegisterPage extends ConsumerWidget {
 
               const SizedBox(height: 30),
 
-              /// 🔁 Login Text
+              ///  Login Text
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
@@ -174,7 +174,7 @@ class RegisterPage extends ConsumerWidget {
     );
   }
 
-  /// 🟡 Gold Styled Input
+  ///  Gold Styled Input
   static Widget _buildGoldInput({
     required TextEditingController controller,
     required String hint,
@@ -205,7 +205,7 @@ class RegisterPage extends ConsumerWidget {
     );
   }
 
-  /// 🟡 Social Icon Circle
+  ///  Social Icon Circle
   static Widget _buildSocialCircle(IconData icon) {
     const gold = Color(0xFFD4AF37);
 
