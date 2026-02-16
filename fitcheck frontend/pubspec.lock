@@ -733,14 +733,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.6"
-  test_core:
-    dependency: transitive
-    description:
-      name: test_core
-      sha256: "80bf5a02b60af04b09e14f6fe68b921aad119493e26e490deaca5993fef1b05a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.11"
   typed_data:
     dependency: transitive
     description:
@@ -894,5 +886,5 @@ packages:
     source: hosted
     version: "2.1.0"
 sdks:
-  dart: ">=3.9.0 <4.0.0"
-  flutter: ">=3.35.0"
+  dart: ">=3.8.0-0 <4.0.0"
+  flutter: ">=3.29.0"
