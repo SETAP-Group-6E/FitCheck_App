@@ -1,3 +1,6 @@
+import 'dart:ffi';
+
+import 'package:fitcheck/Presentation/App/app_style/dashed_box.dart';
 import 'package:fitcheck/Presentation/app/app_style/backlight_gradient.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_navBar.dart';
@@ -8,6 +11,7 @@ class WardrobePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+   
     return Scaffold(
       body: Stack(
         children: [
@@ -15,7 +19,7 @@ class WardrobePage extends StatelessWidget {
             colorBg: const Color.fromRGBO(0, 0, 0, 1),
 
             light1: const [
-              Color.fromRGBO(0, 0, 0, 1),
+              Color.fromRGBO(44, 9, 9, 1),
               Color.fromRGBO(0, 0, 0, 1),
               Color.fromRGBO(0, 0, 0, 1),
             ],
@@ -141,19 +145,11 @@ class WardrobePage extends StatelessWidget {
                           children: [
                             Stack(
                               children: [
+                                
                                 Container(
-                                  height: 120,
-                                  width: 120,
-                                  color: Colors.black12,
-                                  child: DashedRect(
-                                    color: Colors.white,
-                                    strokeWidth: 2.0,
-                                    gap: 3.0,
-                                  ),
-                                ),
-                                Container(
-                                  height: 120,
-                                  width: 120,
+
+                                  height: 125,
+                                  width: 125,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
@@ -166,6 +162,16 @@ class WardrobePage extends StatelessWidget {
                                     Icons.add,
                                     color: Colors.white,
                                     size: 30,
+                                  ),
+                                ),
+                                Container(
+                                  height: 120,
+                                  width: 120,
+                                  color: Colors.black12,
+                                  child: DashedBox(
+                                    color: Colors.black,
+                                    strokeWidth: 4.0,
+                                    gap: 10.5,
                                   ),
                                 ),
                               ],
