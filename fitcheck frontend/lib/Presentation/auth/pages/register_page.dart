@@ -39,6 +39,30 @@ Container(
 
 const SizedBox(height: 30),
 
+const Text(
+  "Join the community",
+  textAlign: TextAlign.center,
+  style: TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  ),
+),
+
+const SizedBox(height: 8),
+
+const Text(
+  "Discover and share your daily style",
+  textAlign: TextAlign.center,
+  style: TextStyle(
+    fontSize: 14,
+    color: Colors.white70,
+  ),
+),
+
+const SizedBox(height: 40),
+
+
 
             TextField(
               controller: nameController,
