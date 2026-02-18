@@ -1,4 +1,5 @@
 import 'package:fitcheck/Presentation/App/app_style/dashed_box.dart';
+import 'package:fitcheck/Presentation/App/app_style/search_bar.dart';
 import 'package:fitcheck/Presentation/app/app_style/backlight_gradient.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/floating_navBar.dart';
@@ -81,13 +82,8 @@ class WardrobePage extends StatelessWidget {
                                   ),
                                   child: Row(
                                     children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(5.0),
-                                        child: Icon(
-                                          Icons.search,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
+                                      SearchBarRow(
+                                        
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
