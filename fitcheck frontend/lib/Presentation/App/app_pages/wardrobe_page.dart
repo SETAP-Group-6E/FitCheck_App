@@ -5,6 +5,7 @@ import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/floating_navBar.dart';
 import 'package:flutter/material.dart';
 
+
 class WardrobePage extends StatelessWidget {
   const WardrobePage({super.key});
 
@@ -50,28 +51,31 @@ class WardrobePage extends StatelessWidget {
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
+                            SizedBox(
                               child: GlassFrame(
                                 child: Container(
-                                  padding: const EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(2),
                                   decoration: BoxDecoration(
                                     color: Color.fromRGBO(0, 0, 0, 0.2),
 
                                     borderRadius: BorderRadius.circular(1),
                                   ),
-                                  child: Icon(
-                                    Icons.arrow_back_ios_sharp,
-                                    color: Colors.white,
-                                    size: 20,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.arrow_back_ios_sharp,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
                                   ),
                                 ),
                               ),
                             ),
                             Expanded(child: SizedBox()),
 
-                            Padding(
-                              padding: EdgeInsets.only(left: 10),
+                            SizedBox(
                               child: GlassFrame(
                                 child: Container(
                                   padding: const EdgeInsets.all(3),
@@ -82,23 +86,31 @@ class WardrobePage extends StatelessWidget {
                                   ),
                                   child: Row(
                                     children: [
-                                      SearchBarRow(
-                                        
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Icon(
-                                          Icons.filter_list_outlined,
-                                          color: Colors.white,
-                                          size: 20,
+                                      SearchBarRow(),
+
+                                      SizedBox(
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.filter_list_outlined,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                          onPressed: () {
+                                            null;
+                                          },
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Icon(
-                                          Icons.grid_view,
-                                          color: Colors.white,
-                                          size: 20,
+
+                                      SizedBox(
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.grid_view,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                          onPressed: () {
+                                            null;
+                                          },
                                         ),
                                       ),
                                     ],
@@ -149,11 +161,6 @@ class WardrobePage extends StatelessWidget {
                                       style: BorderStyle.solid,
                                     ),
                                   ),
-                                  child: Icon(
-                                    Icons.add,
-                                    color: Colors.white,
-                                    size: 30,
-                                  ),
                                 ),
                                 Container(
                                   height: 125,
@@ -163,6 +170,20 @@ class WardrobePage extends StatelessWidget {
                                     color: Colors.black,
                                     strokeWidth: 7.0,
                                     gap: 11.1,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 125,
+                                  width: 125,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.add,
+                                      color: Colors.white,
+                                      size: 30,
+                                    ),
+                                    onPressed: () {
+                                      null;
+                                    },
                                   ),
                                 ),
                               ],
@@ -181,7 +202,12 @@ class WardrobePage extends StatelessWidget {
           FloatingNavbar(
             items: [
               SizedBox(width: 15),
-              Icon(Icons.home, size: 40, color: Colors.white),
+              IconButton(
+                icon: Icon(Icons.home, size: 40, color: Colors.white),
+                onPressed: () {
+                  null;
+                },
+              ),
 
               Expanded(child: SizedBox()),
 
@@ -193,18 +219,31 @@ class WardrobePage extends StatelessWidget {
                   color: Color.fromRGBO(217, 156, 19, 1),
                 ),
 
-                child: Icon(Icons.add, size: 30, color: Colors.white),
+                child: IconButton(
+                  icon: Icon(Icons.add, size: 30, color: Colors.white),
+                  onPressed: () {
+                    null;
+                  },
+                ),
               ),
 
               Expanded(child: SizedBox()),
 
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: Colors.grey[300],
+              GestureDetector(
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    image: DecorationImage(
+                      image: AssetImage("assets/profile_pic.png"),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
+                onTap: () {
+                  null;
+                },
               ),
 
               SizedBox(width: 5),
