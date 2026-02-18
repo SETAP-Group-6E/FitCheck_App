@@ -13,10 +13,13 @@ class RegisterPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
+      body: SafeArea(
+  child: SingleChildScrollView(
+    padding: const EdgeInsets.symmetric(horizontal: 28),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+
             TextField(
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Name'),
@@ -53,7 +56,8 @@ class RegisterPage extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
   
