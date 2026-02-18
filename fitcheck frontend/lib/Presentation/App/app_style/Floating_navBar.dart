@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'glass_frame.dart';
 
-class GlassNavBar extends StatelessWidget {
+
+class FloatingNavbar extends StatelessWidget {
   final List<Widget> items;
   final double width;
   final double height;
   final double bottomPadding;
   final BorderRadius borderRadius;
 
-  const GlassNavBar({
+  const FloatingNavbar({
     super.key,
     required this.items,
     this.width = 470,
@@ -24,9 +24,7 @@ class GlassNavBar extends StatelessWidget {
       right: 0,
       bottom: bottomPadding,
       child: Center(
-        child: GlassFrame(
-          borderRadius: borderRadius,
-          child: Container(
+        child:Container(
             color: const Color.fromRGBO(0, 0, 0, 0.2),
             width: width,
             height: height,
@@ -36,7 +34,6 @@ class GlassNavBar extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+    ); 
   }
 }

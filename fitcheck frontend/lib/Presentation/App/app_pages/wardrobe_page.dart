@@ -1,9 +1,7 @@
-import 'dart:ffi';
-
 import 'package:fitcheck/Presentation/App/app_style/dashed_box.dart';
 import 'package:fitcheck/Presentation/app/app_style/backlight_gradient.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
-import 'package:fitcheck/Presentation/app/app_style/glass_navBar.dart';
+import 'package:fitcheck/Presentation/App/app_style/floating_navBar.dart';
 import 'package:flutter/material.dart';
 
 class WardrobePage extends StatelessWidget {
@@ -11,7 +9,6 @@ class WardrobePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   
     return Scaffold(
       body: Stack(
         children: [
@@ -145,9 +142,7 @@ class WardrobePage extends StatelessWidget {
                           children: [
                             Stack(
                               children: [
-                                
                                 Container(
-
                                   height: 125,
                                   width: 125,
                                   decoration: BoxDecoration(
@@ -165,13 +160,13 @@ class WardrobePage extends StatelessWidget {
                                   ),
                                 ),
                                 Container(
-                                  height: 120,
-                                  width: 120,
+                                  height: 125,
+                                  width: 125,
                                   color: Colors.black12,
                                   child: DashedBox(
                                     color: Colors.black,
-                                    strokeWidth: 4.0,
-                                    gap: 10.5,
+                                    strokeWidth: 7.0,
+                                    gap: 11.1,
                                   ),
                                 ),
                               ],
@@ -187,17 +182,35 @@ class WardrobePage extends StatelessWidget {
             ],
           ),
 
-          GlassNavBar(
+          FloatingNavbar(
             items: [
               SizedBox(width: 15),
-              Icon(Icons.home, size: 30, color: Colors.white),
+              Icon(Icons.home, size: 40, color: Colors.white),
+
               Expanded(child: SizedBox()),
 
-              Icon(
-                Icons.square_rounded,
-                size: 50,
-                color: const Color.fromARGB(255, 91, 90, 90),
+              Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  color: Color.fromRGBO(217, 156, 19, 1),
+                ),
+
+                child: Icon(Icons.add, size: 30, color: Colors.white),
               ),
+
+              Expanded(child: SizedBox()),
+
+              Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: Colors.grey[300],
+                ),
+              ),
+
               SizedBox(width: 5),
             ],
           ),
