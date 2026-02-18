@@ -19,6 +19,26 @@ class RegisterPage extends ConsumerWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        const SizedBox(height: 40),
+
+Container(
+  height: 120,
+  width: 120,
+  decoration: const BoxDecoration(
+    color: Color(0xFFD4AF37),
+    shape: BoxShape.circle,
+  ),
+  child: const Center(
+    child: Icon(
+      Icons.checkroom,
+      color: Colors.white,
+      size: 50,
+    ),
+  ),
+),
+
+const SizedBox(height: 30),
+
 
             TextField(
               controller: nameController,
