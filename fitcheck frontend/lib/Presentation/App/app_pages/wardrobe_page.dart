@@ -230,20 +230,23 @@ class WardrobePage extends StatelessWidget {
               Expanded(child: SizedBox()),
 
               GestureDetector(
+                onTap: () {
+                  null;
+                },
                 child: Container(
                   height: 40,
                   width: 40,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
                     image: DecorationImage(
-                      image: AssetImage("assets/profile_pic.png"),
+                      image: NetworkImage(
+                        "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60",
+                      ),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                onTap: () {
-                  null;
-                },
+                
               ),
 
               SizedBox(width: 5),
