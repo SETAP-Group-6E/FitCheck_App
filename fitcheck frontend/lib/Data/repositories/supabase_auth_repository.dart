@@ -20,10 +20,12 @@ class SupabaseAuthRepository implements AuthRepository {
     final userId = response.user?.id;
     if (userId != null) {
       await Future.delayed(const Duration(milliseconds: 500));
-      await _supabase.from('profiles').insert({
-        'profile_id': userId, 
-        'full_name': name,
+      await _supabase.from('user').insert({
+        'user_id': userId, 
+        'username': name,
         'email': email,
+        'bio': '',
+        'profile_pic_url': '',
       });
     }
   }

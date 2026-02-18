@@ -1,7 +1,10 @@
+import 'package:fitcheck/Presentation/App/app_style/dashed_box.dart';
+import 'package:fitcheck/Presentation/App/app_style/search_bar.dart';
 import 'package:fitcheck/Presentation/app/app_style/backlight_gradient.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
-import 'package:fitcheck/Presentation/app/app_style/glass_navBar.dart';
+import 'package:fitcheck/Presentation/App/app_style/floating_navBar.dart';
 import 'package:flutter/material.dart';
+
 
 class WardrobePage extends StatelessWidget {
   const WardrobePage({super.key});
@@ -12,25 +15,25 @@ class WardrobePage extends StatelessWidget {
       body: Stack(
         children: [
           BacklightGradient(
-            colorBg: const Color.fromARGB(255, 65, 42, 24),
+            colorBg: const Color.fromRGBO(0, 0, 0, 1),
 
             light1: const [
-              Color.fromRGBO(125, 124, 124, 1),
-              Color.fromRGBO(59, 44, 32, 1),
-              Color.fromRGBO(91, 91, 91, 0.3),
+              Color.fromRGBO(44, 9, 9, 1),
+              Color.fromRGBO(0, 0, 0, 1),
+              Color.fromRGBO(0, 0, 0, 1),
             ],
 
-            light1Alignment: const Alignment(1, -1.5),
-            light1Radius: 2,
+            light1Alignment: const Alignment(0, 0),
+            light1Radius: 0,
 
             light2: const [
               Color.fromRGBO(0, 0, 0, 1),
-              Color.fromRGBO(59, 44, 32, .5),
-              Color.fromRGBO(35, 22, 10, 0.536),
+              Color.fromRGBO(0, 0, 0, 1),
+              Color.fromRGBO(0, 0, 0, 1),
             ],
 
-            light2Alignment: const Alignment(-1, 1),
-            light2Radius: 2,
+            light2Alignment: const Alignment(0, 0),
+            light2Radius: 0,
 
             blur: 100,
 
@@ -38,187 +41,219 @@ class WardrobePage extends StatelessWidget {
           ),
           Column(
             children: [
-             
               //non scrollable content
-
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
+                    children: [
+                      SizedBox(height: 50),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
                           children: [
-                            
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: GlassFrame(
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Color.fromRGBO(0, 0, 0, 0.2),
-                    
-                                          borderRadius: BorderRadius.circular(1),
-                                        ),
-                                        child: Icon(
-                                          Icons.settings_outlined,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
+                            SizedBox(
+                              child: GlassFrame(
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Color.fromRGBO(0, 0, 0, 0.2),
+
+                                    borderRadius: BorderRadius.circular(1),
                                   ),
-                                  Expanded(child: SizedBox()),
-                    
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 10),
-                                    child: GlassFrame(
-                                      child: Container(
-                                        padding: const EdgeInsets.all(3),
-                                        decoration: BoxDecoration(
-                                          color: Color.fromRGBO(0, 0, 0, 0.2),
-                    
-                                          borderRadius: BorderRadius.circular(1),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.all(5.0),
-                                              child: Icon(
-                                                Icons.search,
-                                                color: Colors.white,
-                                                size: 20,
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Icon(
-                                                Icons.filter_list_outlined,
-                                                color: Colors.white,
-                                                size: 20,
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Icon(
-                                                Icons.grid_view,
-                                                color: Colors.white,
-                                                size: 20,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.arrow_back_ios_sharp,
+                                      color: Colors.white,
+                                      size: 20,
                                     ),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
                                   ),
-                                ],
+                                ),
                               ),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            Expanded(child: SizedBox()),
+
+                            SizedBox(
+                              child: GlassFrame(
+                                child: Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    color: Color.fromRGBO(0, 0, 0, 0.2),
+
+                                    borderRadius: BorderRadius.circular(1),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      SearchBarRow(),
+
+                                      SizedBox(
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.filter_list_outlined,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                          onPressed: () {
+                                            null;
+                                          },
+                                        ),
+                                      ),
+
+                                      SizedBox(
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.grid_view,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                          onPressed: () {
+                                            null;
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 50),
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 30.0,
+                              bottom: 20,
+                            ),
+                            child: Text(
+                              "Wardrobe",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 35,
+                                fontFamily: "Inter",
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 40.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Stack(
                               children: [
-                                Column(
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(bottom: 30),
-                                      child: Text(
-                                        "WARDROBE",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 24,
-                                          fontFamily: "Oswald",
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
+                                Container(
+                                  height: 125,
+                                  width: 125,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 4,
+                                      style: BorderStyle.solid,
                                     ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        GlassFrame(
-                                          child: Container(
-                                            width: MediaQuery.of(context).size.width * 0.27,
-                                            height: 65,
-                                            padding: const EdgeInsets.all(30),
-                                            decoration: BoxDecoration(
-                                              color: Color.fromRGBO(0, 0, 0, 0.2),
-                                              borderRadius: BorderRadius.circular(1),
-                                          ),
-                                        ),),
-                                        SizedBox(width: 20),
-                                        GlassFrame(
-                                          child: Container(
-                                            width: MediaQuery.of(context).size.width * 0.26,
-                                            height: 65,
-                                            padding: const EdgeInsets.all(30),
-                                            decoration: BoxDecoration(
-                                              color: Color.fromRGBO(0, 0, 0, 0.2),
-                                              borderRadius: BorderRadius.circular(1),
-                                          ),
-                                        ),),
-                                        SizedBox(width: 20),
-                                        GlassFrame(
-                                          child: Container(
-                                            width: MediaQuery.of(context).size.width * 0.27,
-                                            height: 65,
-                                            padding: const EdgeInsets.all(30),
-                                            decoration: BoxDecoration(
-                                              color: Color.fromRGBO(0, 0, 0, 0.2),
-                                              borderRadius: BorderRadius.circular(1),
-                                          ),
-                                        ),),
-                                      ],
-                    
+                                  ),
+                                ),
+                                Container(
+                                  height: 125,
+                                  width: 125,
+                                  color: Colors.black12,
+                                  child: DashedBox(
+                                    color: Colors.black,
+                                    strokeWidth: 7.0,
+                                    gap: 11.1,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 125,
+                                  width: 125,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.add,
+                                      color: Colors.white,
+                                      size: 30,
                                     ),
-                                    SizedBox(height: 10),
-                                    GlassFrame(
-                                      child: Container(
-                                        width: MediaQuery.of(context).size.width * 0.9,
-                                        height: MediaQuery.of(context).size.height * 0.9,
-                                        decoration: BoxDecoration(
-                                          color: Color.fromRGBO(0, 0, 0, 0.2),
-                                          borderRadius: BorderRadius.circular(1),
-                                          
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            "Your wardrobe is empty. Start adding your clothes to create outfits and get personalized recommendations!",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontFamily: "Oswald",
-                                              fontWeight: FontWeight.w300,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 100),
-                                  ],
+                                    onPressed: () {
+                                      null;
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
                           ],
                         ),
+                      ),
+                      SizedBox(height: 100),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-              
-          
-          GlassNavBar(
+
+          FloatingNavbar(
             items: [
-              SizedBox(width: 15,),
-              Icon(Icons.home, size: 30, color: Colors.white),
+              SizedBox(width: 15),
+              IconButton(
+                icon: Icon(Icons.home, size: 40, color: Colors.white),
+                onPressed: () {
+                  null;
+                },
+              ),
+
               Expanded(child: SizedBox()),
-              
-              Icon(Icons.square_rounded, size: 50, color: const Color.fromARGB(255, 91, 90, 90)),
-              SizedBox(width: 5,),
+
+              Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  color: Color.fromRGBO(217, 156, 19, 1),
+                ),
+
+                child: IconButton(
+                  icon: Icon(Icons.add, size: 30, color: Colors.white),
+                  onPressed: () {
+                    null;
+                  },
+                ),
+              ),
+
+              Expanded(child: SizedBox()),
+
+              GestureDetector(
+                onTap: () {
+                  null;
+                },
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    image: DecorationImage(
+                      image: NetworkImage(
+                        "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60",
+                      ),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                
+              ),
+
+              SizedBox(width: 5),
             ],
           ),
-        ]
-      )
-          
-      );
+        ],
+      ),
+    );
   }
 }
