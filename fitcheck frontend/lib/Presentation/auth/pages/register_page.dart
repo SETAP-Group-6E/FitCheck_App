@@ -87,6 +87,16 @@ class RegisterPage extends ConsumerWidget {
                   style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                 ),
               ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildSocialCircle(Icons.g_mobiledata),
+                  const SizedBox(width: 20),
+                  _buildSocialCircle(Icons.apple),
+                ],
+              ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -125,6 +135,18 @@ class RegisterPage extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSocialCircle(IconData iconData) {
+    return Container(
+      height: 48,
+      width: 48,
+      decoration: const BoxDecoration(
+        color: Color(0xFFD4AF37),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(iconData, color: Colors.white),
     );
   }
 }
