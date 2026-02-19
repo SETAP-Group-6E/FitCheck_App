@@ -83,7 +83,7 @@ class RegisterPage extends ConsumerWidget {
                   ),
                 ),
                 child: const Text(
-                  "Sign Up",
+                  "Create Account",
                   style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                 ),
               ),
