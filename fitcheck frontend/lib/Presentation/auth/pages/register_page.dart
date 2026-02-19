@@ -98,6 +98,10 @@ class RegisterPage extends ConsumerWidget {
                       const SnackBar(content: Text('Please fill all fields')),
                     );
                   } else {
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Account created')),
+                    );
                     // Call your auth provider here
                     // ref.read(authProvider).signUp(name, email, password);
                   }
