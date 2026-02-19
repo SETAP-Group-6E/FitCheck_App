@@ -19,7 +19,7 @@ class RegisterPage extends ConsumerWidget {
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: const InputDecoration(labelText: 'Username'),
             ),
             TextField(
               controller: emailController,
