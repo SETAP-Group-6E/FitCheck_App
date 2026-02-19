@@ -64,19 +64,20 @@ const SizedBox(height: 40),
 
 
 
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
+            _buildGoldInput(
+  controller: nameController,
+  hint: "User name",
+),
+
+            _buildGoldInput(
+  controller: emailController,
+  hint: "Email",
+),
+            _buildGoldInput(
+  controller: passwordController,
+  hint: "Password",
+  obscure: true,
+),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
@@ -102,6 +103,7 @@ const SizedBox(height: 40),
       ),
     ),
   );
+  
   }
 }
   
