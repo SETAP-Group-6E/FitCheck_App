@@ -161,7 +161,7 @@ class RegPage extends StatelessWidget {
                             secondaryAnimation,
                             child,
                           ) {
-                            var begin = Offset(0.0, 1.0);
+                            var begin = Offset(-1.0, 0.0);
                             var end = Offset.zero;
                             var curve = Curves.ease;
                             var tween = Tween(
@@ -185,7 +185,20 @@ class RegPage extends StatelessWidget {
               ),
             ],
           ),
-          Expanded(child: SizedBox()),
+          Expanded(child: SizedBox(
+            child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(5),
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.close, color: Colors.white),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+              ),
+          )),
         ],
       ),
     );
