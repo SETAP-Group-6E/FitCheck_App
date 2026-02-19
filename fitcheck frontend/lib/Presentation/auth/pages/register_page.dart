@@ -97,6 +97,22 @@ class RegisterPage extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    "Already have your account? ",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  Text(
+                    "Log in",
+                    style: TextStyle(
+                      color: Color(0xFFD4AF37),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
