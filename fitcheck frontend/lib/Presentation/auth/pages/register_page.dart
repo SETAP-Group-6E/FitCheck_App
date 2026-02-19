@@ -138,7 +138,7 @@ class RegisterPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSocialCircle(IconData iconData) {
+  static Widget _buildSocialCircle(IconData icon) {
     return Container(
       height: 48,
       width: 48,
@@ -146,7 +146,13 @@ class RegisterPage extends ConsumerWidget {
         color: Color(0xFFD4AF37),
         shape: BoxShape.circle,
       ),
-      child: Icon(iconData, color: Colors.white),
+      child: Center(
+        child: Icon(
+          icon,
+          color: Colors.black,
+          size: 24,
+        ),
+      ),
     );
   }
 }
