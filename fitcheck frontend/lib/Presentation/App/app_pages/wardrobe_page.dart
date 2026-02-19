@@ -1,6 +1,5 @@
 import 'package:fitcheck/Presentation/App/app_style/dashed_box.dart';
 import 'package:fitcheck/Presentation/App/app_style/search_bar.dart';
-import 'package:fitcheck/Presentation/app/app_style/backlight_gradient.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/floating_navBar.dart';
 import 'package:flutter/material.dart';
@@ -12,33 +11,10 @@ class WardrobePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
-          BacklightGradient(
-            colorBg: const Color.fromRGBO(0, 0, 0, 1),
-
-            light1: const [
-              Color.fromRGBO(44, 9, 9, 1),
-              Color.fromRGBO(0, 0, 0, 1),
-              Color.fromRGBO(0, 0, 0, 1),
-            ],
-
-            light1Alignment: const Alignment(0, 0),
-            light1Radius: 0,
-
-            light2: const [
-              Color.fromRGBO(0, 0, 0, 1),
-              Color.fromRGBO(0, 0, 0, 1),
-              Color.fromRGBO(0, 0, 0, 1),
-            ],
-
-            light2Alignment: const Alignment(0, 0),
-            light2Radius: 0,
-
-            blur: 100,
-
-            child: SizedBox(),
-          ),
+         
           Column(
             children: [
               //non scrollable content
