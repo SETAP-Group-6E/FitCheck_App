@@ -1,7 +1,7 @@
 import 'package:fitcheck/Presentation/App/app_style/dashed_box.dart';
 import 'package:fitcheck/Presentation/App/app_style/search_bar.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
-import 'package:fitcheck/Presentation/App/app_style/floating_navBar.dart';
+import 'package:fitcheck/Presentation/App/app_style/floating_navbar.dart';
 import 'package:flutter/material.dart';
 
 
