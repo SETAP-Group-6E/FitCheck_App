@@ -14,129 +14,117 @@ class RegisterPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-  child: SingleChildScrollView(
-    padding: const EdgeInsets.symmetric(horizontal: 28),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const SizedBox(height: 40),
-
-Container(
-  height: 120,
-  width: 120,
-  decoration: const BoxDecoration(
-    color: Color(0xFFD4AF37),
-    shape: BoxShape.circle,
-  ),
-  child: const Center(
-    child: Icon(
-      Icons.checkroom,
-      color: Colors.white,
-      size: 50,
-    ),
-  ),
-),
-
-const SizedBox(height: 30),
-
-const Text(
-  "Join the community",
-  textAlign: TextAlign.center,
-  style: TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.bold,
-    color: Colors.white,
-  ),
-),
-
-const SizedBox(height: 8),
-
-const Text(
-  "Discover and share your daily style",
-  textAlign: TextAlign.center,
-  style: TextStyle(
-    fontSize: 14,
-    color: Colors.white70,
-  ),
-),
-
-const SizedBox(height: 40),
-
-
-
-            _buildGoldInput(
-  controller: nameController,
-  hint: "User name",
-),
-
-            _buildGoldInput(
-  controller: emailController,
-  hint: "Email",
-),
-            _buildGoldInput(
-  controller: passwordController,
-  hint: "Password",
-  obscure: true,
-),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-
-                final authRepo = ref.read(authRepositoryProvider);
-                
-                try {
-         
-                  await authRepo.signUp(
-                    name: nameController.text.trim(),
-                    email: emailController.text.trim(),
-                    password: passwordController.text.trim(),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Success! Check your email.')));
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-                }
-              },
-              child: const Text('Test Register'),
-            ),
-          ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 40),
+              Container(
+                height: 120,
+                width: 120,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD4AF37),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.checkroom,
+                    color: Colors.white,
+                    size: 50,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                "Join the community",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "Discover and share your daily style",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 40),
+              _buildGoldInput(
+                controller: nameController,
+                hint: "User name",
+              ),
+              const SizedBox(height: 16),
+              _buildGoldInput(
+                controller: emailController,
+                hint: "Email",
+              ),
+              const SizedBox(height: 16),
+              _buildGoldInput(
+                controller: passwordController,
+                hint: "Password",
+                obscure: true,
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () {
+                  // Add sign-up logic here
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFD4AF37),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Text(
+                  "Sign Up",
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
   }
-  static Widget _buildGoldInput({
-  required TextEditingController controller,
-  required String hint,
-  bool obscure = false,
-}) {
-  return TextField(
-    controller: controller,
-    obscureText: obscure,
-    style: const TextStyle(color: Colors.white),
-    decoration: InputDecoration(
-      hintText: hint,
-      hintStyle: const TextStyle(color: Colors.white54),
-      filled: true,
-      fillColor: const Color(0xFF1C1F2E),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(30),
-        borderSide: const BorderSide(
-          color: Color(0xFFD4AF37),
-          width: 1.5,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(30),
-        borderSide: const BorderSide(
-          color: Color(0xFFD4AF37),
-          width: 2,
-        ),
-      ),
-    ),
-  );
-}
 
+  static Widget _buildGoldInput({
+    required TextEditingController controller,
+    required String hint,
+    bool obscure = false,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white54),
+        filled: true,
+        fillColor: const Color(0xFF1C1F2E),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(
+            color: Color(0xFFD4AF37),
+            width: 1.5,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(
+            color: Color(0xFFD4AF37),
+            width: 2,
+          ),
+        ),
+      ),
+    );
+  }
 }
-  
