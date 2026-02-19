@@ -1,11 +1,9 @@
-import 'package:fitcheck/Presentation/App/app_pages/log_page.dart';
-import 'package:fitcheck/Presentation/App/app_pages/reg_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Presentation/auth/pages/register_page.dart';
-import 'Presentation/app/app_pages/wardrobe_page.dart';
+//import 'Presentation/app/app_pages/wardrobe_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-//import 'Presentation/auth/pages/login_page.dart';
+import 'Presentation/auth/pages/login_page.dart';
 
 
 Future<void> main() async {
@@ -28,9 +26,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       //home: const LogPage(),
-      ///home: const RegPage(),
-      home: const WardrobePage(),
-       //home: const RegisterPage(),
+      //home: const RegPage(),
+      //home: const WardrobePage(),
+       home: const RegisterPage(),
       // home: const LoginPage(),
     );
   }
