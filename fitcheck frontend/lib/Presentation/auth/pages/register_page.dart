@@ -51,6 +51,7 @@ class RegisterPage extends ConsumerWidget {
               },
               child: const Text('Register'),
             ),
+            
           ],
         ),
       ),
