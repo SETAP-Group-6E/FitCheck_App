@@ -1,10 +1,10 @@
-import 'package:fitcheck/Presentation/App/app_pages/log_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/reg_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitcheck/Presentation/App/app_style/password_field.dart';
 import 'package:flutter/material.dart';
 
-class RegPage extends StatelessWidget {
-  const RegPage({super.key});
+class LogPage extends StatelessWidget {
+  const LogPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class RegPage extends StatelessWidget {
               SizedBox(height: 20),
 
               Text(
-                "Join the Community",
+                "Login to your account",
                 style: GoogleFonts.dmSerifText(
                   color: Colors.white,
                   fontSize: 30,
@@ -45,29 +45,13 @@ class RegPage extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 50),
               SizedBox(
                 height: 40,
                 width: 350,
                 child: TextField(
                   decoration: InputDecoration(
-                    hintText: "Username",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                    hintStyle: TextStyle(color: Colors.white54),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              SizedBox(height: 10),
-              SizedBox(
-                height: 40,
-                width: 350,
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: "Email",
+                    hintText: "Email/Username",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
                     ),
@@ -95,7 +79,7 @@ class RegPage extends StatelessWidget {
                     null;
                   },
                   child: Text(
-                    "Register",
+                    "Login",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -143,10 +127,14 @@ class RegPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Already have an account?",
+                    "Don't have an account?",
                     style: TextStyle(color: Colors.white54),
                   ),
                   TextButton(
+                    child: Text(
+                      "Sign up",
+                      style: TextStyle(color: Color.fromRGBO(217, 156, 19, 1)),
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -154,7 +142,7 @@ class RegPage extends StatelessWidget {
                           transitionDuration: Duration(milliseconds: 500),
                           pageBuilder:
                               (context, animation, secondaryAnimation) =>
-                                  LogPage(),
+                                  RegPage(),
                           transitionsBuilder: (
                             context,
                             animation,
@@ -176,10 +164,6 @@ class RegPage extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Text(
-                      "Login",
-                      style: TextStyle(color: Color.fromRGBO(217, 156, 19, 1)),
-                    ),
                   ),
                 ],
               ),
