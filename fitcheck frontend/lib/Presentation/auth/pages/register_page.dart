@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider/auth_provider.dart';
+import 'login_page.dart';
 
 class RegisterPage extends ConsumerWidget {
   const RegisterPage({super.key});
@@ -88,6 +89,18 @@ class RegisterPage extends ConsumerWidget {
               ElevatedButton(
                 onPressed: () {
                   // Add sign-up logic here
+                  String name = nameController.text.trim();
+                  String email = emailController.text.trim();
+                  String password = passwordController.text.trim();
+                  
+                  if (name.isEmpty || email.isEmpty || password.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please fill all fields')),
+                    );
+                  } else {
+                    // Call your auth provider here
+                    // ref.read(authProvider).signUp(name, email, password);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFD4AF37),
@@ -105,27 +118,46 @@ class RegisterPage extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildSocialCircle(Icons.g_mobiledata),
+                  GestureDetector(
+                    onTap: () {
+                      // Google login logic
+                      print('Google login tapped');
+                    },
+                    child: _buildSocialCircle(Icons.g_mobiledata),
+                  ),
                   const SizedBox(width: 20),
-                  _buildSocialCircle(Icons.apple),
+                  GestureDetector(
+                    onTap: () {
+                      // Apple login logic
+                      print('Apple login tapped');
+                    },
+                    child: _buildSocialCircle(Icons.apple),
+                  ),
                 ],
               ),
               const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
-                    "Already have your account? ",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  Text(
-                    "Log in",
-                    style: TextStyle(
-                      color: Color(0xFFD4AF37),
-                      fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text(
+                      "Already have your account? ",
+                      style: TextStyle(color: Colors.white70),
                     ),
-                  ),
-                ],
+                    Text(
+                      "Log in",
+                      style: TextStyle(
+                        color: Color(0xFFD4AF37),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
