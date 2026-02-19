@@ -103,7 +103,40 @@ const SizedBox(height: 40),
       ),
     ),
   );
-  
   }
+  static Widget _buildGoldInput({
+  required TextEditingController controller,
+  required String hint,
+  bool obscure = false,
+}) {
+  return TextField(
+    controller: controller,
+    obscureText: obscure,
+    style: const TextStyle(color: Colors.white),
+    decoration: InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: Colors.white54),
+      filled: true,
+      fillColor: const Color(0xFF1C1F2E),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30),
+        borderSide: const BorderSide(
+          color: Color(0xFFD4AF37),
+          width: 1.5,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30),
+        borderSide: const BorderSide(
+          color: Color(0xFFD4AF37),
+          width: 2,
+        ),
+      ),
+    ),
+  );
+}
+
 }
   
