@@ -23,7 +23,7 @@ class RegPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100),
                     color: Color.fromRGBO(217, 156, 19, 1),
                   ),
-                  child: Image(image: AssetImage("assets/logo_white.png")),
+                  child: Image(image: AssetImage("Assets/logo_white.png")),
                 ),
               ),
               SizedBox(height: 20),
@@ -39,7 +39,7 @@ class RegPage extends StatelessWidget {
               ),
               Text(
                 "Discover and share your daily style",
-                style: GoogleFonts.hedvigLettersSerif(
+                style: GoogleFonts.quicksand(
                   color: Colors.white,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -104,8 +104,8 @@ class RegPage extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: "Hedvig Serif Text",
+                      fontWeight: FontWeight.w200,
+                      
                     ),
                   ),
                 ),
@@ -115,21 +115,17 @@ class RegPage extends StatelessWidget {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: Color.fromRGBO(217, 156, 19, 1),
+                      color: Color.fromRGBO(255, 255, 255, 1),
                       borderRadius: BorderRadius.circular(100),
                     ),
                     height: 35,
                     width: 35,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: Icon(
-                        Icons.one_x_mobiledata,
-                        color: Colors.black,
-                        size: 30,
-                      ),
-                      onPressed: () {
+                    child: GestureDetector(
+                      onTap: () {
                         null;
                       },
+                      child:Image(image: AssetImage("Assets/google_logo.png")),
+                        
                     ),
                   ),
                   SizedBox(width: 25),
