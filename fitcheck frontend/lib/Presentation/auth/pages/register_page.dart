@@ -27,11 +27,25 @@ class RegisterPage extends ConsumerWidget {
                   color: Color(0xFFD4AF37),
                   shape: BoxShape.circle,
                 ),
-                child: const Center(
-                  child: Icon(
-                    Icons.checkroom,
-                    color: Colors.white,
-                    size: 50,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.checkroom,
+                        color: Colors.black,
+                        size: 50,
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "FitCheck",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
