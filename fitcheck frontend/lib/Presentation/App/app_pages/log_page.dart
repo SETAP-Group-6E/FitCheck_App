@@ -169,7 +169,22 @@ class LogPage extends StatelessWidget {
               ),
             ],
           ),
-          Expanded(child: SizedBox()),
+          Expanded(
+            child: SizedBox(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(5),
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
