@@ -36,14 +36,20 @@ class LoginPage extends ConsumerWidget {
                   );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Login successful!')),
+                      const SnackBar(content: Text('Log in successful')),
                     );
                   }
                 } catch (e) {
                   if (context.mounted) {
+                    String errorMessage = 'Log in failed: $e';
+                    if (e.toString().contains('Invalid login credentials') ||
+                        e.toString().contains('User not found') ||
+                        e.toString().contains('invalid_grant')) {
+                      errorMessage = 'Account doesn\'t exist, create an account';
+                    }
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+                    ).showSnackBar(SnackBar(content: Text(errorMessage)));
                   }
                 }
               },

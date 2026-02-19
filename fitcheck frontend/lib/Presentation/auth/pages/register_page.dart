@@ -87,7 +87,7 @@ class RegisterPage extends ConsumerWidget {
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   // Add sign-up logic here
                   String name = nameController.text.trim();
                   String email = emailController.text.trim();
@@ -98,12 +98,25 @@ class RegisterPage extends ConsumerWidget {
                       const SnackBar(content: Text('Please fill all fields')),
                     );
                   } else {
-                    // Show success message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Account created')),
-                    );
-                    // Call your auth provider here
-                    // ref.read(authProvider).signUp(name, email, password);
+                    try {
+                      final authRepo = ref.read(authRepositoryProvider);
+                      await authRepo.signUp(
+                        email: email,
+                        password: password,
+                        name: name,
+                      );
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Account created')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Sign up failed: $e')),
+                        );
+                      }
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(
