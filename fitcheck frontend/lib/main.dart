@@ -28,8 +28,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       //home: const LogPage(),
-      home: const RegPage(),
-      //home: const WardrobePage(),
+      ///home: const RegPage(),
+      home: const WardrobePage(),
        //home: const RegisterPage(),
       // home: const LoginPage(),
     );

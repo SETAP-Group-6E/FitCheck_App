@@ -16,7 +16,7 @@ class _SearchBarRowState extends State<SearchBarRow> {
       children: [
         AnimatedContainer(
           duration: Duration(milliseconds: 300),
-          width: _expanded ? 190 : 0,
+          width: _expanded ? 150 : 0,
           height: 40,
           curve: Curves.ease,
           child: _expanded
