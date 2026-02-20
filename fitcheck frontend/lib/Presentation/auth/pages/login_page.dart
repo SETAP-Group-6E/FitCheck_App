@@ -60,7 +60,7 @@ class LoginPage extends ConsumerWidget {
                   child: TextField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      hintText: "Email/Username",
+                      hintText: "Email",
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(5)),
                       ),
