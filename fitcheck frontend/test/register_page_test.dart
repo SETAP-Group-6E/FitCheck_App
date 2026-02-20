@@ -7,6 +7,16 @@ import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/register_page.dart';
 import 'package:fitcheck/Presentation/auth/provider/auth_provider.dart';
 
+// Helper function to set mobile screen size for tests
+void setUpMobileScreenSize(WidgetTester tester) {
+  tester.view.physicalSize = const Size(375, 667); // iPhone SE size
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(() {
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+}
+
 // Simple fake to keep tests fast and predictable.
 class FakeAuthRepository implements AuthRepository {
   @override
@@ -31,6 +41,7 @@ class FakeAuthRepository implements AuthRepository {
 void main() {
   group('Register Page Tests', () {
     testWidgets('Name field is visible', (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
       // MaterialApp gives the page a proper Material context.
       await tester.pumpWidget(
         const MaterialApp(
@@ -42,6 +53,7 @@ void main() {
     });
 
     testWidgets('Email field is visible', (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
       await tester.pumpWidget(
         const MaterialApp(
           home: RegisterPage(),
@@ -52,6 +64,7 @@ void main() {
     });
 
     testWidgets('Password field is visible', (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
       await tester.pumpWidget(
         const MaterialApp(
           home: RegisterPage(),
@@ -63,6 +76,7 @@ void main() {
 
     testWidgets('Password visibility toggles when eye icon is tapped',
         (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
       final controller = TextEditingController();
       await tester.pumpWidget(
         MaterialApp(
@@ -84,6 +98,7 @@ void main() {
     });
 
     testWidgets('Register button is visible', (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
       await tester.pumpWidget(
         const MaterialApp(
           home: RegisterPage(),
@@ -94,6 +109,7 @@ void main() {
     });
 
     testWidgets('Login link opens Login page', (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
       await tester.pumpWidget(
         const MaterialApp(
           home: RegisterPage(),
@@ -117,6 +133,7 @@ void main() {
 
     testWidgets('Name, email, password fields and register button are all visible together',
         (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
       await tester.pumpWidget(
         const MaterialApp(
           home: RegisterPage(),
@@ -132,6 +149,7 @@ void main() {
 
     testWidgets('Shows error message when fields are empty',
         (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
       // Fake repo forces a predictable error path without network calls.
       await tester.pumpWidget(
         ProviderScope(
@@ -160,6 +178,7 @@ void main() {
 
     testWidgets('Register flow shows success SnackBar when sign-up succeeds',
         (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
       // Use FakeAuthRepository to avoid network calls.
       await tester.pumpWidget(
         ProviderScope(
