@@ -17,9 +17,11 @@ class RegisterPage extends ConsumerWidget {
       backgroundColor: Colors.black,
       body: Row(
         children: [
-          Expanded(child: SizedBox()),
-          SingleChildScrollView(
-            child: Column(
+          Expanded(flex: 1, child: SizedBox()),
+          Expanded(
+            flex: 8,
+            child: SingleChildScrollView(
+              child: Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 50),
@@ -138,6 +140,7 @@ class RegisterPage extends ConsumerWidget {
                 ),
                 SizedBox(height: 20),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
                       decoration: BoxDecoration(
@@ -174,9 +177,12 @@ class RegisterPage extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Already have an account?",
-                      style: TextStyle(color: Colors.white54),
+                    Flexible(
+                      child: Text(
+                        "Already have an account?",
+                        style: TextStyle(color: Colors.white54),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
@@ -217,8 +223,9 @@ class RegisterPage extends ConsumerWidget {
                 ),
               ],
             ),
+            ),
           ),
-          Expanded(child: SizedBox(
+          Expanded(flex: 1, child: SizedBox(
             child: Column(
                 children: [
                   Padding(

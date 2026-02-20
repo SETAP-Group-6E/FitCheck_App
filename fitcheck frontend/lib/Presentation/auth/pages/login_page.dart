@@ -17,9 +17,11 @@ class LoginPage extends ConsumerWidget {
       backgroundColor: Colors.black,
       body: Row(
         children: [
-          Expanded(child: SizedBox()),
-          SingleChildScrollView(
-            child: Column(
+          Expanded(flex: 1, child: SizedBox()),
+          Expanded(
+            flex: 8,
+            child: SingleChildScrollView(
+              child: Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 50),
@@ -114,6 +116,7 @@ class LoginPage extends ConsumerWidget {
                 ),
                 SizedBox(height: 20),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
                       decoration: BoxDecoration(
@@ -150,9 +153,12 @@ class LoginPage extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Don't have an account?",
-                      style: TextStyle(color: Colors.white54),
+                    Flexible(
+                      child: Text(
+                        "Don't have an account?",
+                        style: TextStyle(color: Colors.white54),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     TextButton(
                       child: Text(
@@ -193,8 +199,10 @@ class LoginPage extends ConsumerWidget {
                 ),
               ],
             ),
+            ),
           ),
           Expanded(
+            flex: 1,
             child: SizedBox(
               child: Column(
                 children: [
