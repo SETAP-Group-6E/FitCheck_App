@@ -30,9 +30,9 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> signUp({
     required String email,
     required String password,
-    required String name,
+    required String username,
   }) async {
-    if (email.isEmpty || password.isEmpty || name.isEmpty) {
+    if (email.isEmpty || password.isEmpty || username.isEmpty) {
       throw Exception('All fields are required');
     }
   }

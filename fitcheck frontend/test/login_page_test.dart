@@ -31,7 +31,7 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> signUp({
     required String email,
     required String password,
-    required String name,
+    required String username,
   }) async {
     return;
   }
