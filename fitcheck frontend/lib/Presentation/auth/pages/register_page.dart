@@ -10,7 +10,7 @@ class RegisterPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final nameController = TextEditingController();
+    final userNameController = TextEditingController();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     return Scaffold(
@@ -58,7 +58,7 @@ class RegisterPage extends ConsumerWidget {
                   height: 40,
                   width: 350,
                   child: TextField(
-                    controller: nameController,
+                    controller: userNameController,
                     decoration: InputDecoration(
                       hintText: "Username",
                       border: OutlineInputBorder(
@@ -111,7 +111,7 @@ class RegisterPage extends ConsumerWidget {
                         await authRepo.signUp(
                           email: emailController.text.trim(),
                           password: passwordController.text.trim(),
-                          name: nameController.text.trim(),
+                          username: userNameController.text.trim(),
                         );
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
