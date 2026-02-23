@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'Presentation/auth/pages/login_page.dart';
 
 
+
 Future<void> main() async {
   await Supabase.initialize(
     url: 'https://fsjkselzckrheqtqvzze.supabase.co',
@@ -23,7 +24,6 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const LoginPage(),
-      // home: const RegisterPage(),
     );
   }
 }
