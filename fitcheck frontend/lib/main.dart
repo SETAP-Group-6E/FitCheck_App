@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'Presentation/auth/pages/register_page.dart';
+//import 'Presentation/auth/pages/register_page.dart';
+import 'Presentation/auth/pages/settings_page.dart';
 //import 'Presentation/app/app_pages/wardrobe_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
       //home: const LogPage(),
       //home: const RegPage(),
       //home: const WardrobePage(),
-       home: const RegisterPage(),
+      //home: const RegisterPage(),
+       home: const SettingsPage(),
       // home: const LoginPage(),
     );
   }
