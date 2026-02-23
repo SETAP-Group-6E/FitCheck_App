@@ -3,7 +3,8 @@ import 'package:fitcheck/Presentation/App/app_style/search_bar.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/floating_navBar.dart';
 import 'package:flutter/material.dart';
-
+import 'package:fitcheck/Presentation/auth/Wardrobe/widgets/create_item.dart';
+import 'package:fitcheck/Presentation/auth/Wardrobe/widgets/create_outfit.dart';
 
 class WardrobePage extends StatelessWidget {
   const WardrobePage({super.key});
@@ -14,7 +15,6 @@ class WardrobePage extends StatelessWidget {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-         
           Column(
             children: [
               //non scrollable content
@@ -157,8 +157,8 @@ class WardrobePage extends StatelessWidget {
                                       color: Colors.white,
                                       size: 30,
                                     ),
-                                    onPressed: () {
-                                      null;
+                                    onPressed: () async {
+                                      await CreateItem.open(context);
                                     },
                                   ),
                                 ),
@@ -197,8 +197,8 @@ class WardrobePage extends StatelessWidget {
 
                 child: IconButton(
                   icon: Icon(Icons.add, size: 30, color: Colors.white),
-                  onPressed: () {
-                    null;
+                  onPressed: () async {
+                    await CreateOutfitModal.open(context);
                   },
                 ),
               ),
@@ -222,7 +222,6 @@ class WardrobePage extends StatelessWidget {
                     ),
                   ),
                 ),
-                
               ),
 
               SizedBox(width: 5),
