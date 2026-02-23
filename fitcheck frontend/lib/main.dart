@@ -8,7 +8,6 @@ import 'Presentation/auth/pages/register_page.dart';
 //import 'Presentation/app/app_pages/wardrobe_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 Future<void> main() async {
   const supabaseUrl = 'https://fsjkselzckrheqtqvzze.supabase.co';
   const supabaseAnonKey = 'sb_publishable_Qt6ShYvhFsUlQ4fY_LFl6A_aRLJ4Jnr';
@@ -30,19 +29,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      
-       home: const HomePage(),
-      
-
+      home: const HomePage(),
       routes: {
-
         '/homepage': (context) => const HomePage(),
         '/hpage': (context) => const HPage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/wardrobe': (context) => const WardrobePage(),
-
-      }
+      },
     );
   }
 }
