@@ -1,3 +1,4 @@
+import 'package:fitcheck/Presentation/App/app_style/signin_buttons.dart';
 import 'package:fitcheck/Presentation/auth/pages/register_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:flutter/material.dart';
@@ -138,14 +139,7 @@ class LoginPage extends ConsumerWidget {
                         ),
                         height: 35,
                         width: 35,
-                        child: GestureDetector(
-                          onTap: () {
-                            null;
-                          },
-                          child: Image(
-                            image: AssetImage("Assets/google_logo.png"),
-                          ),
-                        ),
+                        child: GoogleSignInButton()
                       ),
                       SizedBox(width: 25),
                       Container(
