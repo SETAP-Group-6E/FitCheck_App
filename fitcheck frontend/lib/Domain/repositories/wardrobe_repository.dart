@@ -1,18 +1,15 @@
 abstract class WardrobeRepository {
-
   Future<void> addClothingItem({
     required String photoUrl,
     required String title,
-    required Enum wearType,
-    required Enum fabricMaterial,
+    required String wearType,
+    required String fabricMaterial,
     required int warmthRating,
     required bool waterResistance,
-    required Enum layerCategory,
+    required String layerCategory,
   });
 
-  Future<void> removeClothingItem({
-    required String id,
-  });
+  Future<void> removeClothingItem({required String id});
 
   Future<List<Map<String, dynamic>>> getClothingItems();
 
@@ -20,11 +17,11 @@ abstract class WardrobeRepository {
     required String id,
     String? photoUrl,
     String? title,
-    Enum? wearType,
-    Enum? fabricMaterial,
+    String? wearType,
+    String? fabricMaterial,
     int? warmthRating,
     bool? waterResistance,
-    Enum? layerCategory,
+    String? layerCategory,
   });
 
   Future<void> addOutfit({
@@ -34,9 +31,7 @@ abstract class WardrobeRepository {
     required List<String> clothingItemIds,
   });
 
-  Future<void> removeOutfit({
-    required String id,
-  });
+  Future<void> removeOutfit({required String id});
 
   Future<List<Map<String, dynamic>>> getOutfits();
 

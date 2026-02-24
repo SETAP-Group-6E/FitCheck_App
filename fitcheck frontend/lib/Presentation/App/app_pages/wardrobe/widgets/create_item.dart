@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
 
 class _CreateItemTheme {
   static const Color card = Color(0xFF171A20);
@@ -12,18 +13,24 @@ class _CreateItemTheme {
 }
 
 class CreateItem extends StatefulWidget {
-  const CreateItem({super.key});
+  const CreateItem({super.key, required this.repository});
 
-  static Future<bool> open(BuildContext context) async {
+  final WardrobeRepository repository;
+
+  static Future<bool> open(
+    BuildContext context, {
+    required WardrobeRepository repository,
+  }) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.6),
-      builder: (_) => const Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        child: CreateItem(),
-      ),
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            child: CreateItem(repository: repository),
+          ),
     );
     return result ?? false;
   }
@@ -34,11 +41,9 @@ class CreateItem extends StatefulWidget {
 
 class _CreateItemState extends State<CreateItem> {
   static const wearTypes = <String>[
-    "Top",
-    "Bottom",
-    "Footwear",
-    "Outerwear",
-    "Accessory",
+    "Smart",
+    "Casual",
+    "Formal",
   ];
   static const fabricMaterials = <String>[
     "Cotton",
@@ -50,9 +55,9 @@ class _CreateItemState extends State<CreateItem> {
     "Other",
   ];
   static const layerCategories = <String>[
-    "Base layer",
-    "Mid layer",
-    "Outer layer",
+    "coat",
+    "jumper",
+    "sweater",
     "Single layer",
   ];
 
@@ -83,9 +88,28 @@ class _CreateItemState extends State<CreateItem> {
   Future<void> _save() async {
     if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
+
     setState(() => _saving = true);
-    if (!mounted) return;
-    Navigator.of(context).pop(true);
+    try {
+      await widget.repository.addClothingItem(
+        photoUrl: _hasPhoto ? 'local-upload-pending' : '',
+        title: _titleCtrl.text.trim(),
+        wearType: _wearType,
+        fabricMaterial: _fabricMaterial,
+        warmthRating: _warmthRating,
+        waterResistance: _waterResistant,
+        layerCategory: _layerCategory,
+      );
+
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save item: $e')));
+    }
   }
 
   @override
@@ -102,7 +126,7 @@ class _CreateItemState extends State<CreateItem> {
               color: Colors.black.withValues(alpha: 0.25),
               blurRadius: 30,
               offset: const Offset(0, 10),
-            )
+            ),
           ],
         ),
         child: ClipRRect(
@@ -132,9 +156,11 @@ class _CreateItemState extends State<CreateItem> {
                           child: _PillTextField(
                             controller: _titleCtrl,
                             hintText: "e.g. Black puffer jacket",
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? "Item name is required"
-                                : null,
+                            validator:
+                                (v) =>
+                                    (v == null || v.trim().isEmpty)
+                                        ? "Item name is required"
+                                        : null,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -152,8 +178,8 @@ class _CreateItemState extends State<CreateItem> {
                           child: _PillDropdown(
                             value: _fabricMaterial,
                             items: fabricMaterials,
-                            onChanged: (v) =>
-                                setState(() => _fabricMaterial = v),
+                            onChanged:
+                                (v) => setState(() => _fabricMaterial = v),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -163,8 +189,8 @@ class _CreateItemState extends State<CreateItem> {
                           child: _PillDropdown(
                             value: _layerCategory,
                             items: layerCategories,
-                            onChanged: (v) =>
-                                setState(() => _layerCategory = v),
+                            onChanged:
+                                (v) => setState(() => _layerCategory = v),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -179,8 +205,7 @@ class _CreateItemState extends State<CreateItem> {
                           title: "Water resistant",
                           subtitle: "Tick if it handles rain",
                           value: _waterResistant,
-                          onChanged: (v) =>
-                              setState(() => _waterResistant = v),
+                          onChanged: (v) => setState(() => _waterResistant = v),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -277,25 +302,28 @@ class _Field extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(
-        label,
-        style: const TextStyle(
-          color: _CreateItemTheme.muted,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      if (helper != null) ...[
-        const SizedBox(height: 4),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
-          helper!,
-          style: const TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
+          label,
+          style: const TextStyle(
+            color: _CreateItemTheme.muted,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
         ),
+        if (helper != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            helper!,
+            style: const TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
+          ),
+        ],
+        const SizedBox(height: 6),
+        child,
       ],
-      const SizedBox(height: 6),
-      child
-    ]);
+    );
   }
 }
 
@@ -318,11 +346,16 @@ class _PillTextField extends StatelessWidget {
       cursorColor: _CreateItemTheme.gold,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle:
-            const TextStyle(color: _CreateItemTheme.textHint, fontSize: 14),
+        hintStyle: const TextStyle(
+          color: _CreateItemTheme.textHint,
+          fontSize: 14,
+        ),
         filled: true,
         fillColor: _CreateItemTheme.inputFill,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
           borderSide: BorderSide.none,
@@ -361,10 +394,14 @@ class _PillDropdown extends StatelessWidget {
           isExpanded: true,
           dropdownColor: _CreateItemTheme.bg,
           iconEnabledColor: _CreateItemTheme.muted,
-          style: const TextStyle(color: _CreateItemTheme.textDark, fontSize: 14),
-          items: items
-              .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-              .toList(),
+          style: const TextStyle(
+            color: _CreateItemTheme.textDark,
+            fontSize: 14,
+          ),
+          items:
+              items
+                  .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                  .toList(),
           onChanged: (v) => onChanged(v ?? value),
         ),
       ),
@@ -379,50 +416,57 @@ class _WarmthSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        Expanded(
-          child: SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 6,
-              activeTrackColor: _CreateItemTheme.gold,
-              inactiveTrackColor: _CreateItemTheme.border,
-              thumbColor: Colors.white,
-              overlayColor: _CreateItemTheme.gold.withValues(alpha: 0.15),
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 6,
+                  activeTrackColor: _CreateItemTheme.gold,
+                  inactiveTrackColor: _CreateItemTheme.border,
+                  thumbColor: Colors.white,
+                  overlayColor: _CreateItemTheme.gold.withValues(alpha: 0.15),
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 9,
+                  ),
+                ),
+                child: Slider(
+                  min: 1,
+                  max: 5,
+                  divisions: 4,
+                  value: value.toDouble(),
+                  onChanged: (v) => onChanged(v.round()),
+                ),
+              ),
             ),
-            child: Slider(
-              min: 1,
-              max: 5,
-              divisions: 4,
-              value: value.toDouble(),
-              onChanged: (v) => onChanged(v.round()),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: _CreateItemTheme.bg,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: _CreateItemTheme.border),
+              ),
+              child: Text(
+                value.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-        const SizedBox(width: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: _CreateItemTheme.bg,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: _CreateItemTheme.border),
-          ),
-          child: Text(
-            value.toString(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        const SizedBox(height: 6),
+        const Text(
+          "1 = Light   5 = Very warm",
+          style: TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
         ),
-      ]),
-      const SizedBox(height: 6),
-      const Text(
-        "1 = Light   5 = Very warm",
-        style: TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
-      ),
-    ]);
+      ],
+    );
   }
 }
 
@@ -440,50 +484,64 @@ class _CheckboxRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Theme(
-        data: Theme.of(context).copyWith(
-          unselectedWidgetColor: _CreateItemTheme.border,
-          checkboxTheme: CheckboxThemeData(
-            fillColor: WidgetStateProperty.resolveWith(
-              (states) => states.contains(WidgetState.selected)
-                  ? _CreateItemTheme.gold
-                  : Colors.transparent,
-            ),
-            side: const BorderSide(color: _CreateItemTheme.border, width: 1.5),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-            checkColor: WidgetStateProperty.all(Colors.white),
-          ),
-        ),
-        child: Semantics(
-          enabled: true,
-          label: title,
-          child: Checkbox(
-            value: value,
-            onChanged: (v) => onChanged(v ?? false),
-          ),
-        ),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Theme(
+          data: Theme.of(context).copyWith(
+            unselectedWidgetColor: _CreateItemTheme.border,
+            checkboxTheme: CheckboxThemeData(
+              fillColor: WidgetStateProperty.resolveWith(
+                (states) =>
+                    states.contains(WidgetState.selected)
+                        ? _CreateItemTheme.gold
+                        : Colors.transparent,
+              ),
+              side: const BorderSide(
+                color: _CreateItemTheme.border,
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              checkColor: WidgetStateProperty.all(Colors.white),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
+          child: Semantics(
+            enabled: true,
+            label: title,
+            child: Checkbox(
+              value: value,
+              onChanged: (v) => onChanged(v ?? false),
+            ),
           ),
-        ]),
-      ),
-    ]);
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: _CreateItemTheme.muted,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -494,56 +552,60 @@ class _PhotoBoxUIOnly extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        height: 312,
-        width: 312,
-        decoration: BoxDecoration(
-          color: _CreateItemTheme.bg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _CreateItemTheme.border),
-        ),
-        child: hasPhoto
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.image,
-                    size: 64,
-                    color: _CreateItemTheme.muted,
-                  ),
-                ),
-              )
-            : Center(
-                child: Semantics(
-                  label: "Photo upload area",
-                  child: Text(
-                    "Upload item photo",
-                    style: const TextStyle(
-                      color: _CreateItemTheme.muted,
-                      fontSize: 13,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 312,
+          width: 312,
+          decoration: BoxDecoration(
+            color: _CreateItemTheme.bg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _CreateItemTheme.border),
+          ),
+          child:
+              hasPhoto
+                  ? ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.image,
+                        size: 64,
+                        color: _CreateItemTheme.muted,
+                      ),
+                    ),
+                  )
+                  : Center(
+                    child: Semantics(
+                      label: "Photo upload area",
+                      child: Text(
+                        "Upload item photo",
+                        style: const TextStyle(
+                          color: _CreateItemTheme.muted,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-      ),
-      const SizedBox(height: 16),
-      SizedBox(
-        width: 312,
-        height: 48,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _CreateItemTheme.gold,
-            foregroundColor: Colors.white,
-            shape: const StadiumBorder(),
-            elevation: 0,
-          ),
-          onPressed: onUpload,
-          child: Text(hasPhoto ? "Change photo" : "Upload"),
         ),
-      ),
-    ]);
+        const SizedBox(height: 16),
+        SizedBox(
+          width: 312,
+          height: 48,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _CreateItemTheme.gold,
+              foregroundColor: Colors.white,
+              shape: const StadiumBorder(),
+              elevation: 0,
+            ),
+            onPressed: onUpload,
+            child: Text(hasPhoto ? "Change photo" : "Upload"),
+          ),
+        ),
+      ],
+    );
   }
 }
 
