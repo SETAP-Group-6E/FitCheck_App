@@ -3,14 +3,20 @@ import 'package:fitcheck/Presentation/App/app_style/search_bar.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/floating_navbar.dart';
 import 'package:flutter/material.dart';
-import 'package:fitcheck/Presentation/auth/Wardrobe/widgets/create_item.dart';
-import 'package:fitcheck/Presentation/auth/Wardrobe/widgets/create_outfit.dart';
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_item.dart';
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outfit.dart';
+import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WardrobePage extends StatelessWidget {
   const WardrobePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final wardrobeRepository = SupabaseWardrobeRepository(
+      Supabase.instance.client,
+    );
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -158,7 +164,10 @@ class WardrobePage extends StatelessWidget {
                                       size: 30,
                                     ),
                                     onPressed: () async {
-                                      await CreateItem.open(context);
+                                      await CreateItem.open(
+                                        context,
+                                        repository: wardrobeRepository,
+                                      );
                                     },
                                   ),
                                 ),
@@ -198,7 +207,10 @@ class WardrobePage extends StatelessWidget {
                 child: IconButton(
                   icon: Icon(Icons.add, size: 30, color: Colors.white),
                   onPressed: () async {
-                    await CreateOutfitModal.open(context);
+                    await CreateOutfitModal.open(
+                      context,
+                      repository: wardrobeRepository,
+                    );
                   },
                 ),
               ),
