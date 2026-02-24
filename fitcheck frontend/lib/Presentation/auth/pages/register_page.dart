@@ -1,15 +1,11 @@
-import 'dart:async';
-import 'dart:io';
 
 import 'package:fitcheck/Presentation/App/app_style/password_field.dart';
 import 'package:fitcheck/Presentation/App/app_style/signin_buttons.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../provider/auth_provider.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final supabase = Supabase.instance.client;
