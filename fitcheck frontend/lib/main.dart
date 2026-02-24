@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Presentation/auth/pages/register_page.dart';
+//import 'Presentation/app/app_pages/wardrobe_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'Presentation/auth/pages/login_page.dart';
 
 
 Future<void> main() async {
+  const supabaseUrl = 'https://fsjkselzckrheqtqvzze.supabase.co';
+  const supabaseAnonKey = 'sb_publishable_Qt6ShYvhFsUlQ4fY_LFl6A_aRLJ4Jnr';
   await Supabase.initialize(
-    url: 'https://fsjkselzckrheqtqvzze.supabase.co',
-    anonKey: 'sb_publishable_Qt6ShYvhFsUlQ4fY_LFl6A_aRLJ4Jnr',
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -19,12 +21,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'FitCheck',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const LoginPage(),
-      // home: const RegisterPage(),
+      //home: const LogPage(),
+      //home: const RegPage(),
+      //home: const WardrobePage(),
+       home: const RegisterPage(),
+      // home: const LoginPage(),
     );
   }
 }
@@ -46,6 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
