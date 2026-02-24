@@ -7,9 +7,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 
 Future<void> main() async {
+  const supabaseUrl = 'https://fsjkselzckrheqtqvzze.supabase.co';
+  const supabaseAnonKey = 'sb_publishable_Qt6ShYvhFsUlQ4fY_LFl6A_aRLJ4Jnr';
   await Supabase.initialize(
-    url: 'https://fsjkselzckrheqtqvzze.supabase.co',
-    anonKey: 'sb_publishable_Qt6ShYvhFsUlQ4fY_LFl6A_aRLJ4Jnr',
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
   runApp(const ProviderScope(child: MyApp()));
 }
