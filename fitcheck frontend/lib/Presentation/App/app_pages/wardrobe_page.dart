@@ -1,10 +1,12 @@
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_item.dart';
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outfit.dart';
 import 'package:fitcheck/Presentation/App/app_style/dashed_box.dart';
 import 'package:fitcheck/Presentation/App/app_style/search_bar.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/floating_navbar.dart';
 import 'package:flutter/material.dart';
-import 'package:fitcheck/Presentation/auth/Wardrobe/widgets/create_item.dart';
-import 'package:fitcheck/Presentation/auth/Wardrobe/widgets/create_outfit.dart';
+//import 'package:fitcheck/Presentation/auth/Wardrobe/widgets/create_item.dart';
+//import 'package:fitcheck/Presentation/auth/Wardrobe/widgets/create_outfit.dart';
 
 class WardrobePage extends StatelessWidget {
   const WardrobePage({super.key});
