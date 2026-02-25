@@ -88,7 +88,6 @@ class RegisterPage extends ConsumerWidget {
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () async {
-                  // Add sign-up logic here
                   String name = nameController.text.trim();
                   String email = emailController.text.trim();
                   String password = passwordController.text.trim();
@@ -136,18 +135,12 @@ class RegisterPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      // Google login logic
-                      print('Google login tapped');
-                    },
+                    onTap: () {},
                     child: _buildSocialCircle(Icons.g_mobiledata),
                   ),
                   const SizedBox(width: 20),
                   GestureDetector(
-                    onTap: () {
-                      // Apple login logic
-                      print('Apple login tapped');
-                    },
+                    onTap: () {},
                     child: _buildSocialCircle(Icons.apple),
                   ),
                 ],
