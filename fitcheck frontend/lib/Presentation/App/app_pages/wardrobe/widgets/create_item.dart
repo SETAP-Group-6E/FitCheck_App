@@ -6,7 +6,6 @@ class _CreateItemTheme {
   static const Color gold = Color(0xFFD4A017);
   static const Color muted = Color(0xFFA1A1AA);
   static const Color inputFill = Color(0xFFE5E5E5);
-  static const Color bg = Color(0xFF0F1115);
   static const Color textDark = Color(0xFF111111);
   static const Color textHint = Color(0xFF6B7280);
 }
@@ -18,12 +17,13 @@ class CreateItem extends StatefulWidget {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.6),
-      builder: (_) => const Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        child: CreateItem(),
-      ),
+      barrierColor: Colors.black.withOpacity(0.6),
+      builder:
+          (_) => const Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            child: CreateItem(),
+          ),
     );
     return result ?? false;
   }
@@ -33,14 +33,15 @@ class CreateItem extends StatefulWidget {
 }
 
 class _CreateItemState extends State<CreateItem> {
-  static const wearTypes = <String>[
+  static const wearTypes = [
     "Top",
     "Bottom",
     "Footwear",
     "Outerwear",
     "Accessory",
   ];
-  static const fabricMaterials = <String>[
+
+  static const fabricMaterials = [
     "Cotton",
     "Denim",
     "Wool",
@@ -49,7 +50,8 @@ class _CreateItemState extends State<CreateItem> {
     "Nylon",
     "Other",
   ];
-  static const layerCategories = <String>[
+
+  static const layerCategories = [
     "Base layer",
     "Mid layer",
     "Outer layer",
@@ -99,10 +101,10 @@ class _CreateItemState extends State<CreateItem> {
           border: Border.all(color: _CreateItemTheme.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
+              color: Colors.black.withOpacity(0.25),
               blurRadius: 30,
               offset: const Offset(0, 10),
-            )
+            ),
           ],
         ),
         child: ClipRRect(
@@ -132,9 +134,11 @@ class _CreateItemState extends State<CreateItem> {
                           child: _PillTextField(
                             controller: _titleCtrl,
                             hintText: "e.g. Black puffer jacket",
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? "Item name is required"
-                                : null,
+                            validator:
+                                (v) =>
+                                    (v == null || v.trim().isEmpty)
+                                        ? "Item name is required"
+                                        : null,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -152,8 +156,8 @@ class _CreateItemState extends State<CreateItem> {
                           child: _PillDropdown(
                             value: _fabricMaterial,
                             items: fabricMaterials,
-                            onChanged: (v) =>
-                                setState(() => _fabricMaterial = v),
+                            onChanged:
+                                (v) => setState(() => _fabricMaterial = v),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -163,8 +167,8 @@ class _CreateItemState extends State<CreateItem> {
                           child: _PillDropdown(
                             value: _layerCategory,
                             items: layerCategories,
-                            onChanged: (v) =>
-                                setState(() => _layerCategory = v),
+                            onChanged:
+                                (v) => setState(() => _layerCategory = v),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -179,8 +183,7 @@ class _CreateItemState extends State<CreateItem> {
                           title: "Water resistant",
                           subtitle: "Tick if it handles rain",
                           value: _waterResistant,
-                          onChanged: (v) =>
-                              setState(() => _waterResistant = v),
+                          onChanged: (v) => setState(() => _waterResistant = v),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -216,130 +219,11 @@ class _CreateItemState extends State<CreateItem> {
   }
 }
 
-class _Header extends StatelessWidget {
-  final VoidCallback onClose;
-  const _Header({required this.onClose});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 22, 20, 18),
-      child: Row(
-        children: [
-          const Expanded(
-            child: Text(
-              "Add new item",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Semantics(
-            button: true,
-            label: "Close dialog",
-            child: IconButton(
-              onPressed: onClose,
-              icon: const Icon(Icons.close),
-              color: _CreateItemTheme.muted,
-              splashRadius: 20,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Label extends StatelessWidget {
-  final String text;
-  const _Label(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: _CreateItemTheme.muted,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}
-
-class _Field extends StatelessWidget {
-  final String label;
-  final String? helper;
-  final Widget child;
-  const _Field({required this.label, this.helper, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(
-        label,
-        style: const TextStyle(
-          color: _CreateItemTheme.muted,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      if (helper != null) ...[
-        const SizedBox(height: 4),
-        Text(
-          helper!,
-          style: const TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
-        ),
-      ],
-      const SizedBox(height: 6),
-      child
-    ]);
-  }
-}
-
-class _PillTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hintText;
-  final String? Function(String?)? validator;
-  const _PillTextField({
-    required this.controller,
-    required this.hintText,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      style: const TextStyle(color: _CreateItemTheme.textDark, fontSize: 14),
-      cursorColor: _CreateItemTheme.gold,
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle:
-            const TextStyle(color: _CreateItemTheme.textHint, fontSize: 14),
-        filled: true,
-        fillColor: _CreateItemTheme.inputFill,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(999),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(color: _CreateItemTheme.gold, width: 2),
-        ),
-      ),
-    );
-  }
-}
-
 class _PillDropdown extends StatelessWidget {
   final String value;
   final List<String> items;
   final ValueChanged<String> onChanged;
+
   const _PillDropdown({
     required this.value,
     required this.items,
@@ -359,12 +243,32 @@ class _PillDropdown extends StatelessWidget {
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          dropdownColor: _CreateItemTheme.bg,
-          iconEnabledColor: _CreateItemTheme.muted,
-          style: const TextStyle(color: _CreateItemTheme.textDark, fontSize: 14),
-          items: items
-              .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-              .toList(),
+
+          dropdownColor: _CreateItemTheme.inputFill,
+
+          iconEnabledColor: _CreateItemTheme.textHint,
+
+          style: const TextStyle(
+            color: _CreateItemTheme.textDark,
+            fontSize: 14,
+          ),
+
+          items:
+              items
+                  .map(
+                    (s) => DropdownMenuItem(
+                      value: s,
+                      child: Text(
+                        s,
+                        style: const TextStyle(
+                          color: _CreateItemTheme.textDark,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+
           onChanged: (v) => onChanged(v ?? value),
         ),
       ),
@@ -372,57 +276,237 @@ class _PillDropdown extends StatelessWidget {
   }
 }
 
+class _Header extends StatelessWidget {
+  final VoidCallback onClose;
+
+  const _Header({required this.onClose});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 20, 32, 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            "Create item",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: onClose,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Label extends StatelessWidget {
+  final String text;
+
+  const _Label(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: Colors.white,
+        letterSpacing: 0.3,
+      ),
+    );
+  }
+}
+
+class _PhotoBoxUIOnly extends StatelessWidget {
+  final bool hasPhoto;
+  final VoidCallback onUpload;
+
+  const _PhotoBoxUIOnly({required this.hasPhoto, required this.onUpload});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onUpload,
+      child: Container(
+        height: 200,
+        decoration: BoxDecoration(
+          color: _CreateItemTheme.inputFill,
+          borderRadius: BorderRadius.circular(16),
+          border:
+              hasPhoto
+                  ? null
+                  : Border.all(
+                    color: _CreateItemTheme.border,
+                    width: 2,
+                    strokeAlign: BorderSide.strokeAlignOutside,
+                  ),
+        ),
+        child: Center(
+          child:
+              hasPhoto
+                  ? const Icon(
+                    Icons.check_circle,
+                    size: 48,
+                    color: Colors.green,
+                  )
+                  : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.cloud_upload_outlined,
+                        size: 48,
+                        color: _CreateItemTheme.textHint,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        "Upload photo",
+                        style: TextStyle(
+                          color: _CreateItemTheme.textHint,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Field extends StatelessWidget {
+  final String label;
+  final String? helper;
+  final Widget child;
+
+  const _Field({required this.label, this.helper, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+            if (helper != null) ...[
+              const SizedBox(width: 8),
+              Tooltip(
+                message: helper,
+                child: Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: _CreateItemTheme.textHint,
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 8),
+        child,
+      ],
+    );
+  }
+}
+
+class _PillTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final String? Function(String?)? validator;
+
+  const _PillTextField({
+    required this.controller,
+    required this.hintText,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(color: _CreateItemTheme.textHint),
+        filled: true,
+        fillColor: _CreateItemTheme.inputFill,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(999),
+          borderSide: BorderSide.none,
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(999),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(999),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+      ),
+      style: const TextStyle(color: _CreateItemTheme.textDark, fontSize: 14),
+      validator: validator,
+    );
+  }
+}
+
 class _WarmthSlider extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
+
   const _WarmthSlider({required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        Expanded(
-          child: SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 6,
-              activeTrackColor: _CreateItemTheme.gold,
-              inactiveTrackColor: _CreateItemTheme.border,
-              thumbColor: Colors.white,
-              overlayColor: _CreateItemTheme.gold.withValues(alpha: 0.15),
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
-            ),
-            child: Slider(
-              min: 1,
-              max: 5,
-              divisions: 4,
-              value: value.toDouble(),
-              onChanged: (v) => onChanged(v.round()),
-            ),
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Slider(
+          value: value.toDouble(),
+          min: 1,
+          max: 5,
+          divisions: 4,
+          onChanged: (v) => onChanged(v.toInt()),
+          activeColor: _CreateItemTheme.gold,
+          inactiveColor: _CreateItemTheme.border,
         ),
-        const SizedBox(width: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: _CreateItemTheme.bg,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: _CreateItemTheme.border),
-          ),
-          child: Text(
-            value.toString(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(5, (i) {
+            final level = i + 1;
+            return Text(
+              level.toString(),
+              style: TextStyle(
+                fontSize: 12,
+                color:
+                    level == value
+                        ? _CreateItemTheme.gold
+                        : _CreateItemTheme.textHint,
+                fontWeight:
+                    level == value ? FontWeight.w600 : FontWeight.normal,
+              ),
+            );
+          }),
         ),
-      ]),
-      const SizedBox(height: 6),
-      const Text(
-        "1 = Light   5 = Very warm",
-        style: TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
-      ),
-    ]);
+      ],
+    );
   }
 }
 
@@ -431,6 +515,7 @@ class _CheckboxRow extends StatelessWidget {
   final String subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
+
   const _CheckboxRow({
     required this.title,
     required this.subtitle,
@@ -440,132 +525,29 @@ class _CheckboxRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Theme(
-        data: Theme.of(context).copyWith(
-          unselectedWidgetColor: _CreateItemTheme.border,
-          checkboxTheme: CheckboxThemeData(
-            fillColor: WidgetStateProperty.resolveWith(
-              (states) => states.contains(WidgetState.selected)
-                  ? _CreateItemTheme.gold
-                  : Colors.transparent,
-            ),
-            side: const BorderSide(color: _CreateItemTheme.border, width: 1.5),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-            checkColor: WidgetStateProperty.all(Colors.white),
-          ),
-        ),
-        child: Semantics(
-          enabled: true,
-          label: title,
-          child: Checkbox(
-            value: value,
-            onChanged: (v) => onChanged(v ?? false),
-          ),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _CreateItemTheme.border),
       ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+      child: CheckboxListTile(
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
           ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
-          ),
-        ]),
-      ),
-    ]);
-  }
-}
-
-class _PhotoBoxUIOnly extends StatelessWidget {
-  final bool hasPhoto;
-  final VoidCallback onUpload;
-  const _PhotoBoxUIOnly({required this.hasPhoto, required this.onUpload});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        height: 312,
-        width: 312,
-        decoration: BoxDecoration(
-          color: _CreateItemTheme.bg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _CreateItemTheme.border),
         ),
-        child: hasPhoto
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.image,
-                    size: 64,
-                    color: _CreateItemTheme.muted,
-                  ),
-                ),
-              )
-            : Center(
-                child: Semantics(
-                  label: "Photo upload area",
-                  child: Text(
-                    "Upload item photo",
-                    style: const TextStyle(
-                      color: _CreateItemTheme.muted,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              ),
-      ),
-      const SizedBox(height: 16),
-      SizedBox(
-        width: 312,
-        height: 48,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _CreateItemTheme.gold,
-            foregroundColor: Colors.white,
-            shape: const StadiumBorder(),
-            elevation: 0,
-          ),
-          onPressed: onUpload,
-          child: Text(hasPhoto ? "Change photo" : "Upload"),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(fontSize: 12, color: _CreateItemTheme.textHint),
         ),
-      ),
-    ]);
-  }
-}
-
-class _PrimaryButton extends StatelessWidget {
-  final String text;
-  final VoidCallback? onPressed;
-  const _PrimaryButton({required this.text, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _CreateItemTheme.gold,
-          foregroundColor: Colors.white,
-          shape: const StadiumBorder(),
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-        ),
-        onPressed: onPressed,
-        child: Text(text),
+        value: value,
+        onChanged: (v) => onChanged(v ?? false),
+        activeColor: _CreateItemTheme.gold,
+        checkColor: Colors.black,
+        tileColor: Colors.transparent,
       ),
     );
   }
@@ -574,21 +556,55 @@ class _PrimaryButton extends StatelessWidget {
 class _SecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
+
   const _SecondaryButton({required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: const BorderSide(color: _CreateItemTheme.border),
-          shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(horizontal: 18),
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(color: Colors.white24),
         ),
-        onPressed: onPressed,
-        child: Text(text),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+class _PrimaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+
+  const _PrimaryButton({required this.text, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _CreateItemTheme.gold,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        disabledBackgroundColor: _CreateItemTheme.muted,
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: _CreateItemTheme.textDark,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
