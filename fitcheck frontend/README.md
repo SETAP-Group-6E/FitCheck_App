@@ -62,7 +62,7 @@ Install dependencies:
 flutter pub get
 
 
-### Required Supabase Setup
+## Required Supabase Setup
 
 1. Authentication Tables — Supabase Auth automatically manages "auth.users" table
 2. Profiles Table (optional) — For storing user metadata beyond auth
@@ -77,7 +77,7 @@ flutter pub get
 
 ## Architecture Overview
 
-### Clean Architecture Layers
+## Clean Architecture Layers
 
 Presentation Layer ("lib/Presentation/")
 - Contains all UI widgets and pages
@@ -110,7 +110,7 @@ WardrobeRepository (domain interface)
   ↓
 SupabaseWardrobeRepository (data layer)
   ↓
-_supabase.from(table).insert(data)  // tries: item → items → clothing_item → clothing_items
+_supabase.from(table).insert(data)   tries: item → items → clothing_item → clothing_items
   ↓
 Supabase API → Database
 
@@ -132,7 +132,7 @@ Core App Entry:
     - lib/main.dart — Initializes Supabase, sets up Riverpod ProviderScope, configures routes for HomePage, RegisterPage, LoginPage, WardrobePage.
 
 Authentication Layer
-- lib/Domain/repositories/auth_repository.dart — Abstract interface defining `signUp()` and `signIn()` methods
+- lib/Domain/repositories/auth_repository.dart — Abstract interface defining "signUp()" and "signIn()" methods
 - lib/Data/repositories/supabase_auth_repository.dart — Supabase implementation of auth with email/password
 - lib/Presentation/auth/provider/auth_provider.dart — Riverpod providers: authRepositoryProvider and  authControllerProvider for managing auth state
 - lib/Presentation/auth/pages/register_page.dart — Registration UI with validation, username/email/password fields, custom styling
@@ -197,7 +197,7 @@ Login (Sign In)
 4. On success: Riverpod provider updates auth state, navigate to HomePage
 5. On error: display error feedback
 
-### State Management
+## State Management
 
 - authRepositoryProvider (Riverpod Provider) — provides "SupabaseAuthRepository"
 - authControllerProvider (StateNotifierProvider) — Manages boolean auth state (logged in / out)
@@ -266,14 +266,14 @@ WardrobePage
 - Scrollable content area displaying wardrobe items/outfits
 - FloatingNavbar at bottom with action buttons (create item, create outfit)
 
-Create Item Dialog (`create_item.dart`)
+Create Item Dialog ("create_item.dart")
 - Modal overlay with semi-transparent black background
 - Form inputs:
   - Title field
-  - Wear type dropdown (pre-defined options)
+  - Wear type dropdown 
   - Fabric material dropdown
   - Layer category dropdown
-  - Warmth rating slider (1-5)
+  - Warmth rating slider 
   - Water resistance toggle
   - Photo URL field (placeholder image picker not connected to Supabase Storage)
 - Save/Cancel buttons
