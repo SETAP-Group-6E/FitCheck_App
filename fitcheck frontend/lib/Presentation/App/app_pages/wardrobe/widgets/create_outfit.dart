@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../styles/wardrobe_styles.dart';
 
 class _CreateOutfitTheme {
   static const Color card = Color(0xFF171A20);
