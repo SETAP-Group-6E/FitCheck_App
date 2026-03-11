@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
 import '../styles/wardrobe_styles.dart';
+import '../constants/wardrobe_constants.dart';
 
 class _CreateOutfitTheme {
   static const Color card = Color(0xFF171A20);
@@ -9,18 +11,22 @@ class _CreateOutfitTheme {
 }
 
 class CreateOutfitModal extends StatefulWidget {
-  const CreateOutfitModal({super.key});
+  const CreateOutfitModal({super.key, required this.repository});
 
-  /// Opens the modal and returns true if the user pressed "Save outfit"
-  static Future<bool> open(BuildContext context) async {
+  final WardrobeRepository repository;
+
+  static Future<bool> open(
+    BuildContext context, {
+    required WardrobeRepository repository,
+  }) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.60),
-      builder: (_) => const Dialog(
+      builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        child: CreateOutfitModal(),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        child: CreateOutfitModal(repository: repository),
       ),
     );
     return result ?? false;
@@ -36,6 +42,7 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
   final _descCtrl = TextEditingController();
 
   bool _isOwned = false;
+  bool _saving = false;
 
   @override
   void dispose() {
@@ -46,12 +53,28 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
 
   void _cancel() => Navigator.of(context).pop(false);
 
-  void _save() {
+  Future<void> _save() async {
+    if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
 
-    // UI only: just close + return true
-    // Later you can insert into Supabase here.
-    Navigator.of(context).pop(true);
+    setState(() => _saving = true);
+    try {
+      await widget.repository.addOutfit(
+        name: _nameCtrl.text.trim(),
+        description: _descCtrl.text.trim(),
+        isOwned: _isOwned,
+        clothingItemIds: const [],
+      );
+
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save outfit: $e')),
+      );
+    }
   }
 
   @override
@@ -78,7 +101,6 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
             children: [
               _Header(onClose: _cancel, title: "Create outfit"),
               Container(height: 1, color: _CreateOutfitTheme.border),
-
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(32, 24, 32, 16),
@@ -91,7 +113,7 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                           label: "Outfit name",
                           child: _PillTextField(
                             controller: _nameCtrl,
-                            hintText: "e.g. Winter street fit",
+                            hintText: WardrobeConstants.defaultOutfitNameHint,
                             validator: (v) {
                               if (v == null || v.trim().isEmpty) {
                                 return "Outfit name is required";
@@ -101,43 +123,45 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                           ),
                         ),
                         const SizedBox(height: 16),
-
                         _Field(
                           label: "Description",
-                          helper: "Optional notes (style, weather, occasion, etc.)",
+                          helper: WardrobeConstants.outfitDescriptionHelper,
                           child: _TextArea(
                             controller: _descCtrl,
-                            hintText: "Add a short description for this outfit...",
+                            hintText:
+                                WardrobeConstants.defaultOutfitDescriptionHint,
                           ),
                         ),
                         const SizedBox(height: 20),
-
                         _CheckboxRow(
                           title: "Owned",
                           subtitle: "Tick if you currently own this outfit",
                           value: _isOwned,
                           onChanged: (v) => setState(() => _isOwned = v),
                         ),
-
                         const SizedBox(height: 24),
                       ],
                     ),
                   ),
                 ),
               ),
-
               Container(
                 padding: const EdgeInsets.fromLTRB(32, 12, 32, 20),
                 decoration: BoxDecoration(
                   color: _CreateOutfitTheme.card,
-                  border: Border(top: BorderSide(color: _CreateOutfitTheme.border)),
+                  border: Border(
+                    top: BorderSide(color: _CreateOutfitTheme.border),
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     _SecondaryButton(text: "Cancel", onPressed: _cancel),
                     const SizedBox(width: 12),
-                    _PrimaryButton(text: "Save outfit", onPressed: _save),
+                    _PrimaryButton(
+                      text: _saving ? "Saving..." : "Save outfit",
+                      onPressed: _saving ? null : _save,
+                    ),
                   ],
                 ),
               ),
@@ -149,11 +173,10 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
   }
 }
 
-/* ---------------- UI PARTS ---------------- */
-
 class _Header extends StatelessWidget {
   final VoidCallback onClose;
   final String title;
+
   const _Header({required this.onClose, required this.title});
 
   @override
@@ -192,22 +215,40 @@ class _Field extends StatelessWidget {
   final String label;
   final String? helper;
   final Widget child;
-  const _Field({required this.label, this.helper, required this.child});
+
+  const _Field({
+    required this.label,
+    this.helper,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(
-        label,
-        style: const TextStyle(color: _CreateOutfitTheme.muted, fontSize: 12, fontWeight: FontWeight.w600),
-      ),
-      if (helper != null) ...[
-        const SizedBox(height: 4),
-        Text(helper!, style: const TextStyle(color: _CreateOutfitTheme.muted, fontSize: 12)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: _CreateOutfitTheme.muted,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        if (helper != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            helper!,
+            style: const TextStyle(
+              color: _CreateOutfitTheme.muted,
+              fontSize: 12,
+            ),
+          ),
+        ],
+        const SizedBox(height: 6),
+        child,
       ],
-      const SizedBox(height: 6),
-      child,
-    ]);
+    );
   }
 }
 
@@ -239,7 +280,10 @@ class _PillTextField extends StatelessWidget {
         hintStyle: const TextStyle(color: textHint, fontSize: 14),
         filled: true,
         fillColor: inputFill,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
           borderSide: BorderSide.none,
@@ -285,7 +329,10 @@ class _TextArea extends StatelessWidget {
         hintStyle: const TextStyle(color: textHint, fontSize: 14),
         filled: true,
         fillColor: inputFill,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -314,57 +361,74 @@ class _CheckboxRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Theme(
-        data: Theme.of(context).copyWith(
-          unselectedWidgetColor: _CreateOutfitTheme.border,
-          checkboxTheme: CheckboxThemeData(
-            fillColor: WidgetStateProperty.resolveWith((states) {
-              return states.contains(WidgetState.selected)
-                  ? _CreateOutfitTheme.gold
-                  : Colors.transparent;
-            }),
-            side: const BorderSide(
-                color: _CreateOutfitTheme.border, width: 1.5),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-            checkColor: WidgetStateProperty.all(Colors.white),
-          ),
-        ),
-        child: Semantics(
-          enabled: true,
-          label: title,
-          child: Checkbox(
-            value: value,
-            onChanged: (v) => onChanged(v ?? false),
-          ),
-        ),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Theme(
+          data: Theme.of(context).copyWith(
+            unselectedWidgetColor: _CreateOutfitTheme.border,
+            checkboxTheme: CheckboxThemeData(
+              fillColor: WidgetStateProperty.resolveWith((states) {
+                return states.contains(WidgetState.selected)
+                    ? _CreateOutfitTheme.gold
+                    : Colors.transparent;
+              }),
+              side: const BorderSide(
+                color: _CreateOutfitTheme.border,
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              checkColor: WidgetStateProperty.all(Colors.white),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(subtitle,
-              style: const TextStyle(
-                  color: _CreateOutfitTheme.muted, fontSize: 12)),
-        ]),
-      ),
-    ]);
+          child: Semantics(
+            enabled: true,
+            label: title,
+            child: Checkbox(
+              value: value,
+              onChanged: (v) => onChanged(v ?? false),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: _CreateOutfitTheme.muted,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
 class _PrimaryButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
-  const _PrimaryButton({required this.text, required this.onPressed});
+  final VoidCallback? onPressed;
+
+  const _PrimaryButton({
+    required this.text,
+    required this.onPressed,
+  });
 
   static const gold = Color(0xFFD4A017);
 
@@ -390,7 +454,11 @@ class _PrimaryButton extends StatelessWidget {
 class _SecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  const _SecondaryButton({required this.text, required this.onPressed});
+
+  const _SecondaryButton({
+    required this.text,
+    required this.onPressed,
+  });
 
   static const border = Color(0xFF2A2F38);
 

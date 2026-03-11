@@ -4,7 +4,7 @@ class SearchBarRow extends StatefulWidget {
   const SearchBarRow({super.key});
 
   @override
-  _SearchBarRowState createState() => _SearchBarRowState();
+  State<SearchBarRow> createState() => _SearchBarRowState();
 }
 
 class _SearchBarRowState extends State<SearchBarRow> {

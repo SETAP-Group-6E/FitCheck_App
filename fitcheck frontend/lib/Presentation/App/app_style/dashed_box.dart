@@ -1,26 +1,30 @@
 // Source - https://stackoverflow.com/a/55428017
 // Posted by Ajil O., modified by community. See post 'Timeline' for change history
 // Retrieved 2026-02-17, License - CC BY-SA 4.0
-
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:flutter/material.dart';
 
 class DashedBox extends StatelessWidget {
   final Color color;
   final double strokeWidth;
   final double gap;
 
-  const DashedBox(
-      {super.key, this.color = Colors.black, this.strokeWidth = 1.0, this.gap = 5.0});
+  const DashedBox({
+    super.key,
+    this.color = Colors.black,
+    this.strokeWidth = 1.0,
+    this.gap = 5.0,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Padding(
-        padding: EdgeInsets.all(strokeWidth / 2),
-        child: CustomPaint(
-          painter:
-              DashBoxPainter(color: color, strokeWidth: strokeWidth, gap: gap),
+    return Padding(
+      padding: EdgeInsets.all(strokeWidth / 2),
+      child: CustomPaint(
+        painter: DashBoxPainter(
+          color: color,
+          strokeWidth: strokeWidth,
+          gap: gap,
         ),
       ),
     );
@@ -32,8 +36,11 @@ class DashBoxPainter extends CustomPainter {
   Color color;
   double gap;
 
-  DashBoxPainter(
-      {this.strokeWidth = 5.0, this.color = Colors.red, this.gap = 5.0});
+  DashBoxPainter({
+    this.strokeWidth = 5.0,
+    this.color = Colors.red,
+    this.gap = 5.0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
