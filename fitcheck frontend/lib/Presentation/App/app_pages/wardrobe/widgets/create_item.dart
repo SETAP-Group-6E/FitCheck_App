@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
+import '../styles/wardrobe_styles.dart';
+import '../constants/wardrobe_constants.dart';
+
 
 class _CreateItemTheme {
   static const Color card = Color(0xFF171A20);
