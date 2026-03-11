@@ -6,7 +6,7 @@ class PasswordField extends StatefulWidget {
   const PasswordField(this.controller, {super.key});
 
   @override
-  _PasswordFieldState createState() => _PasswordFieldState();
+  State<PasswordField> createState() => _PasswordFieldState();
 }
 
 class _PasswordFieldState extends State<PasswordField> {

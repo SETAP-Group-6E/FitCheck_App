@@ -18,3 +18,4 @@ final authControllerProvider = StateNotifierProvider<AuthController, bool>((
 ) {
   return AuthController();
 });
+
