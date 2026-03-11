@@ -315,5 +315,35 @@ void main() {
 
       expect(fakeRepo.addOutfitCalls, 1);
     });
+
+    testWidgets('Back button calls Navigator.pop', (WidgetTester tester) async {
+      setUpMobileScreenSize(tester);
+      final fakeRepo = FakeWardrobeRepository();
+
+      // Track route pops via a NavigatorObserver.
+      final observer = _TestNavigatorObserver();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorObservers: [observer],
+          home: WardrobePage(repository: fakeRepo),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.arrow_back_ios_sharp));
+      await tester.pumpAndSettle();
+
+      expect(observer.didPopCount, 1);
+    });
   });
+}
+
+class _TestNavigatorObserver extends NavigatorObserver {
+  int didPopCount = 0;
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    didPopCount++;
+  }
 }
