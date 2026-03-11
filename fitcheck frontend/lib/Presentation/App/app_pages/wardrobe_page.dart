@@ -4,6 +4,7 @@ import 'package:fitcheck/Presentation/App/app_style/dashed_box.dart';
 import 'package:fitcheck/Presentation/App/app_style/search_bar.dart';
 import 'package:fitcheck/Presentation/app/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/floating_navbar.dart';
+import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
 import 'package:flutter/material.dart';
 //import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_item.dart';
 //import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outfit.dart';
@@ -11,13 +12,14 @@ import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WardrobePage extends StatelessWidget {
-  const WardrobePage({super.key});
+  const WardrobePage({super.key, this.repository});
+
+  final WardrobeRepository? repository;
 
   @override
   Widget build(BuildContext context) {
-    final wardrobeRepository = SupabaseWardrobeRepository(
-      Supabase.instance.client,
-    );
+    final wardrobeRepository =
+        repository ?? SupabaseWardrobeRepository(Supabase.instance.client);
 
     return Scaffold(
       backgroundColor: Colors.black,
