@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
+import '../styles/wardrobe_styles.dart';
+import '../constants/wardrobe_constants.dart';
 
 class _CreateItemTheme {
   static const Color card = Color(0xFF171A20);
@@ -39,42 +41,16 @@ class CreateItem extends StatefulWidget {
 }
 
 class _CreateItemState extends State<CreateItem> {
-  // Keep the ERD-style options (edit later if you want enums from DB)
-  static const List<String> wearTypes = <String>[
-    "Top",
-    "Bottom",
-    "Footwear",
-    "Outerwear",
-    "Accessory",
-  ];
-
-  static const List<String> fabricMaterials = <String>[
-    "Cotton",
-    "Denim",
-    "Wool",
-    "Leather",
-    "Polyester",
-    "Nylon",
-    "Other",
-  ];
-
-  static const List<String> layerCategories = <String>[
-    "Base layer",
-    "Mid layer",
-    "Outer layer",
-    "Single layer",
-  ];
-
   final _formKey = GlobalKey<FormState>();
   final _titleCtrl = TextEditingController();
 
-  String _wearType = wearTypes.first;
-  String _fabricMaterial = fabricMaterials.first;
-  String _layerCategory = layerCategories.first;
+  String _wearType = WardrobeConstants.wearTypes.first;
+  String _fabricMaterial = WardrobeConstants.fabricMaterials.first;
+  String _layerCategory = WardrobeConstants.layerCategories.first;
   int _warmthRating = 3;
   bool _waterResistant = false;
 
-  bool _hasPhoto = false; // UI-only placeholder
+  bool _hasPhoto = false;
   bool _saving = false;
 
   @override
@@ -92,6 +68,7 @@ class _CreateItemState extends State<CreateItem> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _saving = true);
+
     try {
       await widget.repository.addClothingItem(
         photoUrl: _hasPhoto ? 'local-upload-pending' : '',
@@ -128,7 +105,7 @@ class _CreateItemState extends State<CreateItem> {
               color: Colors.black.withOpacity(0.25),
               blurRadius: 30,
               offset: const Offset(0, 10),
-            )
+            ),
           ],
         ),
         child: ClipRRect(
@@ -153,53 +130,47 @@ class _CreateItemState extends State<CreateItem> {
                           onUpload: _fakePickImage,
                         ),
                         const SizedBox(height: 24),
-
                         _Field(
                           label: "Item name",
                           child: _PillTextField(
                             controller: _titleCtrl,
-                            hintText: "e.g. Black puffer jacket",
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty)
-                                    ? "Item name is required"
-                                    : null,
+                            hintText: WardrobeConstants.defaultItemNameHint,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? "Item name is required"
+                                : null,
                           ),
                         ),
                         const SizedBox(height: 16),
-
                         _Field(
                           label: "Wear type",
                           child: _PillDropdown(
                             value: _wearType,
-                            items: wearTypes,
+                            items: WardrobeConstants.wearTypes,
                             onChanged: (v) => setState(() => _wearType = v),
                           ),
                         ),
                         const SizedBox(height: 16),
-
                         _Field(
                           label: "Fabric material",
                           child: _PillDropdown(
                             value: _fabricMaterial,
-                            items: fabricMaterials,
+                            items: WardrobeConstants.fabricMaterials,
                             onChanged: (v) =>
                                 setState(() => _fabricMaterial = v),
                           ),
                         ),
                         const SizedBox(height: 16),
-
                         _Field(
                           label: "Layer category",
                           helper: "Used for outfit layering logic",
                           child: _PillDropdown(
                             value: _layerCategory,
-                            items: layerCategories,
+                            items: WardrobeConstants.layerCategories,
                             onChanged: (v) =>
                                 setState(() => _layerCategory = v),
                           ),
                         ),
                         const SizedBox(height: 20),
-
                         const _Label("Warmth rating"),
                         const SizedBox(height: 10),
                         _WarmthSlider(
@@ -207,7 +178,6 @@ class _CreateItemState extends State<CreateItem> {
                           onChanged: (v) => setState(() => _warmthRating = v),
                         ),
                         const SizedBox(height: 20),
-
                         _CheckboxRow(
                           title: "Water resistant",
                           subtitle: "Tick if it handles rain",
@@ -225,7 +195,9 @@ class _CreateItemState extends State<CreateItem> {
                 padding: const EdgeInsets.fromLTRB(32, 12, 32, 20),
                 decoration: BoxDecoration(
                   color: _CreateItemTheme.card,
-                  border: Border(top: BorderSide(color: _CreateItemTheme.border)),
+                  border: Border(
+                    top: BorderSide(color: _CreateItemTheme.border),
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -247,10 +219,9 @@ class _CreateItemState extends State<CreateItem> {
   }
 }
 
-/* ---------------- UI PARTS ---------------- */
-
 class _Header extends StatelessWidget {
   final VoidCallback onClose;
+
   const _Header({required this.onClose});
 
   @override
@@ -283,6 +254,7 @@ class _Header extends StatelessWidget {
 
 class _Label extends StatelessWidget {
   final String text;
+
   const _Label(this.text);
 
   @override
@@ -303,29 +275,39 @@ class _Field extends StatelessWidget {
   final String? helper;
   final Widget child;
 
-  const _Field({required this.label, this.helper, required this.child});
+  const _Field({
+    required this.label,
+    this.helper,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(
-        label,
-        style: const TextStyle(
-          color: _CreateItemTheme.muted,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      if (helper != null) ...[
-        const SizedBox(height: 4),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
-          helper!,
-          style: const TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
+          label,
+          style: const TextStyle(
+            color: _CreateItemTheme.muted,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
         ),
+        if (helper != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            helper!,
+            style: const TextStyle(
+              color: _CreateItemTheme.muted,
+              fontSize: 12,
+            ),
+          ),
+        ],
+        const SizedBox(height: 6),
+        child,
       ],
-      const SizedBox(height: 6),
-      child,
-    ]);
+    );
   }
 }
 
@@ -345,31 +327,52 @@ class _PillTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       validator: validator,
-      style: const TextStyle(color: _CreateItemTheme.textDark, fontSize: 14),
+      style: const TextStyle(
+        color: _CreateItemTheme.textDark,
+        fontSize: 14,
+      ),
       cursorColor: _CreateItemTheme.gold,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: _CreateItemTheme.textHint, fontSize: 14),
+        hintStyle: const TextStyle(
+          color: _CreateItemTheme.textHint,
+          fontSize: 14,
+        ),
         filled: true,
         fillColor: _CreateItemTheme.inputFill,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(color: _CreateItemTheme.gold, width: 2),
+          borderSide: const BorderSide(
+            color: _CreateItemTheme.gold,
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+          borderSide: const BorderSide(
+            color: Colors.redAccent,
+            width: 2,
+          ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+          borderSide: const BorderSide(
+            color: Colors.redAccent,
+            width: 2,
+          ),
         ),
-        errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 12),
+        errorStyle: const TextStyle(
+          color: Colors.redAccent,
+          fontSize: 12,
+        ),
       ),
     );
   }
@@ -399,16 +402,12 @@ class _PillDropdown extends StatelessWidget {
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-
-          // ✅ FIX: light dropdown so text is visible immediately
           dropdownColor: _CreateItemTheme.inputFill,
           iconEnabledColor: _CreateItemTheme.textHint,
-
           style: const TextStyle(
             color: _CreateItemTheme.textDark,
             fontSize: 14,
           ),
-
           items: items
               .map(
                 (s) => DropdownMenuItem(
@@ -423,7 +422,6 @@ class _PillDropdown extends StatelessWidget {
                 ),
               )
               .toList(),
-
           onChanged: (v) => onChanged(v ?? value),
         ),
       ),
@@ -435,56 +433,70 @@ class _WarmthSlider extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
 
-  const _WarmthSlider({required this.value, required this.onChanged});
+  const _WarmthSlider({
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(
-        children: [
-          Expanded(
-            child: SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                trackHeight: 6,
-                activeTrackColor: _CreateItemTheme.gold,
-                inactiveTrackColor: _CreateItemTheme.border,
-                thumbColor: Colors.white,
-                overlayColor: _CreateItemTheme.gold.withOpacity(0.15),
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
-              ),
-              child: Slider(
-                min: 1,
-                max: 5,
-                divisions: 4,
-                value: value.toDouble(),
-                onChanged: (v) => onChanged(v.round()),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 6,
+                  activeTrackColor: _CreateItemTheme.gold,
+                  inactiveTrackColor: _CreateItemTheme.border,
+                  thumbColor: Colors.white,
+                  overlayColor: _CreateItemTheme.gold.withOpacity(0.15),
+                  thumbShape:
+                      const RoundSliderThumbShape(enabledThumbRadius: 9),
+                ),
+                child: Slider(
+                  min: WardrobeConstants.minWarmthRating.toDouble(),
+                  max: WardrobeConstants.maxWarmthRating.toDouble(),
+                  divisions: WardrobeConstants.maxWarmthRating -
+                      WardrobeConstants.minWarmthRating,
+                  value: value.toDouble(),
+                  onChanged: (v) => onChanged(v.round()),
+                ),
               ),
             ),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: _CreateItemTheme.bg,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: _CreateItemTheme.border),
+              ),
+              child: Text(
+                value.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          "1 = Light   5 = Very warm",
+          style: TextStyle(
+            color: _CreateItemTheme.muted,
+            fontSize: 12,
           ),
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: _CreateItemTheme.bg,
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: _CreateItemTheme.border),
-            ),
-            child: Text(
-              value.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 6),
-      const Text(
-        "1 = Light   5 = Very warm",
-        style: TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
-      ),
-    ]);
+        ),
+      ],
+    );
   }
 }
 
@@ -503,45 +515,59 @@ class _CheckboxRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Theme(
-        data: Theme.of(context).copyWith(
-          unselectedWidgetColor: _CreateItemTheme.border,
-          checkboxTheme: CheckboxThemeData(
-            fillColor: MaterialStateProperty.resolveWith(
-              (states) => states.contains(MaterialState.selected)
-                  ? _CreateItemTheme.gold
-                  : Colors.transparent,
-            ),
-            side: const BorderSide(color: _CreateItemTheme.border, width: 1.5),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-            checkColor: MaterialStateProperty.all(Colors.white),
-          ),
-        ),
-        child: Checkbox(
-          value: value,
-          onChanged: (v) => onChanged(v ?? false),
-        ),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Theme(
+          data: Theme.of(context).copyWith(
+            unselectedWidgetColor: _CreateItemTheme.border,
+            checkboxTheme: CheckboxThemeData(
+              fillColor: MaterialStateProperty.resolveWith(
+                (states) => states.contains(MaterialState.selected)
+                    ? _CreateItemTheme.gold
+                    : Colors.transparent,
+              ),
+              side: const BorderSide(
+                color: _CreateItemTheme.border,
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              checkColor: MaterialStateProperty.all(Colors.white),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
+          child: Checkbox(
+            value: value,
+            onChanged: (v) => onChanged(v ?? false),
           ),
-        ]),
-      ),
-    ]);
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: _CreateItemTheme.muted,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -549,46 +575,59 @@ class _PhotoBoxUIOnly extends StatelessWidget {
   final bool hasPhoto;
   final VoidCallback onUpload;
 
-  const _PhotoBoxUIOnly({required this.hasPhoto, required this.onUpload});
+  const _PhotoBoxUIOnly({
+    required this.hasPhoto,
+    required this.onUpload,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        height: 312,
-        width: 312,
-        decoration: BoxDecoration(
-          color: _CreateItemTheme.bg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _CreateItemTheme.border),
-        ),
-        child: hasPhoto
-            ? const Center(
-                child: Icon(Icons.image, size: 64, color: _CreateItemTheme.muted),
-              )
-            : const Center(
-                child: Text(
-                  "Upload item photo",
-                  style: TextStyle(color: _CreateItemTheme.muted, fontSize: 13),
-                ),
-              ),
-      ),
-      const SizedBox(height: 16),
-      SizedBox(
-        width: 312,
-        height: 48,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _CreateItemTheme.gold,
-            foregroundColor: Colors.white,
-            shape: const StadiumBorder(),
-            elevation: 0,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 312,
+          width: 312,
+          decoration: BoxDecoration(
+            color: _CreateItemTheme.bg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _CreateItemTheme.border),
           ),
-          onPressed: onUpload,
-          child: Text(hasPhoto ? "Change photo" : "Upload"),
+          child: hasPhoto
+              ? const Center(
+                  child: Icon(
+                    Icons.image,
+                    size: 64,
+                    color: _CreateItemTheme.muted,
+                  ),
+                )
+              : const Center(
+                  child: Text(
+                    "Upload item photo",
+                    style: TextStyle(
+                      color: _CreateItemTheme.muted,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
         ),
-      ),
-    ]);
+        const SizedBox(height: 16),
+        SizedBox(
+          width: 312,
+          height: 48,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _CreateItemTheme.gold,
+              foregroundColor: Colors.white,
+              shape: const StadiumBorder(),
+              elevation: 0,
+            ),
+            onPressed: onUpload,
+            child: Text(hasPhoto ? "Change photo" : "Upload"),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -596,7 +635,10 @@ class _PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
 
-  const _PrimaryButton({required this.text, required this.onPressed});
+  const _PrimaryButton({
+    required this.text,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -621,7 +663,10 @@ class _SecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
 
-  const _SecondaryButton({required this.text, required this.onPressed});
+  const _SecondaryButton({
+    required this.text,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {

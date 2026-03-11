@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
+import '../styles/wardrobe_styles.dart';
+import '../constants/wardrobe_constants.dart';
 
 class _CreateOutfitTheme {
   static const Color card = Color(0xFF171A20);
@@ -13,7 +15,6 @@ class CreateOutfitModal extends StatefulWidget {
 
   final WardrobeRepository repository;
 
-  /// Opens the modal and returns true if the user pressed "Save outfit"
   static Future<bool> open(
     BuildContext context, {
     required WardrobeRepository repository,
@@ -22,12 +23,11 @@ class CreateOutfitModal extends StatefulWidget {
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.60),
-      builder:
-          (_) => Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-            child: CreateOutfitModal(repository: repository),
-          ),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        child: CreateOutfitModal(repository: repository),
+      ),
     );
     return result ?? false;
   }
@@ -71,9 +71,9 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to save outfit: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save outfit: $e')),
+      );
     }
   }
 
@@ -101,7 +101,6 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
             children: [
               _Header(onClose: _cancel, title: "Create outfit"),
               Container(height: 1, color: _CreateOutfitTheme.border),
-
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(32, 24, 32, 16),
@@ -114,7 +113,7 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                           label: "Outfit name",
                           child: _PillTextField(
                             controller: _nameCtrl,
-                            hintText: "e.g. Winter street fit",
+                            hintText: WardrobeConstants.defaultOutfitNameHint,
                             validator: (v) {
                               if (v == null || v.trim().isEmpty) {
                                 return "Outfit name is required";
@@ -124,33 +123,28 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                           ),
                         ),
                         const SizedBox(height: 16),
-
                         _Field(
                           label: "Description",
-                          helper:
-                              "Optional notes (style, weather, occasion, etc.)",
+                          helper: WardrobeConstants.outfitDescriptionHelper,
                           child: _TextArea(
                             controller: _descCtrl,
                             hintText:
-                                "Add a short description for this outfit...",
+                                WardrobeConstants.defaultOutfitDescriptionHint,
                           ),
                         ),
                         const SizedBox(height: 20),
-
                         _CheckboxRow(
                           title: "Owned",
                           subtitle: "Tick if you currently own this outfit",
                           value: _isOwned,
                           onChanged: (v) => setState(() => _isOwned = v),
                         ),
-
                         const SizedBox(height: 24),
                       ],
                     ),
                   ),
                 ),
               ),
-
               Container(
                 padding: const EdgeInsets.fromLTRB(32, 12, 32, 20),
                 decoration: BoxDecoration(
@@ -179,11 +173,10 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
   }
 }
 
-/* ---------------- UI PARTS ---------------- */
-
 class _Header extends StatelessWidget {
   final VoidCallback onClose;
   final String title;
+
   const _Header({required this.onClose, required this.title});
 
   @override
@@ -222,7 +215,12 @@ class _Field extends StatelessWidget {
   final String label;
   final String? helper;
   final Widget child;
-  const _Field({required this.label, this.helper, required this.child});
+
+  const _Field({
+    required this.label,
+    this.helper,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -308,7 +306,10 @@ class _TextArea extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
 
-  const _TextArea({required this.controller, required this.hintText});
+  const _TextArea({
+    required this.controller,
+    required this.hintText,
+  });
 
   static const gold = Color(0xFFD4A017);
   static const inputFill = Color(0xFFE5E5E5);
@@ -423,7 +424,11 @@ class _CheckboxRow extends StatelessWidget {
 class _PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
-  const _PrimaryButton({required this.text, required this.onPressed});
+
+  const _PrimaryButton({
+    required this.text,
+    required this.onPressed,
+  });
 
   static const gold = Color(0xFFD4A017);
 
@@ -449,7 +454,11 @@ class _PrimaryButton extends StatelessWidget {
 class _SecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  const _SecondaryButton({required this.text, required this.onPressed});
+
+  const _SecondaryButton({
+    required this.text,
+    required this.onPressed,
+  });
 
   static const border = Color(0xFF2A2F38);
 
