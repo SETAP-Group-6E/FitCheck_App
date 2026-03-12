@@ -320,7 +320,7 @@ void main() {
       setUpMobileScreenSize(tester);
       final fakeRepo = FakeWardrobeRepository();
 
-      // Track route pops via a NavigatorObserver.
+      
       final observer = _TestNavigatorObserver();
 
       await tester.pumpWidget(
