@@ -81,8 +81,9 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     if (wearType != null) updateData['wear_type'] = wearType;
     if (fabricMaterial != null) updateData['fabric_material'] = fabricMaterial;
     if (warmthRating != null) updateData['warmth_rating'] = warmthRating;
-    if (waterResistance != null)
+    if (waterResistance != null) {
       updateData['water_resistant'] = waterResistance;
+    }
     if (layerCategory != null) updateData['layer_category'] = layerCategory;
 
     await _updateWithTableFallback(_clothingItemsTables, id, updateData);
@@ -131,8 +132,9 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     if (name != null) updateData['name'] = name;
     if (description != null) updateData['description'] = description;
     if (isOwned != null) updateData['is_owned'] = isOwned;
-    if (clothingItemIds != null && clothingItemIds.isNotEmpty)
+    if (clothingItemIds != null && clothingItemIds.isNotEmpty) {
       updateData['clothing_item_ids'] = clothingItemIds;
+    }
 
     await _updateWithTableFallback(_outfitsTables, id, updateData);
   }
