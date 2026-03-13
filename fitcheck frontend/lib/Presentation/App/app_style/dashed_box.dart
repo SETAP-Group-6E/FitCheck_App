@@ -1,9 +1,8 @@
 // Source - https://stackoverflow.com/a/55428017
 // Posted by Ajil O., modified by community. See post 'Timeline' for change history
 // Retrieved 2026-02-17, License - CC BY-SA 4.0
-
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:flutter/material.dart';
 
 class DashedBox extends StatelessWidget {
   final Color color;
@@ -42,8 +41,11 @@ class DashBoxPainter extends CustomPainter {
   Color color;
   double gap;
 
-  DashBoxPainter(
-      {this.strokeWidth = 5.0, this.color = Colors.red, this.gap = 5.0});
+  DashBoxPainter({
+    this.strokeWidth = 5.0,
+    this.color = Colors.red,
+    this.gap = 5.0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
