@@ -20,6 +20,11 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _darkMode = false;
   bool _notifications = true;
+  static const Color _accent = Color.fromRGBO(217, 156, 19, 1);
+  static const Color _surface = Color(0xFF1C1C1C);
+  static const Color _surfaceBorder = Color(0xFF2E2E2E);
+  static const Color _sectionLabel = Color(0xFF9B9B9B);
+  static const Color _iconButtonBg = Color.fromRGBO(42, 42, 42, 1);
 
   @override
   Widget build(BuildContext context) {
@@ -65,14 +70,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Container(
-                    color: Color.fromRGBO(243, 243, 243, 1),
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 28),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                        Expanded(
+                          child: Container(
+                            color: Colors.black,
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.fromLTRB(16, 20, 16, 28),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                           // 1) Profile card
                           GestureDetector(
                             onTap: () {
@@ -92,10 +97,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                     height: 44,
                                     width: 44,
                                     decoration: BoxDecoration(
-                                      color: Color.fromRGBO(155, 155, 155, 1),
+                                      color: const Color(0xFF2F2F2F),
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: Color.fromRGBO(111, 111, 111, 1),
+                                        color: const Color(0xFF3A3A3A),
                                         width: 1,
                                       ),
                                     ),
@@ -110,7 +115,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
-                                      color: Color.fromRGBO(46, 46, 46, 1),
+                                      color: Colors.white,
                                       fontFamily: 'Georgia',
                                     ),
                                   ),
@@ -125,7 +130,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             'Other settings',
                             style: TextStyle(
                               fontSize: 18,
-                              color: Color.fromRGBO(46, 46, 46, 1),
+                              color: _sectionLabel,
                               fontWeight: FontWeight.w700,
                               fontFamily: 'Georgia',
                             ),
@@ -163,7 +168,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 ),
                                 _settingsRow(
                                   'Delete account',
-                                  color: Color.fromRGBO(156, 156, 156, 1),
+                                  color: _accent,
                                   onTap: () {
                                     Navigator.push(
                                       context,
@@ -269,52 +274,65 @@ class _SettingsPageState extends State<SettingsPage> {
                           const SizedBox(height: 16),
 
                           // 5) Logout button
-                          _buildCard(
-                            child: Center(
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LogoutPage(),
-                                    ),
-                                  );
-                                },
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: _accent,
+                              borderRadius: BorderRadius.circular(22),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _accent.withOpacity(0.35),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LogoutPage(),
                                   ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      height: 34,
-                                      width: 34,
-                                      decoration: const BoxDecoration(
-                                        color: Color.fromRGBO(255, 205, 210, 1),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.logout,
-                                        size: 18,
-                                        color: Color.fromRGBO(229, 57, 53, 1),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    const Text(
-                                      'Logout',
-                                      style: TextStyle(
-                                        color: Color.fromRGBO(229, 57, 53, 1),
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 18,
-                                        fontFamily: 'Georgia',
-                                      ),
-                                    ),
-                                  ],
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(22),
                                 ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 34,
+                                    width: 34,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.18),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.logout,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  const Text(
+                                    'Logout',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 18,
+                                      fontFamily: 'Georgia',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -339,7 +357,7 @@ class _SettingsPageState extends State<SettingsPage> {
       width: 40,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: Color.fromRGBO(42, 42, 42, 1),
+        color: _iconButtonBg,
         boxShadow: [
           BoxShadow(
             color: Colors.black38,
@@ -362,17 +380,17 @@ class _SettingsPageState extends State<SettingsPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Color.fromRGBO(234, 234, 234, 1),
+        color: _surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: Color.fromRGBO(189, 189, 189, 1),
+          color: _surfaceBorder,
           width: 1,
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 4),
+            color: Colors.black54,
+            blurRadius: 10,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -382,7 +400,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _settingsRow(
     String label, {
-    Color color = const Color.fromRGBO(46, 46, 46, 1),
+    Color color = Colors.white,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
@@ -415,7 +433,7 @@ class _SettingsPageState extends State<SettingsPage> {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Color.fromRGBO(46, 46, 46, 1),
+            color: Colors.white,
             fontFamily: 'Georgia',
           ),
         ),
@@ -424,10 +442,10 @@ class _SettingsPageState extends State<SettingsPage> {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeThumbColor: const Color.fromRGBO(46, 46, 46, 1),
-          activeTrackColor: const Color.fromRGBO(189, 189, 189, 1),
-          inactiveThumbColor: const Color.fromRGBO(142, 142, 142, 1),
-          inactiveTrackColor: const Color.fromRGBO(211, 211, 211, 1),
+          activeThumbColor: Colors.white,
+          activeTrackColor: const Color(0xFF3A3A3A),
+          inactiveThumbColor: const Color(0xFF8A8A8A),
+          inactiveTrackColor: const Color(0xFF2B2B2B),
         ),
       ],
     );
