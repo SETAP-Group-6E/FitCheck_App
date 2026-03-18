@@ -1,3 +1,4 @@
+import 'package:fitcheck/Presentation/App/app_pages/h_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
@@ -30,12 +31,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       
-       home: const HomePage(),
+       home: const HPage(),
       
 
       routes: {
 
         '/homepage': (context) => const HomePage(),
+        '/hpage': (context) => const HPage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/wardrobe': (context) => const WardrobePage(),
