@@ -12,7 +12,6 @@ class FloatingNavbar extends StatelessWidget {
     Supabase.instance.client,
   );
 
-
   FloatingNavbar({
     super.key,
     this.width = 470,
@@ -21,8 +20,37 @@ class FloatingNavbar extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
 
+  Widget _defaultAvatar(BuildContext context) {
+    return Container(
+      width: 35,
+      height: 35,
+      decoration: BoxDecoration(
+        color: Colors.grey[350],
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Center(
+        child: IconButton(
+          icon: const Icon(Icons.person),
+          color: Colors.black87,
+          iconSize: 20,
+          onPressed: () {
+            Navigator.pushNamed(context, '/settings');
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final imageUrl =
+      userId == null
+        ? null
+        : Supabase.instance.client.storage
+          .from('Avatars')
+          .getPublicUrl('$userId/avatar.jpg');
+
     return Positioned(
       left: 0,
       right: 0,
@@ -61,18 +89,43 @@ class FloatingNavbar extends StatelessWidget {
                 ),
               ),
               Expanded(child: SizedBox()),
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Icon(Icons.person, size: 20),
-                ),
+              
+              
+                  imageUrl == null
+                          ? _defaultAvatar(context)
+                          : ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
+                            child: Stack(
+                children: [Image.network(
+                              imageUrl,
+                              width: 35,
+                              height: 35,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return _defaultAvatar(context);
+                              },
+                            ),
+                            IconButton(
+                            onPressed: () {// Placeholder for settings page navigation
+                              Navigator.pushNamed(context, '/settings');
+                            },
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              splashFactory: NoSplash.splashFactory,
+                            ),
+                            icon: const Icon(
+                              Icons.account_box_rounded,
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        
+                            ]
+                          ),
+
+                          
+                        
               ),
+              
 
               SizedBox(width: 5),
             ],
