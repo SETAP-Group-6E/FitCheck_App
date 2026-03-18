@@ -18,7 +18,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _darkMode = false;
   bool _notifications = true;
   static const Color _accent = Color.fromRGBO(217, 156, 19, 1);
   static const Color _surface = Color(0xFF1C1C1C);
@@ -64,7 +63,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         _circleIconButton(
                           icon: Icons.notifications_none,
-                          onTap: () {},
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('No notifications yet.'),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -244,28 +249,34 @@ class _SettingsPageState extends State<SettingsPage> {
 
                           const SizedBox(height: 12),
 
-                          // 4) Switches card
+                          // 4) Preferences card
                           _buildCard(
                             child: Column(
                               children: [
-                                _toggleRow(
-                                  title: 'Dark mode',
-                                  value: _darkMode,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _darkMode = value;
-                                    });
-                                  },
+                                _preferenceRow(
+                                  title: 'Theme',
+                                  trailing: _valueChip('Dark (default)'),
                                 ),
-                                const SizedBox(height: 6),
-                                _toggleRow(
+                                const SizedBox(height: 8),
+                                _preferenceRow(
+                                  title: 'Language',
+                                  trailing: _valueChip('English'),
+                                ),
+                                const SizedBox(height: 8),
+                                _preferenceRow(
                                   title: 'Notifications',
-                                  value: _notifications,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _notifications = value;
-                                    });
-                                  },
+                                  trailing: Switch(
+                                    value: _notifications,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _notifications = value;
+                                      });
+                                    },
+                                    activeThumbColor: Colors.white,
+                                    activeTrackColor: const Color(0xFF3A3A3A),
+                                    inactiveThumbColor: const Color(0xFF8A8A8A),
+                                    inactiveTrackColor: const Color(0xFF2B2B2B),
+                                  ),
                                 ),
                               ],
                             ),
@@ -281,7 +292,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               borderRadius: BorderRadius.circular(22),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _accent.withOpacity(0.35),
+                                  color: _accent.withValues(alpha: 0.35),
                                   blurRadius: 12,
                                   offset: const Offset(0, 6),
                                 ),
@@ -289,11 +300,113 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             child: TextButton(
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LogoutPage(),
-                                  ),
+                                showDialog<void>(
+                                  context: context,
+                                  builder: (context) {
+                                    return Dialog(
+                                      backgroundColor: const Color(0xFF1C1C1C),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(18),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Log out?',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w700,
+                                                fontFamily: 'Georgia',
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            const Text(
+                                              'Are you sure you want to log out of your account?',
+                                              style: TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 14,
+                                                height: 1.35,
+                                                fontFamily: 'Georgia',
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    style:
+                                                        TextButton.styleFrom(
+                                                      foregroundColor:
+                                                          Colors.white70,
+                                                      padding:
+                                                          const EdgeInsets
+                                                              .symmetric(
+                                                        vertical: 10,
+                                                      ),
+                                                    ),
+                                                    child: const Text(
+                                                      'Cancel',
+                                                      style: TextStyle(
+                                                        fontFamily: 'Georgia',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor: _accent,
+                                                      foregroundColor:
+                                                          Colors.white,
+                                                      padding:
+                                                          const EdgeInsets
+                                                              .symmetric(
+                                                        vertical: 10,
+                                                      ),
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(14),
+                                                      ),
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const LogoutPage(),
+                                                        ),
+                                                      );
+                                                    },
+                                                    child: const Text(
+                                                      'Log out',
+                                                      style: TextStyle(
+                                                        fontFamily: 'Georgia',
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                               style: TextButton.styleFrom(
@@ -313,7 +426,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     height: 34,
                                     width: 34,
                                     decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.18),
+                                      color: Colors.black.withValues(alpha: 0.18),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -421,33 +534,47 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _toggleRow({
+  Widget _preferenceRow({
     required String title,
-    required bool value,
-    required ValueChanged<bool> onChanged, 
+    required Widget trailing,
   }) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-            fontFamily: 'Georgia',
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              fontFamily: 'Georgia',
+            ),
           ),
+          const Spacer(),
+          trailing,
+        ],
+      ),
+    );
+  }
+
+  Widget _valueChip(String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF3A3A3A)),
+      ),
+      child: Text(
+        value,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.white70,
+          fontFamily: 'Georgia',
         ),
-        const Spacer(),
-        
-        Switch(
-          value: value,
-          onChanged: onChanged,
-          activeThumbColor: Colors.white,
-          activeTrackColor: const Color(0xFF3A3A3A),
-          inactiveThumbColor: const Color(0xFF8A8A8A),
-          inactiveTrackColor: const Color(0xFF2B2B2B),
-        ),
-      ],
+      ),
     );
   }
 }
