@@ -9,17 +9,12 @@ class DashedBox extends StatelessWidget {
   final double strokeWidth;
   final double gap;
 
-<<<<<<< HEAD
   const DashedBox({
     super.key,
     this.color = Colors.black,
     this.strokeWidth = 1.0,
     this.gap = 5.0,
   });
-=======
-  const DashedBox(
-      {super.key, this.color = Colors.black, this.strokeWidth = 1.0, this.gap = 5.0});
->>>>>>> 8e8991f (Add wardrobe constants and styles files)
 
   @override
   Widget build(BuildContext context) {
