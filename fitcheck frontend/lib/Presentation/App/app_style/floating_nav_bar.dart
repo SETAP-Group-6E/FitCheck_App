@@ -20,8 +20,30 @@ class FloatingNavbar extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
 
+  Widget _defaultAvatar() {
+    return Container(
+      width: 35,
+      height: 35,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: const Center(
+        child: Icon(Icons.person, color: Colors.black54, size: 10),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final imageUrl =
+      userId == null
+        ? null
+        : Supabase.instance.client.storage
+          .from('Avatars')
+          .getPublicUrl('$userId/avatar.jpg');
+
     return Positioned(
       left: 0,
       right: 0,
@@ -60,32 +82,41 @@ class FloatingNavbar extends StatelessWidget {
                 ),
               ),
               Expanded(child: SizedBox()),
-              GestureDetector(
-                onTap: () {},
-                child: Stack(
-                  children: [
-                    Positioned(
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(color: Colors.grey[300]),
-                      ),
-                      
-                    ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: Image(
-                        height: 40,
-                        width: 40,
-                        fit: BoxFit.cover, 
-                        image: NetworkImage(
-                          'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              
+              Stack(
+                children: [
+                  imageUrl == null
+                          ? _defaultAvatar()
+                          : ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
+                            child: Image.network(
+                              imageUrl,
+                              width: 35,
+                              height: 35,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return _defaultAvatar();
+                              },
+                            ),
+                          ),
+
+                          IconButton(
+                            onPressed: () {// Placeholder for settings page navigation
+                              Navigator.pushNamed(context, '/settings');
+                            },
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              splashFactory: NoSplash.splashFactory,
+                            ),
+                            icon: const Icon(
+                              Icons.account_box_rounded,
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        
+                        ],
               ),
+              
 
               SizedBox(width: 5),
             ],
