@@ -20,16 +20,23 @@ class FloatingNavbar extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
 
-  Widget _defaultAvatar() {
+  Widget _defaultAvatar(BuildContext context) {
     return Container(
       width: 35,
       height: 35,
       decoration: BoxDecoration(
-        color: Colors.grey[300],
+        color: Colors.grey[350],
         borderRadius: BorderRadius.circular(5),
       ),
-      child: const Center(
-        child: Icon(Icons.person, color: Colors.black54, size: 10),
+      child: Center(
+        child: IconButton(
+          icon: const Icon(Icons.person),
+          color: Colors.black87,
+          iconSize: 20,
+          onPressed: () {
+            Navigator.pushNamed(context, '/settings');
+          },
+        ),
       ),
     );
   }
@@ -83,24 +90,22 @@ class FloatingNavbar extends StatelessWidget {
               ),
               Expanded(child: SizedBox()),
               
-              Stack(
-                children: [
+              
                   imageUrl == null
-                          ? _defaultAvatar()
+                          ? _defaultAvatar(context)
                           : ClipRRect(
                             borderRadius: BorderRadius.circular(5),
-                            child: Image.network(
+                            child: Stack(
+                children: [Image.network(
                               imageUrl,
                               width: 35,
                               height: 35,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
-                                return _defaultAvatar();
+                                return _defaultAvatar(context);
                               },
                             ),
-                          ),
-
-                          IconButton(
+                            IconButton(
                             onPressed: () {// Placeholder for settings page navigation
                               Navigator.pushNamed(context, '/settings');
                             },
@@ -114,7 +119,11 @@ class FloatingNavbar extends StatelessWidget {
                             ),
                           ),
                         
-                        ],
+                            ]
+                          ),
+
+                          
+                        
               ),
               
 
