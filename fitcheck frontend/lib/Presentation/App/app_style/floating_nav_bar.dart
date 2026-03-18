@@ -12,7 +12,6 @@ class FloatingNavbar extends StatelessWidget {
     Supabase.instance.client,
   );
 
-
   FloatingNavbar({
     super.key,
     this.width = 470,
@@ -63,14 +62,28 @@ class FloatingNavbar extends StatelessWidget {
               Expanded(child: SizedBox()),
               GestureDetector(
                 onTap: () {},
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Icon(Icons.person, size: 20),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(color: Colors.grey[300]),
+                      ),
+                      
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Image(
+                        height: 40,
+                        width: 40,
+                        fit: BoxFit.cover, 
+                        image: NetworkImage(
+                          'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
