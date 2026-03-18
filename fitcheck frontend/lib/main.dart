@@ -1,3 +1,4 @@
+import 'package:fitcheck/Presentation/App/app_pages/h_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
       routes: {
 
         '/homepage': (context) => const HomePage(),
+        '/hpage': (context) => const HPage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/wardrobe': (context) => const WardrobePage(),
@@ -45,3 +47,4 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// flutter run -d chrome --web-port 62597
