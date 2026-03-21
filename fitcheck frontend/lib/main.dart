@@ -31,6 +31,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const HomePage(),
+      
+      
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/homepage':
@@ -52,8 +54,8 @@ class MyApp extends StatelessWidget {
           case '/hpage':
             return PageRouteBuilder(
               settings: settings,
-              transitionDuration: const Duration(milliseconds: 280),
-              reverseTransitionDuration: const Duration(milliseconds: 220),
+              transitionDuration: const Duration(milliseconds: 220),
+              reverseTransitionDuration: const Duration(milliseconds: 180),
               pageBuilder: (context, animation, secondaryAnimation) =>
                   const HPage(),
               transitionsBuilder: (
@@ -62,22 +64,14 @@ class MyApp extends StatelessWidget {
                 secondaryAnimation,
                 child,
               ) {
-                final slideTween = Tween<Offset>(
-                  begin: const Offset(-1, 0),
-                  end: Offset.zero,
-                ).chain(CurveTween(curve: Curves.easeOutCubic));
-
-                return SlideTransition(
-                  position: animation.drive(slideTween),
-                  child: child,
-                );
+                return FadeTransition(opacity: animation, child: child);
               },
             );
           case '/register':
             return PageRouteBuilder(
               settings: settings,
-              transitionDuration: const Duration(milliseconds: 260),
-              reverseTransitionDuration: const Duration(milliseconds: 200),
+              transitionDuration: const Duration(milliseconds: 280),
+              reverseTransitionDuration: const Duration(milliseconds: 220),
               pageBuilder: (context, animation, secondaryAnimation) =>
                   const RegisterPage(),
               transitionsBuilder: (
@@ -86,18 +80,14 @@ class MyApp extends StatelessWidget {
                 secondaryAnimation,
                 child,
               ) {
-                final scaleTween = Tween<double>(
-                  begin: 0.94,
-                  end: 1.0,
-                ).chain(CurveTween(curve: Curves.easeOutBack));
-                final fadeTween = Tween<double>(begin: 0.2, end: 1.0);
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutQuart));
 
-                return FadeTransition(
-                  opacity: animation.drive(fadeTween),
-                  child: ScaleTransition(
-                    scale: animation.drive(scaleTween),
-                    child: child,
-                  ),
+                return SlideTransition(
+                  position: animation.drive(slideTween),
+                  child: child,
                 );
               },
             );
@@ -115,7 +105,7 @@ class MyApp extends StatelessWidget {
                 child,
               ) {
                 final slideTween = Tween<Offset>(
-                  begin: const Offset(0, 1),
+                  begin: const Offset(1, 0),
                   end: Offset.zero,
                 ).chain(CurveTween(curve: Curves.easeOutQuart));
 
@@ -152,8 +142,8 @@ class MyApp extends StatelessWidget {
           case '/wardrobe':
             return PageRouteBuilder(
               settings: settings,
-              transitionDuration: const Duration(milliseconds: 300),
-              reverseTransitionDuration: const Duration(milliseconds: 240),
+              transitionDuration: const Duration(milliseconds: 220),
+              reverseTransitionDuration: const Duration(milliseconds: 180),
               pageBuilder: (context, animation, secondaryAnimation) =>
                   const WardrobePage(),
               transitionsBuilder: (
@@ -162,18 +152,14 @@ class MyApp extends StatelessWidget {
                 secondaryAnimation,
                 child,
               ) {
-                final rotateTween = Tween<double>(
-                  begin: 0.96,
-                  end: 1.0,
-                ).chain(CurveTween(curve: Curves.easeOutQuart));
-                final fadeTween = Tween<double>(begin: 0.0, end: 1.0);
+                final fadeCurve = CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeInOut,
+                );
 
                 return FadeTransition(
-                  opacity: animation.drive(fadeTween),
-                  child: RotationTransition(
-                    turns: animation.drive(rotateTween),
-                    child: child,
-                  ),
+                  opacity: fadeCurve,
+                  child: child,
                 );
               },
             );
