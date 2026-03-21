@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:fitcheck/Presentation/auth/pages/about_us_page.dart';
-import 'package:fitcheck/Presentation/auth/pages/change_email_page.dart';
-import 'package:fitcheck/Presentation/auth/pages/change_password_page.dart';
-import 'package:fitcheck/Presentation/auth/pages/contact_us_page.dart';
-import 'package:fitcheck/Presentation/auth/pages/delete_account_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/settings/about_us_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/settings/change_email_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/settings/change_password_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/settings/contact_us_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/settings/delete_account_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/logout_page.dart';
-import 'package:fitcheck/Presentation/auth/pages/privacy_policy_page.dart';
-import 'package:fitcheck/Presentation/auth/pages/profile_details_page.dart';
-import 'package:fitcheck/Presentation/auth/pages/terms_conditions_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/settings/privacy_policy_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/settings/profile_details_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/settings/terms_conditions_page.dart';
 
 
 class SettingsPage extends StatefulWidget {
