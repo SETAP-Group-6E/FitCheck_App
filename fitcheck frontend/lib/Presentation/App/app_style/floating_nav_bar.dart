@@ -44,12 +44,13 @@ class FloatingNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userId = Supabase.instance.client.auth.currentUser?.id;
+    final cacheBuster = DateTime.now().millisecondsSinceEpoch;
     final imageUrl =
       userId == null
         ? null
         : Supabase.instance.client.storage
           .from('Avatars')
-          .getPublicUrl('$userId/avatar.jpg');
+          .getPublicUrl('$userId/avatar.jpg?t=$cacheBuster');
 
     return Positioned(
       left: 0,
@@ -94,19 +95,19 @@ class FloatingNavbar extends StatelessWidget {
                   imageUrl == null
                           ? _defaultAvatar(context)
                           : ClipRRect(
-                            borderRadius: BorderRadius.circular(5),
+                            borderRadius: BorderRadius.circular(6),
                             child: Stack(
                 children: [Image.network(
                               imageUrl,
-                              width: 35,
-                              height: 35,
+                              width: 40,
+                              height: 40,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return _defaultAvatar(context);
                               },
                             ),
                             IconButton(
-                            onPressed: () {// Placeholder for settings page navigation
+                            onPressed: () {
                               Navigator.pushNamed(context, '/settings');
                             },
                             style: IconButton.styleFrom(
