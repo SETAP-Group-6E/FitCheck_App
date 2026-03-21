@@ -1,5 +1,5 @@
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
-import 'package:fitcheck/Presentation/App/app_pages/wardrobe_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/wardrobe_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/settings/settings_page.dart';
 import 'package:flutter/material.dart';
