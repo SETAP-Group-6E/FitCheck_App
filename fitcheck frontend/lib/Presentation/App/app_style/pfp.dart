@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePicture extends StatelessWidget {
   const ProfilePicture({super.key, this.imageUrl, required this.onUpload});
