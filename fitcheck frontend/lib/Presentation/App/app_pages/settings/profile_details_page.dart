@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileDetailsPage extends StatelessWidget {
-  const ProfileDetailsPage({super.key});
+  ProfileDetailsPage({super.key});
 
   static const Color _accent = Color.fromRGBO(217, 156, 19, 1);
   static const Color _surface = Color(0xFF1C1C1C);
   static const Color _surfaceBorder = Color(0xFF2E2E2E);
   static const Color _iconButtonBg = Color.fromRGBO(42, 42, 42, 1);
-
+  
   @override
   Widget build(BuildContext context) {
+
+    final username =
+      Supabase.instance.client.auth.currentUser?.userMetadata?['username'] ??
+      'User';
+
     const double topBarHeight = 120;
 
     return Scaffold(
@@ -57,36 +63,65 @@ class ProfileDetailsPage extends StatelessWidget {
                     children: [
                       Align(
                         alignment: Alignment.center,
-                        child: Column(
+                        child: Stack(
                           children: [
-                            CircleAvatar(
-                              radius: 44,
-                              backgroundColor: const Color(0xFF2A2A2A),
-                              child: const Icon(
-                                Icons.person,
-                                size: 46,
-                                color: Colors.white,
-                              ),
+                            Column(
+                              children: [
+                                
+                                    CircleAvatar(
+                                      radius: 44,
+                                      backgroundColor: const Color(0xFF2A2A2A),
+                                      child: 
+                                          Icon(
+                                            Icons.person,
+                                            size: 46,
+                                            color: Colors.white,
+                                          ),
+                                        
+                                    ),
+                                     
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Mark Wardrobe',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: 'Georgia',
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '@$username',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14,
+                                    fontFamily: 'Georgia',
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Mark Wardrobe',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'Georgia',
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              '@markstyle',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                                fontFamily: 'Georgia',
-                              ),
-                            ),
+                            Positioned(
+                                        top: 62,
+                                        left: 92,
+                                        
+                                        child: CircleAvatar(
+                                          radius: 12,
+                                          backgroundColor:Colors.grey[700],
+                                          child: IconButton(
+                                            icon: Icon( 
+                                              Icons.edit,
+                                              size: 15,
+                                              color: Colors.white70,
+                                              
+                                            ), onPressed: () { null; },
+                                            style: IconButton.styleFrom(
+                                              padding: EdgeInsets.zero,
+                                              minimumSize: Size(24, 24),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                           ],
                         ),
                       ),
@@ -186,11 +221,7 @@ class ProfileDetailsPage extends StatelessWidget {
         shape: BoxShape.circle,
         color: _iconButtonBg,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
+          BoxShadow(color: Colors.black38, blurRadius: 6, offset: Offset(0, 3)),
         ],
       ),
       child: IconButton(
@@ -207,10 +238,7 @@ class ProfileDetailsPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: _surfaceBorder,
-          width: 1,
-        ),
+        border: Border.all(color: _surfaceBorder, width: 1),
         boxShadow: const [
           BoxShadow(
             color: Colors.black54,
