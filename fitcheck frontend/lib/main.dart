@@ -140,7 +140,7 @@ class MyApp extends StatelessWidget {
           case '/login':
             return PageRouteBuilder(
               settings: settings,
-              transitionDuration: const Duration(milliseconds: 500),
+              transitionDuration: const Duration(milliseconds: 400),
               reverseTransitionDuration: const Duration(milliseconds: 200),
               pageBuilder: (context, animation, secondaryAnimation) =>
                   const LoginPage(),
@@ -151,7 +151,7 @@ class MyApp extends StatelessWidget {
                 child,
               ) {
                 final slideTween = Tween<Offset>(
-                  begin: const Offset(1, 0),
+                  begin: const Offset(0, 1),
                   end: Offset.zero,
                 ).chain(CurveTween(curve: Curves.easeOut));
 
