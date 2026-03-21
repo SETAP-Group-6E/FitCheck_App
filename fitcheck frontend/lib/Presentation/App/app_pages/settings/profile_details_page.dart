@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ProfileDetailsPage extends StatelessWidget {
-  ProfileDetailsPage({super.key});
+class ProfileDetailsPage extends StatefulWidget {
+  const ProfileDetailsPage({super.key});
 
   static const Color _accent = Color.fromRGBO(217, 156, 19, 1);
   static const Color _surface = Color(0xFF1C1C1C);
@@ -12,15 +12,33 @@ class ProfileDetailsPage extends StatelessWidget {
   static const Color _iconButtonBg = Color.fromRGBO(42, 42, 42, 1);
 
   @override
-  Widget build(BuildContext context) {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
-    final imageUrl =
-        userId == null
-            ? null
-            : Supabase.instance.client.storage
-                .from('Avatars')
-                .getPublicUrl('$userId/avatar.jpg');
+  State<ProfileDetailsPage> createState() => _ProfileDetailsPageState();
+}
 
+class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
+  String? _avatarUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshAvatarUrl();
+  }
+
+  void _refreshAvatarUrl() {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      _avatarUrl = null;
+      return;
+    }
+
+    final baseUrl = Supabase.instance.client.storage
+        .from('Avatars')
+        .getPublicUrl('$userId/avatar.jpg');
+    _avatarUrl = '$baseUrl?t=${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final username =
         Supabase.instance.client.auth.currentUser?.userMetadata?['username'] ??
         'User';
@@ -76,7 +94,7 @@ class ProfileDetailsPage extends StatelessWidget {
                           children: [
                             Column(
                               children: [
-                                imageUrl == null
+                                _avatarUrl == null
                                     ? CircleAvatar(
                                       radius: 44,
                                       backgroundColor: const Color(0xFF2A2A2A),
@@ -91,7 +109,7 @@ class ProfileDetailsPage extends StatelessWidget {
                                       child: Stack(
                                         children: [
                                           Image.network(
-                                            imageUrl,
+                                            _avatarUrl!,
                                             width: 90,
                                             height: 90,
                                             fit: BoxFit.cover,
@@ -166,7 +184,7 @@ class ProfileDetailsPage extends StatelessWidget {
                                     final userId =
                                         supabase.auth.currentUser?.id;
                                     if (userId == null) {
-                                      if (context.mounted) {
+                                      if (mounted) {
                                         ScaffoldMessenger.of(
                                           context,
                                         ).showSnackBar(
@@ -206,7 +224,7 @@ class ProfileDetailsPage extends StatelessWidget {
                                               .update({'avatar_url': imageUrl})
                                               .eq('id', userId);
 
-                                          if (context.mounted) {
+                                          if (mounted) {
                                             ScaffoldMessenger.of(
                                               context,
                                             ).showSnackBar(
@@ -219,8 +237,14 @@ class ProfileDetailsPage extends StatelessWidget {
                                           }
                                         },
                                       ).onUpload(imageUrl);
+
+                                      if (mounted) {
+                                        setState(() {
+                                          _refreshAvatarUrl();
+                                        });
+                                      }
                                     } catch (e) {
-                                      if (context.mounted) {
+                                      if (mounted) {
                                         ScaffoldMessenger.of(
                                           context,
                                         ).showSnackBar(
@@ -294,7 +318,7 @@ class ProfileDetailsPage extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _accent,
+                            backgroundColor: ProfileDetailsPage._accent,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -335,7 +359,7 @@ class ProfileDetailsPage extends StatelessWidget {
       width: 40,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: _iconButtonBg,
+        color: ProfileDetailsPage._iconButtonBg,
         boxShadow: [
           BoxShadow(color: Colors.black38, blurRadius: 6, offset: Offset(0, 3)),
         ],
@@ -352,9 +376,9 @@ class ProfileDetailsPage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _surface,
+        color: ProfileDetailsPage._surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: _surfaceBorder, width: 1),
+        border: Border.all(color: ProfileDetailsPage._surfaceBorder, width: 1),
         boxShadow: const [
           BoxShadow(
             color: Colors.black54,
