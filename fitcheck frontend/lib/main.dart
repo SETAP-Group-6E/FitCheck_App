@@ -1,4 +1,3 @@
-import 'package:fitcheck/Presentation/App/app_pages/h_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
@@ -12,10 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 Future<void> main() async {
   const supabaseUrl = 'https://fsjkselzckrheqtqvzze.supabase.co';
   const supabaseAnonKey = 'sb_publishable_Qt6ShYvhFsUlQ4fY_LFl6A_aRLJ4Jnr';
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
-  );
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -32,8 +28,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
       ),
       home: const HomePage(),
-      
-      
+
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/homepage':
@@ -41,8 +36,8 @@ class MyApp extends StatelessWidget {
               settings: settings,
               transitionDuration: const Duration(milliseconds: 220),
               reverseTransitionDuration: const Duration(milliseconds: 180),
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const HomePage(),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) => const HomePage(),
               transitionsBuilder: (
                 context,
                 animation,
@@ -67,44 +62,15 @@ class MyApp extends StatelessWidget {
                 );
               },
             );
-          case '/hpage':
-            return PageRouteBuilder(
-              settings: settings,
-              transitionDuration: const Duration(milliseconds: 220),
-              reverseTransitionDuration: const Duration(milliseconds: 180),
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const HPage(),
-              transitionsBuilder: (
-                context,
-                animation,
-                secondaryAnimation,
-                child,
-              ) {
-                return Stack(
-                  children: [
-                    Positioned.fill(
-                      child: FadeTransition(
-                        opacity: CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOut,
-                        ),
-                        child: ColoredBox(
-                          color: Theme.of(context).scaffoldBackgroundColor,
-                        ),
-                      ),
-                    ),
-                    FadeTransition(opacity: animation, child: child),
-                  ],
-                );
-              },
-            );
+
           case '/register':
             return PageRouteBuilder(
               settings: settings,
               transitionDuration: const Duration(milliseconds: 500),
               reverseTransitionDuration: const Duration(milliseconds: 200),
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const RegisterPage(),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) =>
+                      const RegisterPage(),
               transitionsBuilder: (
                 context,
                 animation,
@@ -142,8 +108,8 @@ class MyApp extends StatelessWidget {
               settings: settings,
               transitionDuration: const Duration(milliseconds: 400),
               reverseTransitionDuration: const Duration(milliseconds: 200),
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const LoginPage(),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) => const LoginPage(),
               transitionsBuilder: (
                 context,
                 animation,
@@ -181,8 +147,9 @@ class MyApp extends StatelessWidget {
               settings: settings,
               transitionDuration: const Duration(milliseconds: 280),
               reverseTransitionDuration: const Duration(milliseconds: 220),
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const SettingsPage(),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) =>
+                      const SettingsPage(),
               transitionsBuilder: (
                 context,
                 animation,
@@ -220,8 +187,9 @@ class MyApp extends StatelessWidget {
               settings: settings,
               transitionDuration: const Duration(milliseconds: 220),
               reverseTransitionDuration: const Duration(milliseconds: 180),
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const WardrobePage(),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) =>
+                      const WardrobePage(),
               transitionsBuilder: (
                 context,
                 animation,
