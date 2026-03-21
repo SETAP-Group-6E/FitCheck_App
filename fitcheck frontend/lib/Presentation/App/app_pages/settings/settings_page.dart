@@ -1,3 +1,4 @@
+import 'package:fitcheck/Presentation/auth/pages/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:fitcheck/Presentation/App/app_pages/settings/about_us_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/settings/change_email_page.dart';
@@ -380,7 +381,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                                                 .circular(14),
                                                       ),
                                                     ),
-                                                    onPressed: () {
+                                                    onPressed: () async{
                                                       Navigator.pop(context);
                                                       Navigator.push(
                                                         context,
@@ -388,7 +389,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                                           builder: (context) =>
                                                               const LogoutPage(),
                                                         ),
+                                                       
                                                       );
+                                                      await supabase.auth.signOut();
                                                     },
                                                     child: const Text(
                                                       'Log out',
