@@ -52,8 +52,14 @@ class MyApp extends StatelessWidget {
                 return Stack(
                   children: [
                     Positioned.fill(
-                      child: ColoredBox(
-                        color: Theme.of(context).scaffoldBackgroundColor,
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeInQuart,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
                       ),
                     ),
                     FadeTransition(opacity: animation, child: child),
@@ -77,8 +83,14 @@ class MyApp extends StatelessWidget {
                 return Stack(
                   children: [
                     Positioned.fill(
-                      child: ColoredBox(
-                        color: Theme.of(context).scaffoldBackgroundColor,
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
                       ),
                     ),
                     FadeTransition(opacity: animation, child: child),
@@ -107,8 +119,14 @@ class MyApp extends StatelessWidget {
                 return Stack(
                   children: [
                     Positioned.fill(
-                      child: ColoredBox(
-                        color: Theme.of(context).scaffoldBackgroundColor,
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
                       ),
                     ),
                     SlideTransition(
@@ -140,8 +158,14 @@ class MyApp extends StatelessWidget {
                 return Stack(
                   children: [
                     Positioned.fill(
-                      child: ColoredBox(
-                        color: Theme.of(context).scaffoldBackgroundColor,
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
                       ),
                     ),
                     SlideTransition(
@@ -173,8 +197,14 @@ class MyApp extends StatelessWidget {
                 return Stack(
                   children: [
                     Positioned.fill(
-                      child: ColoredBox(
-                        color: Theme.of(context).scaffoldBackgroundColor,
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
                       ),
                     ),
                     SlideTransition(
@@ -207,8 +237,14 @@ class MyApp extends StatelessWidget {
                 return Stack(
                   children: [
                     Positioned.fill(
-                      child: ColoredBox(
-                        color: Theme.of(context).scaffoldBackgroundColor,
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
                       ),
                     ),
                     FadeTransition(
