@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
       title: 'FitCheck',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: Colors.black,
       ),
       home: const HomePage(),
       
