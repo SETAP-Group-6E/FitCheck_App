@@ -1,24 +1,46 @@
+import 'dart:async';
 import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outfit.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class FloatingNavbar extends StatelessWidget {
+class FloatingNavbar extends StatefulWidget {
   final double width;
   final double height;
   final double bottomPadding;
   final BorderRadius borderRadius;
-  final wardrobeRepository = SupabaseWardrobeRepository(
-    Supabase.instance.client,
-  );
 
-  FloatingNavbar({
+  const FloatingNavbar({
     super.key,
     this.width = 470,
     this.height = 60,
     this.bottomPadding = 20,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
+
+  @override
+  State<FloatingNavbar> createState() => _FloatingNavbarState();
+}
+
+class _FloatingNavbarState extends State<FloatingNavbar> {
+  final wardrobeRepository = SupabaseWardrobeRepository(
+    Supabase.instance.client,
+  );
+  StreamSubscription<AuthState>? _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
 
   Widget _defaultAvatar(BuildContext context) {
     return Container(
@@ -55,12 +77,12 @@ class FloatingNavbar extends StatelessWidget {
     return Positioned(
       left: 0,
       right: 0,
-      bottom: bottomPadding,
+      bottom: widget.bottomPadding,
       child: Center(
         child: Container(
           color: const Color.fromRGBO(0, 0, 0, 0.2),
-          width: width,
-          height: height,
+          width: widget.width,
+          height: widget.height,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
