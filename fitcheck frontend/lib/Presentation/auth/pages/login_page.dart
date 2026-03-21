@@ -182,32 +182,9 @@ class LoginPage extends ConsumerWidget {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                transitionDuration: Duration(milliseconds: 500),
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) =>
-                                        RegisterPage(),
-                                transitionsBuilder: (
-                                  context,
-                                  animation,
-                                  secondaryAnimation,
-                                  child,
-                                ) {
-                                  var begin = Offset(0.0, 1.0);
-                                  var end = Offset.zero;
-                                  var curve = Curves.ease;
-                                  var tween = Tween(
-                                    begin: begin,
-                                    end: end,
-                                  ).chain(CurveTween(curve: curve));
-                                  return SlideTransition(
-                                    position: animation.drive(tween),
-                                    child: child,
-                                  );
-                                },
-                              ),
+                            Navigator.popAndPushNamed(
+                              context, '/register',
+                              
                             );
                           },
                         ),
@@ -227,7 +204,7 @@ class LoginPage extends ConsumerWidget {
                         padding: EdgeInsets.all(5),
                         child: IconButton(
                           onPressed: () => Navigator.pop(context),
-                          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+                          icon: Icon(Icons.close, color: Colors.white),
                           padding: EdgeInsets.zero,
                         ),
                       ),

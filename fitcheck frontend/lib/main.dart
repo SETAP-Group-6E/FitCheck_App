@@ -48,7 +48,16 @@ class MyApp extends StatelessWidget {
                 secondaryAnimation,
                 child,
               ) {
-                return FadeTransition(opacity: animation, child: child);
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                    ),
+                    FadeTransition(opacity: animation, child: child),
+                  ],
+                );
               },
             );
           case '/hpage':
@@ -64,14 +73,23 @@ class MyApp extends StatelessWidget {
                 secondaryAnimation,
                 child,
               ) {
-                return FadeTransition(opacity: animation, child: child);
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                    ),
+                    FadeTransition(opacity: animation, child: child),
+                  ],
+                );
               },
             );
           case '/register':
             return PageRouteBuilder(
               settings: settings,
-              transitionDuration: const Duration(milliseconds: 280),
-              reverseTransitionDuration: const Duration(milliseconds: 220),
+              transitionDuration: const Duration(milliseconds: 500),
+              reverseTransitionDuration: const Duration(milliseconds: 200),
               pageBuilder: (context, animation, secondaryAnimation) =>
                   const RegisterPage(),
               transitionsBuilder: (
@@ -83,19 +101,28 @@ class MyApp extends StatelessWidget {
                 final slideTween = Tween<Offset>(
                   begin: const Offset(0, 1),
                   end: Offset.zero,
-                ).chain(CurveTween(curve: Curves.easeOutQuart));
+                ).chain(CurveTween(curve: Curves.easeOut));
 
-                return SlideTransition(
-                  position: animation.drive(slideTween),
-                  child: child,
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                    ),
+                    SlideTransition(
+                      position: animation.drive(slideTween),
+                      child: child,
+                    ),
+                  ],
                 );
               },
             );
           case '/login':
             return PageRouteBuilder(
               settings: settings,
-              transitionDuration: const Duration(milliseconds: 280),
-              reverseTransitionDuration: const Duration(milliseconds: 220),
+              transitionDuration: const Duration(milliseconds: 500),
+              reverseTransitionDuration: const Duration(milliseconds: 200),
               pageBuilder: (context, animation, secondaryAnimation) =>
                   const LoginPage(),
               transitionsBuilder: (
@@ -107,11 +134,20 @@ class MyApp extends StatelessWidget {
                 final slideTween = Tween<Offset>(
                   begin: const Offset(1, 0),
                   end: Offset.zero,
-                ).chain(CurveTween(curve: Curves.easeOutQuart));
+                ).chain(CurveTween(curve: Curves.easeOut));
 
-                return SlideTransition(
-                  position: animation.drive(slideTween),
-                  child: child,
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                    ),
+                    SlideTransition(
+                      position: animation.drive(slideTween),
+                      child: child,
+                    ),
+                  ],
                 );
               },
             );
@@ -133,9 +169,18 @@ class MyApp extends StatelessWidget {
                   end: Offset.zero,
                 ).chain(CurveTween(curve: Curves.easeOutCubic));
 
-                return SlideTransition(
-                  position: animation.drive(slideTween),
-                  child: child,
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                    ),
+                    SlideTransition(
+                      position: animation.drive(slideTween),
+                      child: child,
+                    ),
+                  ],
                 );
               },
             );
@@ -156,10 +201,20 @@ class MyApp extends StatelessWidget {
                   parent: animation,
                   curve: Curves.easeInOut,
                 );
+                final opacityTween = Tween<double>(begin: 0.85, end: 1.0);
 
-                return FadeTransition(
-                  opacity: fadeCurve,
-                  child: child,
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                    ),
+                    FadeTransition(
+                      opacity: fadeCurve.drive(opacityTween),
+                      child: child,
+                    ),
+                  ],
                 );
               },
             );
