@@ -72,20 +72,8 @@ class HomePage extends StatelessWidget {
                 ),
               ),
                   const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(217, 156, 19, 1),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/hpage');
-                  },
-                  child: const Text('Go to hpage'),
-                ),
-              ),
+              
+              
             ],
           ),
         ),
