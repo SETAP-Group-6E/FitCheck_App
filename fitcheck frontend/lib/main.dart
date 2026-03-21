@@ -31,13 +31,155 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const HomePage(),
-      routes: {
-        '/homepage': (context) => const HomePage(),
-        '/hpage': (context) => const HPage(),
-        '/register': (context) => const RegisterPage(),
-        '/login': (context) => const LoginPage(),
-        '/settings': (context) => const SettingsPage(),
-        '/wardrobe': (context) => const WardrobePage(),
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/homepage':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 220),
+              reverseTransitionDuration: const Duration(milliseconds: 180),
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const HomePage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+            );
+          case '/hpage':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 280),
+              reverseTransitionDuration: const Duration(milliseconds: 220),
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const HPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(-1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutCubic));
+
+                return SlideTransition(
+                  position: animation.drive(slideTween),
+                  child: child,
+                );
+              },
+            );
+          case '/register':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 260),
+              reverseTransitionDuration: const Duration(milliseconds: 200),
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const RegisterPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final scaleTween = Tween<double>(
+                  begin: 0.94,
+                  end: 1.0,
+                ).chain(CurveTween(curve: Curves.easeOutBack));
+                final fadeTween = Tween<double>(begin: 0.2, end: 1.0);
+
+                return FadeTransition(
+                  opacity: animation.drive(fadeTween),
+                  child: ScaleTransition(
+                    scale: animation.drive(scaleTween),
+                    child: child,
+                  ),
+                );
+              },
+            );
+          case '/login':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 280),
+              reverseTransitionDuration: const Duration(milliseconds: 220),
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const LoginPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutQuart));
+
+                return SlideTransition(
+                  position: animation.drive(slideTween),
+                  child: child,
+                );
+              },
+            );
+          case '/settings':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 280),
+              reverseTransitionDuration: const Duration(milliseconds: 220),
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const SettingsPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutCubic));
+
+                return SlideTransition(
+                  position: animation.drive(slideTween),
+                  child: child,
+                );
+              },
+            );
+          case '/wardrobe':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 300),
+              reverseTransitionDuration: const Duration(milliseconds: 240),
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const WardrobePage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final rotateTween = Tween<double>(
+                  begin: 0.96,
+                  end: 1.0,
+                ).chain(CurveTween(curve: Curves.easeOutQuart));
+                final fadeTween = Tween<double>(begin: 0.0, end: 1.0);
+
+                return FadeTransition(
+                  opacity: animation.drive(fadeTween),
+                  child: RotationTransition(
+                    turns: animation.drive(rotateTween),
+                    child: child,
+                  ),
+                );
+              },
+            );
+          default:
+            return null;
+        }
       },
     );
   }
