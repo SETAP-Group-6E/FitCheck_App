@@ -1,4 +1,6 @@
+import 'package:fitcheck/Presentation/App/app_style/pfp.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileDetailsPage extends StatelessWidget {
@@ -8,13 +10,20 @@ class ProfileDetailsPage extends StatelessWidget {
   static const Color _surface = Color(0xFF1C1C1C);
   static const Color _surfaceBorder = Color(0xFF2E2E2E);
   static const Color _iconButtonBg = Color.fromRGBO(42, 42, 42, 1);
-  
+
   @override
   Widget build(BuildContext context) {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final imageUrl =
+        userId == null
+            ? null
+            : Supabase.instance.client.storage
+                .from('Avatars')
+                .getPublicUrl('$userId/avatar.jpg');
 
     final username =
-      Supabase.instance.client.auth.currentUser?.userMetadata?['username'] ??
-      'User';
+        Supabase.instance.client.auth.currentUser?.userMetadata?['username'] ??
+        'User';
 
     const double topBarHeight = 120;
 
@@ -67,19 +76,47 @@ class ProfileDetailsPage extends StatelessWidget {
                           children: [
                             Column(
                               children: [
-                                
-                                    CircleAvatar(
+                                imageUrl == null
+                                    ? CircleAvatar(
                                       radius: 44,
                                       backgroundColor: const Color(0xFF2A2A2A),
-                                      child: 
-                                          Icon(
-                                            Icons.person,
-                                            size: 46,
-                                            color: Colors.white,
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 46,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                    : ClipRRect(
+                                      borderRadius: BorderRadius.circular(100),
+                                      child: Stack(
+                                        children: [
+                                          Image.network(
+                                            imageUrl,
+                                            width: 90,
+                                            height: 90,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (
+                                              context,
+                                              error,
+                                              stackTrace,
+                                            ) {
+                                              return CircleAvatar(
+                                                radius: 44,
+                                                backgroundColor: const Color(
+                                                  0xFF2A2A2A,
+                                                ),
+                                                child: Icon(
+                                                  Icons.person,
+                                                  size: 46,
+                                                  color: Colors.white,
+                                                ),
+                                              );
+                                            },
                                           ),
-                                        
+                                        ],
+                                      ),
                                     ),
-                                     
+
                                 const SizedBox(height: 12),
                                 const Text(
                                   'Mark Wardrobe',
@@ -102,26 +139,105 @@ class ProfileDetailsPage extends StatelessWidget {
                               ],
                             ),
                             Positioned(
-                                        top: 62,
-                                        left: 92,
-                                        
-                                        child: CircleAvatar(
-                                          radius: 12,
-                                          backgroundColor:Colors.grey[700],
-                                          child: IconButton(
-                                            icon: Icon( 
-                                              Icons.edit,
-                                              size: 15,
-                                              color: Colors.white70,
-                                              
-                                            ), onPressed: () { null; },
-                                            style: IconButton.styleFrom(
-                                              padding: EdgeInsets.zero,
-                                              minimumSize: Size(24, 24),
+                              top: 65,
+                              left: 90,
+
+                              child: CircleAvatar(
+                                radius: 12,
+                                backgroundColor: Colors.white54,
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.edit,
+                                    size: 15,
+                                    color: Colors.black,
+                                  ),
+                                  onPressed: () async {
+                                    final supabase = Supabase.instance.client;
+                                    final ImagePicker picker = ImagePicker();
+                                    final XFile? image = await picker.pickImage(
+                                      source: ImageSource.gallery,
+                                    );
+                                    if (image == null) {
+                                      return;
+                                    }
+
+                                    final imageBytes =
+                                        await image.readAsBytes();
+                                    final userId =
+                                        supabase.auth.currentUser?.id;
+                                    if (userId == null) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Log in to upload an avatar',
                                             ),
                                           ),
-                                        ),
-                                      ),
+                                        );
+                                        Navigator.pushNamed(context, '/login');
+                                      }
+                                      return;
+                                    }
+
+                                    final imagePath = '$userId/avatar.jpg';
+
+                                    try {
+                                      await supabase.storage
+                                          .from('Avatars')
+                                          .uploadBinary(
+                                            imagePath,
+                                            imageBytes,
+                                            fileOptions: const FileOptions(
+                                              contentType: 'image/jpeg',
+                                              upsert: true,
+                                            ),
+                                          );
+
+                                      final imageUrl = supabase.storage
+                                          .from('Avatars')
+                                          .getPublicUrl(imagePath);
+
+                                      ProfilePicture(
+                                        onUpload: (imageUrl) async {
+                                          await supabase
+                                              .from('profiles')
+                                              .update({'avatar_url': imageUrl})
+                                              .eq('id', userId);
+
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Uploaded to Avatars/$imagePath',
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ).onUpload(imageUrl);
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Upload failed: $e'),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  style: IconButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size(24, 24),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
