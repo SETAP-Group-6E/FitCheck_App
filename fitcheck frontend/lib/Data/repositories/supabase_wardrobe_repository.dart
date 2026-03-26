@@ -58,7 +58,15 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
 
   @override
   Future<List<Map<String, dynamic>>> getClothingItems() async {
-    return _selectWithTableFallback(_clothingItemsTables);
+    final userId = _currentUserIdOrThrow();
+
+    try {
+      final data = await _supabase.from('item').select().eq('user_id', userId);
+
+      return List<Map<String, dynamic>>.from(data as List);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
