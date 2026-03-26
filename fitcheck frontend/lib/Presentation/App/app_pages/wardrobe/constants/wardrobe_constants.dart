@@ -1,10 +1,8 @@
 class WardrobeConstants {
   static const List<String> wearTypes = [
-    "Top",
-    "Bottom",
-    "Footwear",
-    "Outerwear",
-    "Accessory",
+    "Smart",
+    "Casual",
+    "Formal",
   ];
 
   static const List<String> fabricMaterials = [
