@@ -9,6 +9,7 @@ class FloatingNavbar extends StatefulWidget {
   final double height;
   final double bottomPadding;
   final BorderRadius borderRadius;
+  final VoidCallback? onOutfitCreated;
 
   const FloatingNavbar({
     super.key,
@@ -16,6 +17,7 @@ class FloatingNavbar extends StatefulWidget {
     this.height = 60,
     this.bottomPadding = 20,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
+    this.onOutfitCreated,
   });
 
   @override
@@ -31,7 +33,9 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
   @override
   void initState() {
     super.initState();
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
+      _,
+    ) {
       setState(() {});
     });
   }
@@ -68,11 +72,11 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     final cacheBuster = DateTime.now().millisecondsSinceEpoch;
     final imageUrl =
-      userId == null
-        ? null
-        : Supabase.instance.client.storage
-          .from('Avatars')
-          .getPublicUrl('$userId/avatar.jpg?t=$cacheBuster');
+        userId == null
+            ? null
+            : Supabase.instance.client.storage
+                .from('Avatars')
+                .getPublicUrl('$userId/avatar.jpg?t=$cacheBuster');
 
     return Positioned(
       left: 0,
@@ -104,51 +108,49 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                 child: IconButton(
                   icon: Icon(Icons.add, size: 30, color: Colors.white),
                   onPressed: () async {
-                    await CreateOutfitModal.open(
+                    final didSave = await CreateOutfitModal.open(
                       context,
                       repository: wardrobeRepository,
                     );
+                    if (didSave) {
+                      widget.onOutfitCreated?.call();
+                    }
                   },
                 ),
               ),
               Expanded(child: SizedBox()),
-              
-              
-                  imageUrl == null
-                          ? _defaultAvatar(context)
-                          : ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Stack(
-                children: [Image.network(
-                              imageUrl,
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return _defaultAvatar(context);
-                              },
-                            ),
-                            IconButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/settings');
-                            },
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              splashFactory: NoSplash.splashFactory,
-                            ),
-                            icon: const Icon(
-                              Icons.account_box_rounded,
-                              color: Colors.transparent,
-                            ),
-                          ),
-                        
-                            ]
-                          ),
 
-                          
-                        
-              ),
-              
+              imageUrl == null
+                  ? _defaultAvatar(context)
+                  : ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Stack(
+                      children: [
+                        Image.network(
+                          imageUrl,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return _defaultAvatar(context);
+                          },
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/settings');
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            splashFactory: NoSplash.splashFactory,
+                          ),
+                          icon: const Icon(
+                            Icons.account_box_rounded,
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
               SizedBox(width: 5),
             ],

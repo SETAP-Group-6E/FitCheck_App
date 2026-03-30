@@ -19,12 +19,17 @@ class _WardrobePageState extends State<WardrobePage> {
   bool _isLoading = true;
   String? _error;
   List<Map<String, dynamic>> _items = [];
+  bool _isLoadingOutfits = true;
+  String? _outfitsError;
+  List<Map<String, dynamic>> _outfits = [];
+  bool _showOutfits = false;
 
   @override
   void initState() {
     super.initState();
     _wardrobeRepository = SupabaseWardrobeRepository(Supabase.instance.client);
     _loadItems();
+    _loadOutfits();
   }
 
   Future<void> _loadItems() async {
@@ -41,6 +46,24 @@ class _WardrobePageState extends State<WardrobePage> {
       setState(() {
         _isLoading = false;
         _error = e.toString();
+      });
+    }
+  }
+
+  Future<void> _loadOutfits() async {
+    try {
+      final outfits = await _wardrobeRepository.getOutfits();
+      if (!mounted) return;
+      setState(() {
+        _outfits = outfits;
+        _isLoadingOutfits = false;
+        _outfitsError = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingOutfits = false;
+        _outfitsError = e.toString();
       });
     }
   }
@@ -141,72 +164,122 @@ class _WardrobePageState extends State<WardrobePage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
                         Padding(
-                          padding: const EdgeInsets.only(
-                            left: 40.0,
-                            right: 16.0,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 30.0),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                    height: 125,
-                                    width: 125,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 4,
-                                        style: BorderStyle.solid,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    height: 125,
-                                    width: 125,
-                                    color: Colors.black12,
-                                    child: const DashedBox(
-                                      color: Colors.black,
-                                      strokeWidth: 7.0,
-                                      gap: 11.1,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 125,
-                                    width: 125,
-                                    child: IconButton(
-                                      icon: const Icon(
-                                        Icons.add,
-                                        color: Colors.white,
-                                        size: 30,
-                                      ),
-                                      onPressed: () async {
-                                        final didSave = await CreateItem.open(
-                                          context,
-                                          repository: _wardrobeRepository,
-                                        );
-                                        if (didSave) {
-                                          await _loadItems();
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ],
+                              ChoiceChip(
+                                label: const Text('Items'),
+                                selected: !_showOutfits,
+                                onSelected: (_) {
+                                  setState(() => _showOutfits = false);
+                                },
+                                selectedColor: const Color(0xFFD4A017),
+                                backgroundColor: const Color(0xFF2A2F38),
+                                labelStyle: TextStyle(
+                                  color:
+                                      !_showOutfits
+                                          ? Colors.white
+                                          : Colors.white70,
+                                ),
                               ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: _WardrobeItemsGrid(
-                                  isLoading: _isLoading,
-                                  error: _error,
-                                  items: _items,
+                              const SizedBox(width: 10),
+                              ChoiceChip(
+                                label: const Text('Outfits'),
+                                selected: _showOutfits,
+                                onSelected: (_) {
+                                  setState(() => _showOutfits = true);
+                                },
+                                selectedColor: const Color(0xFFD4A017),
+                                backgroundColor: const Color(0xFF2A2F38),
+                                labelStyle: TextStyle(
+                                  color:
+                                      _showOutfits
+                                          ? Colors.white
+                                          : Colors.white70,
                                 ),
                               ),
                             ],
                           ),
                         ),
+                        const SizedBox(height: 10),
+                        if (!_showOutfits)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 40.0,
+                              right: 16.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Stack(
+                                  children: [
+                                    Container(
+                                      height: 125,
+                                      width: 125,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 4,
+                                          style: BorderStyle.solid,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 125,
+                                      width: 125,
+                                      color: Colors.black12,
+                                      child: const DashedBox(
+                                        color: Colors.black,
+                                        strokeWidth: 7.0,
+                                        gap: 11.1,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 125,
+                                      width: 125,
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                          size: 30,
+                                        ),
+                                        onPressed: () async {
+                                          final didSave = await CreateItem.open(
+                                            context,
+                                            repository: _wardrobeRepository,
+                                          );
+                                          if (didSave) {
+                                            await _loadItems();
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: _WardrobeItemsGrid(
+                                    isLoading: _isLoading,
+                                    error: _error,
+                                    items: _items,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 30.0,
+                            ),
+                            child: _WardrobeOutfitsList(
+                              isLoading: _isLoadingOutfits,
+                              error: _outfitsError,
+                              outfits: _outfits,
+                            ),
+                          ),
                         const SizedBox(height: 100),
                       ],
                     ),
@@ -215,9 +288,111 @@ class _WardrobePageState extends State<WardrobePage> {
               ],
             ),
           ),
-          FloatingNavbar(),
+          FloatingNavbar(onOutfitCreated: _loadOutfits),
         ],
       ),
+    );
+  }
+}
+
+class _WardrobeOutfitsList extends StatelessWidget {
+  const _WardrobeOutfitsList({
+    required this.isLoading,
+    required this.error,
+    required this.outfits,
+  });
+
+  final bool isLoading;
+  final String? error;
+  final List<Map<String, dynamic>> outfits;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(
+        child: SizedBox(
+          height: 24,
+          width: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    if (error != null) {
+      return const Text(
+        'Could not load outfits',
+        style: TextStyle(color: Colors.white70, fontSize: 12),
+      );
+    }
+
+    if (outfits.isEmpty) {
+      return const Text(
+        'No outfits yet',
+        style: TextStyle(color: Colors.white70, fontSize: 12),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: outfits.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final outfit = outfits[index];
+        final name = (outfit['name'] ?? 'Untitled outfit').toString();
+        final description = (outfit['description'] ?? '').toString();
+        final isOwned = outfit['is_owned'] == true;
+
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.06),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white24),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  if (isOwned)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4A017),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Text(
+                        'Owned',
+                        style: TextStyle(color: Colors.white, fontSize: 11),
+                      ),
+                    ),
+                ],
+              ),
+              if (description.trim().isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
