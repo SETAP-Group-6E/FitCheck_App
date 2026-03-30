@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
-import '../styles/wardrobe_styles.dart';
 import '../constants/wardrobe_constants.dart';
-
 
 class _CreateItemTheme {
   static const Color card = Color(0xFF171A20);
@@ -28,11 +26,15 @@ class CreateItem extends StatefulWidget {
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withOpacity(0.6),
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        child: CreateItem(repository: repository),
-      ),
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 18,
+            ),
+            child: CreateItem(repository: repository),
+          ),
     );
     return result ?? false;
   }
@@ -86,9 +88,9 @@ class _CreateItemState extends State<CreateItem> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save item: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save item: $e')));
     }
   }
 
@@ -136,9 +138,11 @@ class _CreateItemState extends State<CreateItem> {
                           child: _PillTextField(
                             controller: _titleCtrl,
                             hintText: WardrobeConstants.defaultItemNameHint,
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? "Item name is required"
-                                : null,
+                            validator:
+                                (v) =>
+                                    (v == null || v.trim().isEmpty)
+                                        ? "Item name is required"
+                                        : null,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -156,8 +160,8 @@ class _CreateItemState extends State<CreateItem> {
                           child: _PillDropdown(
                             value: _fabricMaterial,
                             items: WardrobeConstants.fabricMaterials,
-                            onChanged: (v) =>
-                                setState(() => _fabricMaterial = v),
+                            onChanged:
+                                (v) => setState(() => _fabricMaterial = v),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -167,8 +171,8 @@ class _CreateItemState extends State<CreateItem> {
                           child: _PillDropdown(
                             value: _layerCategory,
                             items: WardrobeConstants.layerCategories,
-                            onChanged: (v) =>
-                                setState(() => _layerCategory = v),
+                            onChanged:
+                                (v) => setState(() => _layerCategory = v),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -183,8 +187,7 @@ class _CreateItemState extends State<CreateItem> {
                           title: "Water resistant",
                           subtitle: "Tick if it handles rain",
                           value: _waterResistant,
-                          onChanged: (v) =>
-                              setState(() => _waterResistant = v),
+                          onChanged: (v) => setState(() => _waterResistant = v),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -276,11 +279,7 @@ class _Field extends StatelessWidget {
   final String? helper;
   final Widget child;
 
-  const _Field({
-    required this.label,
-    this.helper,
-    required this.child,
-  });
+  const _Field({required this.label, this.helper, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -299,10 +298,7 @@ class _Field extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             helper!,
-            style: const TextStyle(
-              color: _CreateItemTheme.muted,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
           ),
         ],
         const SizedBox(height: 6),
@@ -328,10 +324,7 @@ class _PillTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       validator: validator,
-      style: const TextStyle(
-        color: _CreateItemTheme.textDark,
-        fontSize: 14,
-      ),
+      style: const TextStyle(color: _CreateItemTheme.textDark, fontSize: 14),
       cursorColor: _CreateItemTheme.gold,
       decoration: InputDecoration(
         hintText: hintText,
@@ -351,29 +344,17 @@ class _PillTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(
-            color: _CreateItemTheme.gold,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: _CreateItemTheme.gold, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(999),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
         ),
-        errorStyle: const TextStyle(
-          color: Colors.redAccent,
-          fontSize: 12,
-        ),
+        errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 12),
       ),
     );
   }
@@ -409,20 +390,21 @@ class _PillDropdown extends StatelessWidget {
             color: _CreateItemTheme.textDark,
             fontSize: 14,
           ),
-          items: items
-              .map(
-                (s) => DropdownMenuItem(
-                  value: s,
-                  child: Text(
-                    s,
-                    style: const TextStyle(
-                      color: _CreateItemTheme.textDark,
-                      fontSize: 14,
+          items:
+              items
+                  .map(
+                    (s) => DropdownMenuItem(
+                      value: s,
+                      child: Text(
+                        s,
+                        style: const TextStyle(
+                          color: _CreateItemTheme.textDark,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              )
-              .toList(),
+                  )
+                  .toList(),
           onChanged: (v) => onChanged(v ?? value),
         ),
       ),
@@ -434,10 +416,7 @@ class _WarmthSlider extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
 
-  const _WarmthSlider({
-    required this.value,
-    required this.onChanged,
-  });
+  const _WarmthSlider({required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -454,13 +433,15 @@ class _WarmthSlider extends StatelessWidget {
                   inactiveTrackColor: _CreateItemTheme.border,
                   thumbColor: Colors.white,
                   overlayColor: _CreateItemTheme.gold.withOpacity(0.15),
-                  thumbShape:
-                      const RoundSliderThumbShape(enabledThumbRadius: 9),
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 9,
+                  ),
                 ),
                 child: Slider(
                   min: WardrobeConstants.minWarmthRating.toDouble(),
                   max: WardrobeConstants.maxWarmthRating.toDouble(),
-                  divisions: WardrobeConstants.maxWarmthRating -
+                  divisions:
+                      WardrobeConstants.maxWarmthRating -
                       WardrobeConstants.minWarmthRating,
                   value: value.toDouble(),
                   onChanged: (v) => onChanged(v.round()),
@@ -469,10 +450,7 @@ class _WarmthSlider extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: _CreateItemTheme.bg,
                 borderRadius: BorderRadius.circular(999),
@@ -491,10 +469,7 @@ class _WarmthSlider extends StatelessWidget {
         const SizedBox(height: 6),
         const Text(
           "1 = Light   5 = Very warm",
-          style: TextStyle(
-            color: _CreateItemTheme.muted,
-            fontSize: 12,
-          ),
+          style: TextStyle(color: _CreateItemTheme.muted, fontSize: 12),
         ),
       ],
     );
@@ -524,9 +499,10 @@ class _CheckboxRow extends StatelessWidget {
             unselectedWidgetColor: _CreateItemTheme.border,
             checkboxTheme: CheckboxThemeData(
               fillColor: MaterialStateProperty.resolveWith(
-                (states) => states.contains(MaterialState.selected)
-                    ? _CreateItemTheme.gold
-                    : Colors.transparent,
+                (states) =>
+                    states.contains(MaterialState.selected)
+                        ? _CreateItemTheme.gold
+                        : Colors.transparent,
               ),
               side: const BorderSide(
                 color: _CreateItemTheme.border,
@@ -576,10 +552,7 @@ class _PhotoBoxUIOnly extends StatelessWidget {
   final bool hasPhoto;
   final VoidCallback onUpload;
 
-  const _PhotoBoxUIOnly({
-    required this.hasPhoto,
-    required this.onUpload,
-  });
+  const _PhotoBoxUIOnly({required this.hasPhoto, required this.onUpload});
 
   @override
   Widget build(BuildContext context) {
@@ -594,23 +567,24 @@ class _PhotoBoxUIOnly extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: _CreateItemTheme.border),
           ),
-          child: hasPhoto
-              ? const Center(
-                  child: Icon(
-                    Icons.image,
-                    size: 64,
-                    color: _CreateItemTheme.muted,
-                  ),
-                )
-              : const Center(
-                  child: Text(
-                    "Upload item photo",
-                    style: TextStyle(
+          child:
+              hasPhoto
+                  ? const Center(
+                    child: Icon(
+                      Icons.image,
+                      size: 64,
                       color: _CreateItemTheme.muted,
-                      fontSize: 13,
+                    ),
+                  )
+                  : const Center(
+                    child: Text(
+                      "Upload item photo",
+                      style: TextStyle(
+                        color: _CreateItemTheme.muted,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
-                ),
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -636,10 +610,7 @@ class _PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
 
-  const _PrimaryButton({
-    required this.text,
-    required this.onPressed,
-  });
+  const _PrimaryButton({required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -664,10 +635,7 @@ class _SecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
 
-  const _SecondaryButton({
-    required this.text,
-    required this.onPressed,
-  });
+  const _SecondaryButton({required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

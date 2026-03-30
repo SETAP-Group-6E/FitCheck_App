@@ -2,13 +2,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../Domain/repositories/wardrobe_repository.dart';
 
 class SupabaseWardrobeRepository implements WardrobeRepository {
-  static const List<String> _clothingItemsTables = [
-    'item',
-    'items',
-    'clothing_item',
-    'clothing_items',
-  ];
-  static const List<String> _outfitsTables = ['outfit', 'outfits'];
+  static const List<String> _clothingItemsTables = ['item'];
+  static const List<String> _outfitsTables = ['outfit'];
+  static const List<String> _outfitItemsTables = ['outfit_item'];
 
   final SupabaseClient _supabase;
 
@@ -53,20 +49,18 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
 
   @override
   Future<void> removeClothingItem({required String id}) async {
-    await _deleteWithTableFallback(_clothingItemsTables, id);
+    await _deleteWithTableFallback(
+      _clothingItemsTables,
+      id,
+      idColumn: 'item_id',
+    );
   }
 
   @override
   Future<List<Map<String, dynamic>>> getClothingItems() async {
     final userId = _currentUserIdOrThrow();
-
-    try {
-      final data = await _supabase.from('item').select().eq('user_id', userId);
-
-      return List<Map<String, dynamic>>.from(data as List);
-    } catch (e) {
-      rethrow;
-    }
+    final data = await _supabase.from('item').select().eq('user_id', userId);
+    return List<Map<String, dynamic>>.from(data as List);
   }
 
   @override
@@ -94,7 +88,12 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     }
     if (layerCategory != null) updateData['layer_category'] = layerCategory;
 
-    await _updateWithTableFallback(_clothingItemsTables, id, updateData);
+    await _updateWithTableFallback(
+      _clothingItemsTables,
+      id,
+      updateData,
+      idColumn: 'item_id',
+    );
   }
 
   @override
@@ -104,27 +103,35 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     required bool isOwned,
     required List<String> clothingItemIds,
   }) async {
+    final userId = _currentUserIdOrThrow();
     final data = <String, dynamic>{
+      'user_id': userId,
       'name': name,
       'description': description,
       'is_owned': isOwned,
     };
 
-    if (clothingItemIds.isNotEmpty) {
-      data['clothing_item_ids'] = clothingItemIds;
-    }
+    final outfitId = await _insertOutfitAndGetId(data);
 
-    await _insertWithTableFallback(_outfitsTables, data);
+    if (clothingItemIds.isNotEmpty) {
+      await _insertOutfitItemLinks(
+        outfitId: outfitId,
+        clothingItemIds: clothingItemIds,
+        userId: userId,
+      );
+    }
   }
 
   @override
   Future<void> removeOutfit({required String id}) async {
-    await _deleteWithTableFallback(_outfitsTables, id);
+    await _deleteWithTableFallback(_outfitsTables, id, idColumn: 'outfit_id');
   }
 
   @override
   Future<List<Map<String, dynamic>>> getOutfits() async {
-    return _selectWithTableFallback(_outfitsTables);
+    final userId = _currentUserIdOrThrow();
+    final data = await _supabase.from('outfit').select().eq('user_id', userId);
+    return List<Map<String, dynamic>>.from(data as List);
   }
 
   @override
@@ -144,7 +151,12 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
       updateData['clothing_item_ids'] = clothingItemIds;
     }
 
-    await _updateWithTableFallback(_outfitsTables, id, updateData);
+    await _updateWithTableFallback(
+      _outfitsTables,
+      id,
+      updateData,
+      idColumn: 'outfit_id',
+    );
   }
 
   Future<void> _insertWithTableFallback(
@@ -170,12 +182,145 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     );
   }
 
-  Future<void> _deleteWithTableFallback(List<String> tables, String id) async {
+  Future<String> _insertOutfitAndGetId(Map<String, dynamic> data) async {
+    PostgrestException? lastException;
+
+    for (final table in _outfitsTables) {
+      try {
+        final response =
+            await _supabase
+                .from(table)
+                .insert(data)
+                .select('outfit_id')
+                .single();
+        final row = Map<String, dynamic>.from(response);
+        final outfitId = row['outfit_id']?.toString();
+        if (outfitId == null || outfitId.isEmpty) {
+          throw Exception(
+            'Outfit insert succeeded but no outfit id was returned.',
+          );
+        }
+        return outfitId;
+      } on PostgrestException catch (e) {
+        lastException = e;
+
+        if (_isColumnMissingError(e) &&
+            e.message.toLowerCase().contains('user_id')) {
+          final dataWithoutUserId = Map<String, dynamic>.from(data)
+            ..remove('user_id');
+          try {
+            final response =
+                await _supabase
+                    .from(table)
+                    .insert(dataWithoutUserId)
+                    .select('outfit_id')
+                    .single();
+            final row = Map<String, dynamic>.from(response);
+            final outfitId = row['outfit_id']?.toString();
+            if (outfitId == null || outfitId.isEmpty) {
+              throw Exception(
+                'Outfit insert succeeded but no outfit id was returned.',
+              );
+            }
+            return outfitId;
+          } on PostgrestException catch (e2) {
+            lastException = e2;
+            if (_isTableMissingError(e2) || _isColumnMissingError(e2)) {
+              continue;
+            }
+            rethrow;
+          }
+        }
+
+        if (_isTableMissingError(e) || _isColumnMissingError(e)) {
+          continue;
+        }
+        rethrow;
+      }
+    }
+
+    throw Exception(
+      'Could not insert outfit and resolve outfit id. Last error: ${lastException?.message ?? 'unknown error'}',
+    );
+  }
+
+  Future<void> _insertOutfitItemLinks({
+    required String outfitId,
+    required List<String> clothingItemIds,
+    required String userId,
+  }) async {
+    PostgrestException? lastException;
+
+    final columnVariants = <Map<String, String>>[
+      {'outfit_id': 'outfit_id', 'item_id': 'item_id'},
+      {'outfit_id': 'outfit_id', 'item_id': 'clothing_item_id'},
+    ];
+
+    for (final table in _outfitItemsTables) {
+      for (final columns in columnVariants) {
+        final payload =
+            clothingItemIds
+                .map(
+                  (itemId) => <String, dynamic>{
+                    columns['outfit_id']!: outfitId,
+                    columns['item_id']!: itemId,
+                    'user_id': userId,
+                  },
+                )
+                .toList();
+
+        try {
+          await _supabase.from(table).insert(payload);
+          return;
+        } on PostgrestException catch (e) {
+          lastException = e;
+
+          if (_isColumnMissingError(e) &&
+              e.message.toLowerCase().contains('user_id')) {
+            final payloadWithoutUserId =
+                clothingItemIds
+                    .map(
+                      (itemId) => <String, dynamic>{
+                        columns['outfit_id']!: outfitId,
+                        columns['item_id']!: itemId,
+                      },
+                    )
+                    .toList();
+            try {
+              await _supabase.from(table).insert(payloadWithoutUserId);
+              return;
+            } on PostgrestException catch (e2) {
+              lastException = e2;
+              if (_isTableMissingError(e2) || _isColumnMissingError(e2)) {
+                continue;
+              }
+              rethrow;
+            }
+          }
+
+          if (_isTableMissingError(e) || _isColumnMissingError(e)) {
+            continue;
+          }
+          rethrow;
+        }
+      }
+    }
+
+    throw Exception(
+      'Could not insert outfit-item links. Last error: ${lastException?.message ?? 'unknown error'}',
+    );
+  }
+
+  Future<void> _deleteWithTableFallback(
+    List<String> tables,
+    String id, {
+    required String idColumn,
+  }) async {
     PostgrestException? lastException;
 
     for (final table in tables) {
       try {
-        await _supabase.from(table).delete().eq('id', id);
+        await _supabase.from(table).delete().eq(idColumn, id);
         return;
       } on PostgrestException catch (e) {
         lastException = e;
@@ -190,38 +335,17 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     );
   }
 
-  Future<List<Map<String, dynamic>>> _selectWithTableFallback(
-    List<String> tables,
-  ) async {
-    PostgrestException? lastException;
-
-    for (final table in tables) {
-      try {
-        final data = await _supabase.from(table).select();
-        return List<Map<String, dynamic>>.from(data as List);
-      } on PostgrestException catch (e) {
-        lastException = e;
-        if (!_isTableMissingError(e)) {
-          rethrow;
-        }
-      }
-    }
-
-    throw Exception(
-      'Could not find a valid table for select. Last error: ${lastException?.message ?? 'unknown error'}',
-    );
-  }
-
   Future<void> _updateWithTableFallback(
     List<String> tables,
     String id,
-    Map<String, dynamic> data,
-  ) async {
+    Map<String, dynamic> data, {
+    required String idColumn,
+  }) async {
     PostgrestException? lastException;
 
     for (final table in tables) {
       try {
-        await _supabase.from(table).update(data).eq('id', id);
+        await _supabase.from(table).update(data).eq(idColumn, id);
         return;
       } on PostgrestException catch (e) {
         lastException = e;
@@ -238,7 +362,13 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
 
   bool _isTableMissingError(PostgrestException e) {
     return e.code == '42P01' ||
+        e.code == 'PGRST205' ||
         e.message.toLowerCase().contains('relation') ||
+        e.message.toLowerCase().contains('schema cache') ||
         e.message.toLowerCase().contains('does not exist');
+  }
+
+  bool _isColumnMissingError(PostgrestException e) {
+    return e.code == '42703' || e.message.toLowerCase().contains('column');
   }
 }
