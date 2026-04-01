@@ -1,4 +1,5 @@
 import 'package:fitcheck/Presentation/App/app_pages/social.dart';
+import 'package:fitcheck/Presentation/App/app_pages/widgets/feed_post_card.dart';
 import 'package:fitcheck/Presentation/App/app_style/floating_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -100,45 +101,56 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-    final posts = grouped.values
-        .map((group) async {
-          group.images.sort((a, b) => a.order.compareTo(b.order));
-          
-          String? avatarUrl;
-          try {
-            final avatarBucket = supabase.storage.from('Avatars');
-            avatarUrl = avatarBucket.getPublicUrl('${group.author}/avatar.jpg');
-          } catch (e) {
-            debugPrint('Error getting avatar URL for ${group.author}: $e');
-          }
-          debugPrint('Generated avatar URL for ${group.author}: $avatarUrl');
-          
-          // Fetch username from users table
-          String? username;
-          try {
-            final userResponse = await supabase
-                .from('user')
-                .select('username')
-                .eq('id', group.author)
-                .single();
-            username = userResponse['username'] as String?;
-          } catch (e) {
-            debugPrint('Error fetching username for ${group.author}: $e');
-          }
-          
-          return _BucketPost(
-            author: group.author,
-            username: username ?? group.author,
-            createdAt: group.createdAt,
-            imageUrls: group.images.map((img) => img.url).toList(),
-            profileImageUrl: avatarUrl,
-          );
-        })
+    final profileById = <String, Map<String, dynamic>>{};
+    final authorIds = grouped.values
+        .map((group) => group.author)
+        .toSet()
         .toList();
 
-    final resolvedPosts = await Future.wait(posts);
-    resolvedPosts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return resolvedPosts;
+    if (authorIds.isNotEmpty) {
+      try {
+        final rows = await supabase
+            .from('profiles')
+            .select('id, username, avatar_url')
+            .inFilter('id', authorIds);
+        for (final row in rows as List<dynamic>) {
+          if (row is Map<String, dynamic> && row['id'] != null) {
+            profileById[row['id'].toString()] = row;
+          }
+        }
+      } catch (e) {
+        debugPrint('Error fetching profiles for feed: $e');
+      }
+    }
+
+    final avatarBucket = supabase.storage.from('Avatars');
+    final posts = grouped.values.map((group) {
+      group.images.sort((a, b) => a.order.compareTo(b.order));
+      final profile = profileById[group.author];
+      final username = (profile?['username'] as String?)?.trim();
+      final shortenedUid = group.author.length > 8
+          ? group.author.substring(0, 8)
+          : group.author;
+      final fallbackUsername = 'user_$shortenedUid';
+      final avatarFromProfile = (profile?['avatar_url'] as String?)?.trim();
+
+      final avatarUrl = (avatarFromProfile != null && avatarFromProfile.isNotEmpty)
+          ? avatarFromProfile
+          : avatarBucket.getPublicUrl('${group.author}/avatar.jpg');
+
+      return _BucketPost(
+        author: group.author,
+        username: (username != null && username.isNotEmpty)
+            ? username
+            : fallbackUsername,
+        createdAt: group.createdAt,
+        imageUrls: group.images.map((img) => img.url).toList(),
+        profileImageUrl: avatarUrl,
+      );
+    }).toList();
+
+    posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return posts;
   }
 
   @override
@@ -231,74 +243,11 @@ class _HomePageState extends State<HomePage> {
                         itemCount: posts.length,
                         itemBuilder: (context, index) {
                           final post = posts[index];
-                          final username = post.username;
-                          final imageUrls = post.imageUrls;
-                          final createdAt = post.createdAt;
-                          debugPrint('Post $index: username=$username, profileImageUrl=${post.profileImageUrl}');
-
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            color: const Color(0xFF121212),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: const Color.fromARGB(176, 217, 214, 214),
-                                    backgroundImage: post.profileImageUrl != null
-                                        ? NetworkImage(post.profileImageUrl!)
-                                        : null,
-                                    child: post.profileImageUrl == null
-                                        ? const Icon(Icons.person, color: Colors.white)
-                                        : null,
-                                  ),
-                                  title: Text(
-                                    username,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    _formatTimeAgo(createdAt),
-                                    style: const TextStyle(color: Colors.white70),
-                                  ),
-                                ),
-                                if (imageUrls.isNotEmpty)
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: SizedBox(
-                                      height: 260,
-                                      child: PageView.builder(
-                                        itemCount: imageUrls.length,
-                                        itemBuilder: (context, imageIndex) {
-                                          return FadeInImage.assetNetwork(
-                                            placeholder: 'Assets/profile_pic.png',
-                                            image: imageUrls[imageIndex],
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            placeholderFit: BoxFit.cover,
-                                            imageErrorBuilder: (
-                                              context,
-                                              error,
-                                              stackTrace,
-                                            ) {
-                                              return Image.asset(
-                                                'Assets/profile_pic.png',
-                                                fit: BoxFit.cover,
-                                                width: double.infinity,
-                                              );
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
+                          return FeedPostCard(
+                            username: post.username,
+                            timeLabel: _formatTimeAgo(post.createdAt),
+                            imageUrls: post.imageUrls,
+                            profileImageUrl: post.profileImageUrl,
                           );
                         },
                       );
