@@ -15,7 +15,7 @@ class FloatingNavbar extends StatefulWidget {
     super.key,
     this.width = 480,
     this.height = 70,
-    this.bottomPadding = 0,
+    this.bottomPadding = 5,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
     this.onOutfitCreated,
   });
