@@ -1,11 +1,11 @@
-import 'package:fitcheck/Presentation/App/app_style/signin_buttons.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/signin_buttons.dart';
 import 'package:fitcheck/Presentation/auth/pages/register_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider/auth_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fitcheck/Presentation/App/app_style/password_field.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/password_field.dart';
 
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
