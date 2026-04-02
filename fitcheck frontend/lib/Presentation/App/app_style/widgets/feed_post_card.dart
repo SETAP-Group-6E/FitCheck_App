@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class FeedPostCard extends StatelessWidget {
+class FeedPostCard extends StatefulWidget {
   const FeedPostCard({
     super.key,
     required this.username,
@@ -13,6 +13,20 @@ class FeedPostCard extends StatelessWidget {
   final String timeLabel;
   final List<String> imageUrls;
   final String? profileImageUrl;
+
+  @override
+  State<FeedPostCard> createState() => _FeedPostCardState();
+}
+
+class _FeedPostCardState extends State<FeedPostCard> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,38 +46,41 @@ class FeedPostCard extends StatelessWidget {
               ListTile(
                 leading: CircleAvatar(
                   backgroundColor: const Color.fromARGB(176, 217, 214, 214),
-                  backgroundImage: profileImageUrl != null
-                      ? NetworkImage(profileImageUrl!)
+                  backgroundImage: widget.profileImageUrl != null
+                      ? NetworkImage(widget.profileImageUrl!)
                       : null,
-                  child: profileImageUrl == null
+                  child: widget.profileImageUrl == null
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
                 ),
                 title: Text(
-                  username,
+                  widget.username,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 subtitle: Text(
-                  timeLabel,
+                  widget.timeLabel,
                   style: const TextStyle(color: Colors.white70),
                 ),
               ),
-              if (imageUrls.isNotEmpty)
+              if (widget.imageUrls.isNotEmpty)
                 ClipRRect(
-                  
-                    
-                  
                   child: AspectRatio(
                     aspectRatio: 1,
                     child: PageView.builder(
-                      itemCount: imageUrls.length,
+                      controller: _pageController,
+                      onPageChanged: (page) {
+                        setState(() {
+                          _currentPage = page;
+                        });
+                      },
+                      itemCount: widget.imageUrls.length,
                       itemBuilder: (context, imageIndex) {
                         return FadeInImage.assetNetwork(
                           placeholder: 'Assets/profile_pic.png',
-                          image: imageUrls[imageIndex],
+                          image: widget.imageUrls[imageIndex],
                           fit: BoxFit.cover,
                           width: double.infinity,
                           placeholderFit: BoxFit.cover,
@@ -77,6 +94,28 @@ class FeedPostCard extends StatelessWidget {
                         );
                       },
                     ),
+                  ),
+                ),
+              if (widget.imageUrls.length > 1)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 2),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(widget.imageUrls.length, (index) {
+                      final isActive = index == _currentPage;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        width: isActive ? 8 : 6,
+                        height: isActive ? 8 : 6,
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? Colors.white
+                              : Colors.white.withValues(alpha: 0.35),
+                          shape: BoxShape.circle,
+                        ),
+                      );
+                    }),
                   ),
                 ),
               Padding(
