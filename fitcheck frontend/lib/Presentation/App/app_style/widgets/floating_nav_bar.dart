@@ -55,14 +55,19 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
   }
 
   void _openSettingsIfLoggedIn(BuildContext context) {
-    if (Supabase.instance.client.auth.currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    final auth = Supabase.instance.client.auth;
+    final isLoggedIn = auth.currentSession != null && auth.currentUser != null;
+
+    if (!isLoggedIn) {
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Please log in to access settings.'),
           duration: Duration(milliseconds: 1000),
         ),
       );
-      Navigator.pushNamed(context, '/login');
+      _navigateIfNotCurrent(context, '/login');
       return;
     }
     _navigateIfNotCurrent(context, '/settings');
