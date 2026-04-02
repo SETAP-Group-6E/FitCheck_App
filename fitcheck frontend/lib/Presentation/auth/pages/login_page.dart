@@ -100,7 +100,7 @@ class LoginPage extends ConsumerWidget {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Login successful!'), duration: Duration(milliseconds: 3000),
+                                  content: Text('Login successful!'), duration: Duration(milliseconds: 300),
                                 ),
                               );
                               Navigator.pushReplacement(
