@@ -164,7 +164,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () {
-                                  _openSettingsIfLoggedIn(context);
+                                  _navigateIfNotCurrent(context, '/settings');
                                 },
                               ),
                             ),
