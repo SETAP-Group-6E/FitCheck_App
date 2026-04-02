@@ -101,56 +101,54 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-    final profileById = <String, Map<String, dynamic>>{};
-    final authorIds = grouped.values
-        .map((group) => group.author)
-        .toSet()
-        .toList();
-
-    if (authorIds.isNotEmpty) {
-      try {
-        final rows = await supabase
-            .from('profiles')
-            .select('id, username, avatar_url')
-            .inFilter('id', authorIds);
-        for (final row in rows as List<dynamic>) {
-          if (row is Map<String, dynamic> && row['id'] != null) {
-            profileById[row['id'].toString()] = row;
-          }
-        }
-      } catch (e) {
-        debugPrint('Error fetching profiles for feed: $e');
-      }
-    }
-
-    final avatarBucket = supabase.storage.from('Avatars');
-    final posts = grouped.values.map((group) {
+    final posts = await Future.wait(grouped.values.map((group) async {
       group.images.sort((a, b) => a.order.compareTo(b.order));
-      final profile = profileById[group.author];
-      final username = (profile?['username'] as String?)?.trim();
-      final shortenedUid = group.author.length > 8
-          ? group.author.substring(0, 8)
-          : group.author;
-      final fallbackUsername = 'user_$shortenedUid';
-      final avatarFromProfile = (profile?['avatar_url'] as String?)?.trim();
-
-      final avatarUrl = (avatarFromProfile != null && avatarFromProfile.isNotEmpty)
-          ? avatarFromProfile
-          : avatarBucket.getPublicUrl('${group.author}/avatar.jpg');
+      final userData = await _fetchPosterUser(group.author);
 
       return _BucketPost(
         author: group.author,
-        username: (username != null && username.isNotEmpty)
-            ? username
-            : fallbackUsername,
+        username: userData.username,
         createdAt: group.createdAt,
         imageUrls: group.images.map((img) => img.url).toList(),
-        profileImageUrl: avatarUrl,
+        profileImageUrl: userData.profileImageUrl,
       );
-    }).toList();
+    }));
 
     posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return posts;
+  }
+
+  Future<_PosterUser> _fetchPosterUser(String userId) async {
+    try {
+      final row = await supabase
+          .from('user')
+          .select('username, profile_pic_url')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      final username = (row?['username'] as String?)?.trim();
+      final profileImageUrl = (row?['profile_pic_url'] as String?)?.trim();
+
+      final shortenedUid = userId.length > 8 ? userId.substring(0, 8) : userId;
+      final fallbackUsername = 'user_$shortenedUid';
+
+      return _PosterUser(
+        username: (username != null && username.isNotEmpty)
+            ? username
+            : fallbackUsername,
+        profileImageUrl:
+            profileImageUrl != null && profileImageUrl.isNotEmpty
+                ? profileImageUrl
+                : supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg'),
+      );
+    } catch (e) {
+      debugPrint('Error fetching user row for $userId: $e');
+      final shortenedUid = userId.length > 8 ? userId.substring(0, 8) : userId;
+      return _PosterUser(
+        username: 'user_$shortenedUid',
+        profileImageUrl: supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg'),
+      );
+    }
   }
 
   @override
@@ -284,9 +282,15 @@ class _BucketPostBuilder {
   final String author;
   final DateTime createdAt;
   final List<_PostImage> images = [];
-  String? profileImageUrl;
 
   _BucketPostBuilder({required this.author, required this.createdAt});
+}
+
+class _PosterUser {
+  final String username;
+  final String profileImageUrl;
+
+  const _PosterUser({required this.username, required this.profileImageUrl});
 }
 
 class _PostImage {
