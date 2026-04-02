@@ -107,7 +107,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
 
     return Positioned(
       left: 0,
-      right: 0,
+      right: 10,
       bottom: widget.bottomPadding,
       child: Center(
         child: Container(
@@ -115,11 +115,11 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
           width: widget.width,
           height: widget.height,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(width: 15),
+              Expanded(child: SizedBox()),
               IconButton(
-                icon: const Icon(Icons.home, size: 40, color: Colors.white),
+                icon: const Icon(Icons.home, size: 30, color: Colors.white),
                 onPressed: () {
                   _navigateIfNotCurrent(context, '/homepage');
                 },
@@ -171,8 +171,8 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                         children: [
                           Image.network(
                             imageUrl,
-                            width: 40,
-                            height: 40,
+                            width: 35,
+                            height: 35,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return _defaultAvatar(context);
