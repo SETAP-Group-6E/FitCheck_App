@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fitcheck/Domain/repositories/auth_repository.dart';
-import 'package:fitcheck/Presentation/App/app_style/password_field.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/password_field.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/register_page.dart';
 import 'package:fitcheck/Presentation/auth/provider/auth_provider.dart';
