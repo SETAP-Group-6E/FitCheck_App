@@ -170,6 +170,7 @@ class _HomePageState extends State<HomePage> {
 
       final shortenedUid = userId.length > 8 ? userId.substring(0, 8) : userId;
       final fallbackUsername = 'user_$shortenedUid';
+      final cacheBuster = DateTime.now().millisecondsSinceEpoch;
 
       return _PosterUser(
         username: (username != null && username.isNotEmpty)
@@ -178,14 +179,15 @@ class _HomePageState extends State<HomePage> {
         profileImageUrl:
             profileImageUrl != null && profileImageUrl.isNotEmpty
                 ? profileImageUrl
-                : supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg'),
+                : supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg?t=$cacheBuster'),
       );
     } catch (e) {
       debugPrint('Error fetching user row for $userId: $e');
       final shortenedUid = userId.length > 8 ? userId.substring(0, 8) : userId;
+      final cacheBuster = DateTime.now().millisecondsSinceEpoch;
       return _PosterUser(
         username: 'user_$shortenedUid',
-        profileImageUrl: supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg'),
+        profileImageUrl: supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg?t=$cacheBuster'),
       );
     }
   }
