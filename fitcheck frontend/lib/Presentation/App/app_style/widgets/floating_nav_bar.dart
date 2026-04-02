@@ -80,7 +80,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
       bottom: widget.bottomPadding,
       child: Center(
         child: Container(
-          color: const Color.fromARGB(255, 0, 0, 0),
+          color: Colors.black,
           width: widget.width,
           height: widget.height,
           child: Row(
@@ -165,7 +165,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
               ),
               
 
-              SizedBox(width: 5),
+              Expanded(child: SizedBox()),
             ],
           ),
         ),
