@@ -171,6 +171,24 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                                   ),
                                   onPressed: () async {
                                     final supabase = Supabase.instance.client;
+                                    final userId = supabase.auth.currentUser?.id;
+                                    if (userId == null) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Log in to upload an avatar',
+                                            ),
+                                            duration: Duration(milliseconds: 1000),
+                                          ),
+                                        );
+                                        Navigator.pushNamed(context, '/login');
+                                      }
+                                      return;
+                                    }
+
                                     final ImagePicker picker = ImagePicker();
                                     final XFile? image = await picker.pickImage(
                                       source: ImageSource.gallery,
@@ -181,23 +199,6 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
 
                                     final imageBytes =
                                         await image.readAsBytes();
-                                    final userId =
-                                        supabase.auth.currentUser?.id;
-                                    if (userId == null) {
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Log in to upload an avatar',
-                                            ),
-                                          ),
-                                        );
-                                        Navigator.pushNamed(context, '/login');
-                                      }
-                                      return;
-                                    }
 
                                     final imagePath = '$userId/avatar.jpg';
 

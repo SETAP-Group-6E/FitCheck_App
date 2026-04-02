@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:fitcheck/Presentation/App/app_pages/social.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/feed_post_card.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,6 +18,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final supabase = Supabase.instance.client;
   Future<List<_BucketPost>> _feedFuture = Future.value(const <_BucketPost>[]);
+  bool _showNoMorePostsPrompt = false;
+  Timer? _noMorePostsTimer;
 
   void _refreshFeed() {
     _feedFuture = _fetchBucketPosts().timeout(
@@ -26,6 +32,39 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _refreshFeed();
+  }
+
+  @override
+  void dispose() {
+    _noMorePostsTimer?.cancel();
+    super.dispose();
+  }
+
+  void _triggerNoMorePostsPrompt() {
+    _noMorePostsTimer?.cancel();
+    if (!_showNoMorePostsPrompt) {
+      setState(() {
+        _showNoMorePostsPrompt = true;
+      });
+    }
+
+    _noMorePostsTimer = Timer(const Duration(milliseconds: 900), () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _showNoMorePostsPrompt = false;
+      });
+    });
+  }
+
+  void _hideNoMorePostsPrompt() {
+    _noMorePostsTimer?.cancel();
+    if (_showNoMorePostsPrompt) {
+      setState(() {
+        _showNoMorePostsPrompt = false;
+      });
+    }
   }
 
   String _formatTimeAgo(DateTime dateTime) {
@@ -181,6 +220,7 @@ class _HomePageState extends State<HomePage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Please log in to create a post.'),
+                                duration: Duration(milliseconds: 1000),
                               ),
                             );
                             Navigator.pushNamed(context, '/login');
@@ -236,18 +276,67 @@ class _HomePageState extends State<HomePage> {
                         );
                       }
 
-                      return ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(12, 6, 12, 110),
-                        itemCount: posts.length,
-                        itemBuilder: (context, index) {
-                          final post = posts[index];
-                          return FeedPostCard(
-                            username: post.username,
-                            timeLabel: _formatTimeAgo(post.createdAt),
-                            imageUrls: post.imageUrls,
-                            profileImageUrl: post.profileImageUrl,
-                          );
-                        },
+                      return Stack(
+                        children: [
+                          NotificationListener<ScrollNotification>(
+                            onNotification: (notification) {
+                              final pixels = notification.metrics.pixels;
+                              final max = notification.metrics.maxScrollExtent;
+                              final atBottom = pixels >= max - 1;
+
+                              if (notification is OverscrollNotification) {
+                                if (atBottom && notification.overscroll > 0) {
+                                  _triggerNoMorePostsPrompt();
+                                }
+                              } else if (notification is ScrollUpdateNotification) {
+                                final delta = notification.scrollDelta ?? 0;
+                                final scrollingDown = delta > 0;
+                                final scrollingUp = delta < 0;
+
+                                if (atBottom && scrollingDown) {
+                                  _triggerNoMorePostsPrompt();
+                                } else if (scrollingUp || !atBottom) {
+                                  _hideNoMorePostsPrompt();
+                                }
+                              } else if (notification is UserScrollNotification) {
+                                if (notification.direction == ScrollDirection.forward) {
+                                  _hideNoMorePostsPrompt();
+                                } else if (!atBottom) {
+                                  _hideNoMorePostsPrompt();
+                                }
+                              }
+                              return false;
+                            },
+                            child: ListView.builder(
+                              padding: const EdgeInsets.fromLTRB(12, 6, 12, 100),
+                              itemCount: kIsWeb ? posts.length + 1 : posts.length,
+                              itemBuilder: (context, index) {
+                                if (kIsWeb && index == posts.length) {
+                                  return const Padding(
+                                    padding: EdgeInsets.only(top: 8, bottom: 8),
+                                    child: Center(
+                                      child: Text(
+                                        'No more posts',
+                                        style: TextStyle(
+                                          color: Colors.white38,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                final post = posts[index];
+                                return FeedPostCard(
+                                  username: post.username,
+                                  timeLabel: _formatTimeAgo(post.createdAt),
+                                  imageUrls: post.imageUrls,
+                                  profileImageUrl: post.profileImageUrl,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -255,6 +344,27 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+          if (!kIsWeb)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 70,
+              child: IgnorePointer(
+                child: Center(
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 180),
+                    opacity: _showNoMorePostsPrompt ? 1 : 0,
+                    child: const Text(
+                      'No more posts',
+                      style: TextStyle(
+                        color: Colors.white38,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           const FloatingNavbar(),
         ],
       ),

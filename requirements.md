@@ -5,7 +5,7 @@ Requirements:
 - Read posts from Supabase Storage bucket "User Posts"
 - Folder format: {userId}/
 - File naming format: {timestamp}_{index}.jpg
-- Group files with same timestamp as one post
+- Group files with the same timestamp as one post
 - Sort post groups newest first
 - Sort images within a post by index
 
@@ -25,11 +25,11 @@ Requirements:
   - No labels
 
 3. Identity and profile:
-- Resolve author from folder userId
-- Fetch username + avatar_url from "profiles" table by id
-- If username missing, fallback to shortened id format: user_{first8chars}
+- Resolve author from the storage folder user_id
+- Fetch username + profile picture data from the public user table by user_id
+- If username is missing, fallback to shortened id format: user_{first8chars}
 - Avatar fallback order:
-  - profiles.avatar_url if present
+  - user.profile_pic_url if present
   - else public URL from Avatars bucket: {userId}/avatar.jpg
   - else person icon
 
