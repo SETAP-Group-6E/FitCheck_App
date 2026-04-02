@@ -33,7 +33,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
       backgroundColor: Colors.black,
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
+          constraints: const BoxConstraints(maxWidth: 470),
           child: Column(
             children: [
               SafeArea(

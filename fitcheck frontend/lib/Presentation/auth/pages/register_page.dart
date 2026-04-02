@@ -1,6 +1,6 @@
 
-import 'package:fitcheck/Presentation/App/app_style/password_field.dart';
-import 'package:fitcheck/Presentation/App/app_style/signin_buttons.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/password_field.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/signin_buttons.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -13,9 +13,9 @@ class FloatingNavbar extends StatefulWidget {
 
   const FloatingNavbar({
     super.key,
-    this.width = 470,
-    this.height = 60,
-    this.bottomPadding = 20,
+    this.width = 480,
+    this.height = 70,
+    this.bottomPadding = 0,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
     this.onOutfitCreated,
   });
@@ -46,6 +46,28 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
     super.dispose();
   }
 
+  void _navigateIfNotCurrent(BuildContext context, String routeName) {
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    if (currentRoute == routeName) {
+      return;
+    }
+    Navigator.pushNamed(context, routeName);
+  }
+
+  void _openSettingsIfLoggedIn(BuildContext context) {
+    if (Supabase.instance.client.auth.currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to access settings.'),
+          duration: Duration(milliseconds: 1000),
+        ),
+      );
+      Navigator.pushNamed(context, '/login');
+      return;
+    }
+    _navigateIfNotCurrent(context, '/settings');
+  }
+
   Widget _defaultAvatar(BuildContext context) {
     return Container(
       width: 35,
@@ -56,11 +78,11 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
       ),
       child: Center(
         child: IconButton(
-          icon: const Icon(Icons.person),
+          icon: const Icon(Icons.manage_accounts),
           color: Colors.black87,
           iconSize: 20,
           onPressed: () {
-            Navigator.pushNamed(context, '/settings');
+            _openSettingsIfLoggedIn(context);
           },
         ),
       ),
@@ -84,29 +106,36 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
       bottom: widget.bottomPadding,
       child: Center(
         child: Container(
-          color: const Color.fromRGBO(0, 0, 0, 0.2),
+          color: Colors.black,
           width: widget.width,
           height: widget.height,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              SizedBox(width: 15),
+              const SizedBox(width: 15),
               IconButton(
-                icon: Icon(Icons.home, size: 40, color: Colors.white),
+                icon: const Icon(Icons.home, size: 40, color: Colors.white),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/homepage');
+                  _navigateIfNotCurrent(context, '/homepage');
                 },
               ),
-              Expanded(child: SizedBox()),
+              const Expanded(child: SizedBox()),
+              IconButton(
+                icon: const Icon(Icons.dry_cleaning_sharp, size: 30, color: Colors.white),
+                onPressed: () {
+                  _navigateIfNotCurrent(context, '/wardrobe');
+                },
+              ),
+              const Expanded(child: SizedBox()),
               Container(
                 height: 50,
                 width: 50,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  color: Color.fromRGBO(217, 156, 19, 1),
+                  color: const Color.fromRGBO(217, 156, 19, 1),
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.add, size: 30, color: Colors.white),
+                  icon: const Icon(Icons.add, size: 30, color: Colors.white),
                   onPressed: () async {
                     final didSave = await CreateOutfitModal.open(
                       context,
@@ -118,41 +147,46 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                   },
                 ),
               ),
-              Expanded(child: SizedBox()),
+              const Expanded(child: SizedBox()),
 
+              IconButton(
+                icon: const Icon(
+                  Icons.message_rounded,
+                  size: 30,
+                  color: Colors.white,
+                ),
+                onPressed: () {},
+              ),
+              const Expanded(child: SizedBox()),
               imageUrl == null
                   ? _defaultAvatar(context)
                   : ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Stack(
-                      children: [
-                        Image.network(
-                          imageUrl,
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return _defaultAvatar(context);
-                          },
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/settings');
-                          },
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            splashFactory: NoSplash.splashFactory,
+                      borderRadius: BorderRadius.circular(6),
+                      child: Stack(
+                        children: [
+                          Image.network(
+                            imageUrl,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _defaultAvatar(context);
+                            },
                           ),
-                          icon: const Icon(
-                            Icons.account_box_rounded,
-                            color: Colors.transparent,
+                          Positioned.fill(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  _openSettingsIfLoggedIn(context);
+                                },
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-
-              SizedBox(width: 5),
+              const Expanded(child: SizedBox()),
             ],
           ),
         ),

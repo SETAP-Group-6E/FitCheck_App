@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         scaffoldBackgroundColor: Colors.black,
       ),
-      home: const HomePage(),
+      home: HomePage(),
 
       onGenerateRoute: (settings) {
         switch (settings.name) {
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
               transitionDuration: const Duration(milliseconds: 220),
               reverseTransitionDuration: const Duration(milliseconds: 180),
               pageBuilder:
-                  (context, animation, secondaryAnimation) => const HomePage(),
+                  (context, animation, secondaryAnimation) => HomePage(),
               transitionsBuilder: (
                 context,
                 animation,
