@@ -12,7 +12,7 @@ class FloatingNavbar extends StatefulWidget {
 
   const FloatingNavbar({
     super.key,
-    this.width = 485,
+    this.width = 480,
     this.height = 70,
     this.bottomPadding = 0,
     this.borderRadius = const BorderRadius.all(Radius.circular(30)),
@@ -42,6 +42,28 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
     super.dispose();
   }
 
+  void _navigateIfNotCurrent(BuildContext context, String routeName) {
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    if (currentRoute == routeName) {
+      return;
+    }
+    Navigator.pushNamed(context, routeName);
+  }
+
+  void _openSettingsIfLoggedIn(BuildContext context) {
+    if (Supabase.instance.client.auth.currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to access settings.'),
+          duration: Duration(milliseconds: 1000),
+        ),
+      );
+      Navigator.pushNamed(context, '/login');
+      return;
+    }
+    _navigateIfNotCurrent(context, '/settings');
+  }
+
   Widget _defaultAvatar(BuildContext context) {
     return Container(
       width: 35,
@@ -52,11 +74,11 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
       ),
       child: Center(
         child: IconButton(
-          icon: const Icon(Icons.person),
+          icon: const Icon(Icons.manage_accounts),
           color: Colors.black87,
           iconSize: 20,
           onPressed: () {
-            Navigator.pushNamed(context, '/settings');
+            _openSettingsIfLoggedIn(context);
           },
         ),
       ),
@@ -90,13 +112,13 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
               IconButton(
                 icon: Icon(Icons.home, size: 40, color: Colors.white),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/homepage');
+                  _navigateIfNotCurrent(context, '/homepage');
                 },
               ),
               Expanded(child: SizedBox()),
               IconButton(
-                icon: const Icon(Icons.search, size: 30, color: Colors.white),
-                onPressed: () {},
+                icon: const Icon(Icons.dry_cleaning_sharp, size: 30, color: Colors.white),
+                onPressed: () {_navigateIfNotCurrent(context, '/wardrobe');},
               ),
               Expanded(child: SizedBox()),
               Container(
@@ -120,7 +142,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
               
               IconButton(
                 icon: const Icon(
-                  Icons.notifications_none,
+                  Icons.message_rounded,
                   size: 30,
                   color: Colors.white,
                 ),
@@ -145,14 +167,14 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                             ),
                             IconButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, '/settings');
+                              _openSettingsIfLoggedIn(context);
                             },
                             style: IconButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               splashFactory: NoSplash.splashFactory,
                             ),
                             icon: const Icon(
-                              Icons.account_box_rounded,
+                              Icons.manage_accounts,
                               color: Colors.transparent,
                             ),
                           ),

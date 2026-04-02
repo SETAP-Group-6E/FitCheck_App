@@ -1,5 +1,6 @@
 import 'package:fitcheck/Presentation/App/app_style/pfp.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -49,7 +50,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
       backgroundColor: Colors.black,
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
+          constraints: const BoxConstraints(maxWidth: 470),
           child: Column(
             children: [
               SafeArea(
@@ -197,8 +198,36 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                                       return;
                                     }
 
+                                    final croppedImage =
+                                        await ImageCropper().cropImage(
+                                          sourcePath: image.path,
+                                          compressFormat:
+                                              ImageCompressFormat.jpg,
+                                          compressQuality: 90,
+                                          uiSettings: [
+                                            WebUiSettings(context: context),
+                                            AndroidUiSettings(
+                                              toolbarTitle:
+                                                  'Crop avatar',
+                                              toolbarColor: Colors.black,
+                                              toolbarWidgetColor:
+                                                  Colors.white,
+                                              initAspectRatio:
+                                                  CropAspectRatioPreset.square,
+                                              lockAspectRatio: true,
+                                            ),
+                                            IOSUiSettings(
+                                              title: 'Crop avatar',
+                                              aspectRatioLockEnabled: true,
+                                            ),
+                                          ],
+                                        );
+                                    if (croppedImage == null) {
+                                      return;
+                                    }
+
                                     final imageBytes =
-                                        await image.readAsBytes();
+                                        await croppedImage.readAsBytes();
 
                                     final imagePath = '$userId/avatar.jpg';
 

@@ -1,5 +1,4 @@
 import 'package:fitcheck/Presentation/App/app_style/widgets/signin_buttons.dart';
-import 'package:fitcheck/Presentation/auth/pages/register_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -101,7 +100,7 @@ class LoginPage extends ConsumerWidget {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Login successful!'),
+                                  content: Text('Login successful!'), duration: Duration(milliseconds: 3000),
                                 ),
                               );
                               Navigator.pushReplacement(
