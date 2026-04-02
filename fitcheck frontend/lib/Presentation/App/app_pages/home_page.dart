@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
   final supabase = Supabase.instance.client;
   Future<List<_BucketPost>> _feedFuture = Future.value(const <_BucketPost>[]);
   bool _showNoMorePostsPrompt = false;
+  bool _isScrollingDown = false;
   Timer? _noMorePostsTimer;
 
   void _refreshFeed() {
@@ -113,45 +114,46 @@ class _HomePageState extends State<HomePage> {
 
         final tsMatch = tsRegex.firstMatch(fileName);
         final indexMatch = indexRegex.firstMatch(fileName);
-        final timestamp = tsMatch == null
-            ? 0
-            : int.tryParse(tsMatch.group(1) ?? '0') ?? 0;
-        final imageOrder = indexMatch == null
-            ? 0
-            : int.tryParse(indexMatch.group(1) ?? '0') ?? 0;
-        final groupKey = tsMatch == null
-            ? '$folderName/$fileName'
-            : '$folderName/$timestamp';
+        final timestamp =
+            tsMatch == null ? 0 : int.tryParse(tsMatch.group(1) ?? '0') ?? 0;
+        final imageOrder =
+            indexMatch == null
+                ? 0
+                : int.tryParse(indexMatch.group(1) ?? '0') ?? 0;
+        final groupKey =
+            tsMatch == null
+                ? '$folderName/$fileName'
+                : '$folderName/$timestamp';
         final path = '$folderName/$fileName';
-        final createdAt = timestamp > 0
-            ? DateTime.fromMillisecondsSinceEpoch(timestamp)
-            : DateTime.now();
+        final createdAt =
+            timestamp > 0
+                ? DateTime.fromMillisecondsSinceEpoch(timestamp)
+                : DateTime.now();
 
         grouped.putIfAbsent(
           groupKey,
           () => _BucketPostBuilder(author: folderName, createdAt: createdAt),
         );
         grouped[groupKey]!.images.add(
-          _PostImage(
-            order: imageOrder,
-            url: bucket.getPublicUrl(path),
-          ),
+          _PostImage(order: imageOrder, url: bucket.getPublicUrl(path)),
         );
       }
     }
 
-    final posts = await Future.wait(grouped.values.map((group) async {
-      group.images.sort((a, b) => a.order.compareTo(b.order));
-      final userData = await _fetchPosterUser(group.author);
+    final posts = await Future.wait(
+      grouped.values.map((group) async {
+        group.images.sort((a, b) => a.order.compareTo(b.order));
+        final userData = await _fetchPosterUser(group.author);
 
-      return _BucketPost(
-        author: group.author,
-        username: userData.username,
-        createdAt: group.createdAt,
-        imageUrls: group.images.map((img) => img.url).toList(),
-        profileImageUrl: userData.profileImageUrl,
-      );
-    }));
+        return _BucketPost(
+          author: group.author,
+          username: userData.username,
+          createdAt: group.createdAt,
+          imageUrls: group.images.map((img) => img.url).toList(),
+          profileImageUrl: userData.profileImageUrl,
+        );
+      }),
+    );
 
     posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return posts;
@@ -159,11 +161,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<_PosterUser> _fetchPosterUser(String userId) async {
     try {
-      final row = await supabase
-          .from('user')
-          .select('username, profile_pic_url')
-          .eq('user_id', userId)
-          .maybeSingle();
+      final row =
+          await supabase
+              .from('user')
+              .select('username, profile_pic_url')
+              .eq('user_id', userId)
+              .maybeSingle();
 
       final username = (row?['username'] as String?)?.trim();
       final profileImageUrl = (row?['profile_pic_url'] as String?)?.trim();
@@ -173,13 +176,16 @@ class _HomePageState extends State<HomePage> {
       final cacheBuster = DateTime.now().millisecondsSinceEpoch;
 
       return _PosterUser(
-        username: (username != null && username.isNotEmpty)
-            ? username
-            : fallbackUsername,
+        username:
+            (username != null && username.isNotEmpty)
+                ? username
+                : fallbackUsername,
         profileImageUrl:
             profileImageUrl != null && profileImageUrl.isNotEmpty
                 ? profileImageUrl
-                : supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg?t=$cacheBuster'),
+                : supabase.storage
+                    .from('Avatars')
+                    .getPublicUrl('$userId/avatar.jpg?t=$cacheBuster'),
       );
     } catch (e) {
       debugPrint('Error fetching user row for $userId: $e');
@@ -187,7 +193,9 @@ class _HomePageState extends State<HomePage> {
       final cacheBuster = DateTime.now().millisecondsSinceEpoch;
       return _PosterUser(
         username: 'user_$shortenedUid',
-        profileImageUrl: supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg?t=$cacheBuster'),
+        profileImageUrl: supabase.storage
+            .from('Avatars')
+            .getPublicUrl('$userId/avatar.jpg?t=$cacheBuster'),
       );
     }
   }
@@ -221,7 +229,9 @@ class _HomePageState extends State<HomePage> {
                           if (user == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Please log in to create a post.'),
+                                content: Text(
+                                  'Please log in to create a post.',
+                                ),
                                 duration: Duration(milliseconds: 1000),
                               ),
                             );
@@ -287,10 +297,13 @@ class _HomePageState extends State<HomePage> {
                               final atBottom = pixels >= max - 1;
 
                               if (notification is OverscrollNotification) {
-                                if (atBottom && notification.overscroll > 0) {
+                                if (atBottom &&
+                                    _isScrollingDown &&
+                                    notification.overscroll > 0) {
                                   _triggerNoMorePostsPrompt();
                                 }
-                              } else if (notification is ScrollUpdateNotification) {
+                              } else if (notification
+                                  is ScrollUpdateNotification) {
                                 final delta = notification.scrollDelta ?? 0;
                                 final scrollingDown = delta > 0;
                                 final scrollingUp = delta < 0;
@@ -300,8 +313,14 @@ class _HomePageState extends State<HomePage> {
                                 } else if (scrollingUp || !atBottom) {
                                   _hideNoMorePostsPrompt();
                                 }
-                              } else if (notification is UserScrollNotification) {
-                                if (notification.direction == ScrollDirection.forward) {
+                              } else if (notification
+                                  is UserScrollNotification) {
+                                _isScrollingDown =
+                                    notification.direction ==
+                                    ScrollDirection.reverse;
+
+                                if (notification.direction ==
+                                    ScrollDirection.forward) {
                                   _hideNoMorePostsPrompt();
                                 } else if (!atBottom) {
                                   _hideNoMorePostsPrompt();
@@ -310,8 +329,14 @@ class _HomePageState extends State<HomePage> {
                               return false;
                             },
                             child: ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(12, 6, 12, 100),
-                              itemCount: kIsWeb ? posts.length + 1 : posts.length,
+                              padding: const EdgeInsets.fromLTRB(
+                                12,
+                                6,
+                                12,
+                                100,
+                              ),
+                              itemCount:
+                                  kIsWeb ? posts.length + 1 : posts.length,
                               itemBuilder: (context, index) {
                                 if (kIsWeb && index == posts.length) {
                                   return const Padding(
@@ -358,10 +383,7 @@ class _HomePageState extends State<HomePage> {
                     opacity: _showNoMorePostsPrompt ? 1 : 0,
                     child: const Text(
                       'No more posts',
-                      style: TextStyle(
-                        color: Colors.white38,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: Colors.white38, fontSize: 13),
                     ),
                   ),
                 ),
