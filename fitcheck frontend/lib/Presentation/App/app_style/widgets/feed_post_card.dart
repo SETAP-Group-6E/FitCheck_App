@@ -19,7 +19,7 @@ class FeedPostCard extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 445),
+        constraints: const BoxConstraints(maxWidth: 470),
         child: Card(
           margin: const EdgeInsets.only(bottom: 15),
           color: const Color(0xFF121212),
