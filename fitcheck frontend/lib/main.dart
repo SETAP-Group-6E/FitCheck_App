@@ -143,13 +143,16 @@ class MyApp extends StatelessWidget {
               },
             );
           case '/settings':
+            final auth = Supabase.instance.client.auth;
+            final isLoggedIn = auth.currentSession != null && auth.currentUser != null;
+            
             return PageRouteBuilder(
               settings: settings,
               transitionDuration: const Duration(milliseconds: 280),
               reverseTransitionDuration: const Duration(milliseconds: 220),
               pageBuilder:
                   (context, animation, secondaryAnimation) =>
-                      const SettingsPage(),
+                      isLoggedIn ? const SettingsPage() : const LoginPage(),
               transitionsBuilder: (
                 context,
                 animation,
