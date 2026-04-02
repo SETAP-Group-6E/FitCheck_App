@@ -1,6 +1,6 @@
 import 'package:fitcheck/Presentation/App/app_pages/social.dart';
-import 'package:fitcheck/Presentation/App/app_pages/widgets/feed_post_card.dart';
-import 'package:fitcheck/Presentation/App/app_style/floating_nav_bar.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/feed_post_card.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

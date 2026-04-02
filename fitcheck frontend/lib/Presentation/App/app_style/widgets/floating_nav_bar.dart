@@ -12,10 +12,10 @@ class FloatingNavbar extends StatefulWidget {
 
   const FloatingNavbar({
     super.key,
-    this.width = 470,
-    this.height = 60,
-    this.bottomPadding = 20,
-    this.borderRadius = const BorderRadius.all(Radius.circular(20)),
+    this.width = 485,
+    this.height = 70,
+    this.bottomPadding = 0,
+    this.borderRadius = const BorderRadius.all(Radius.circular(30)),
   });
 
   @override
@@ -80,7 +80,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
       bottom: widget.bottomPadding,
       child: Center(
         child: Container(
-          color: const Color.fromRGBO(0, 0, 0, 0.2),
+          color: const Color.fromARGB(255, 0, 0, 0),
           width: widget.width,
           height: widget.height,
           child: Row(
@@ -92,6 +92,11 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                 onPressed: () {
                   Navigator.pushNamed(context, '/homepage');
                 },
+              ),
+              Expanded(child: SizedBox()),
+              IconButton(
+                icon: const Icon(Icons.search, size: 30, color: Colors.white),
+                onPressed: () {},
               ),
               Expanded(child: SizedBox()),
               Container(
@@ -110,6 +115,16 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                     );
                   },
                 ),
+              ),
+              Expanded(child:SizedBox()),
+              
+              IconButton(
+                icon: const Icon(
+                  Icons.notifications_none,
+                  size: 30,
+                  color: Colors.white,
+                ),
+                onPressed: () {},
               ),
               Expanded(child: SizedBox()),
               
