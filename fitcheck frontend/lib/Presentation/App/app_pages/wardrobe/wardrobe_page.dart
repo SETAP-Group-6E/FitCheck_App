@@ -92,7 +92,6 @@ class _WardrobePageState extends State<WardrobePage> {
     );
     if (confirm != true) return;
 
-    // Optimistic update: remove locally first
     final index = _items.indexWhere(
       (m) => ((m['item_id'] ?? m['id'] ?? '').toString()) == id,
     );
@@ -105,7 +104,6 @@ class _WardrobePageState extends State<WardrobePage> {
     try {
       debugPrint('[WardrobePage] deleting item id=$id');
       await _wardrobeRepository.removeClothingItem(id: id);
-      // Reload from server to ensure deletion actually persisted
       await _loadItems();
       if (mounted) {
         ScaffoldMessenger.of(
@@ -114,7 +112,6 @@ class _WardrobePageState extends State<WardrobePage> {
       }
     } catch (e) {
       debugPrint('[WardrobePage] delete error: $e');
-      // revert optimistic change
       if (removed != null) {
         _items.insert(index, removed);
         if (mounted) setState(() {});
@@ -293,68 +290,22 @@ class _WardrobePageState extends State<WardrobePage> {
                         const SizedBox(height: 10),
                         if (!_showOutfits)
                           Padding(
-                            padding: const EdgeInsets.only(
-                              left: 40.0,
-                              right: 16.0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 30.0,
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Stack(
-                                  children: [
-                                    Container(
-                                      height: 125,
-                                      width: 125,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: Colors.white,
-                                          width: 4,
-                                          style: BorderStyle.solid,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 125,
-                                      width: 125,
-                                      color: Colors.black12,
-                                      child: const DashedBox(
-                                        color: Colors.black,
-                                        strokeWidth: 7.0,
-                                        gap: 11.1,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 125,
-                                      width: 125,
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.add,
-                                          color: Colors.white,
-                                          size: 30,
-                                        ),
-                                        onPressed: () async {
-                                          final didSave = await CreateItem.open(
-                                            context,
-                                            repository: _wardrobeRepository,
-                                          );
-                                          if (didSave) await _loadItems();
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: _WardrobeItemsGrid(
-                                    isLoading: _isLoading,
-                                    error: _error,
-                                    items: _items,
-                                    onDelete: _deleteItem,
-                                    onEdit: _openEditItem,
-                                  ),
-                                ),
-                              ],
+                            child: _WardrobeItemsGrid(
+                              isLoading: _isLoading,
+                              error: _error,
+                              items: _items,
+                              onDelete: _deleteItem,
+                              onEdit: _openEditItem,
+                              onCreatePressed: () async {
+                                final didSave = await CreateItem.open(
+                                  context,
+                                  repository: _wardrobeRepository,
+                                );
+                                if (didSave) await _loadItems();
+                              },
                             ),
                           )
                         else
@@ -392,6 +343,7 @@ class _WardrobeItemsGrid extends StatelessWidget {
     required this.items,
     this.onDelete,
     this.onEdit,
+    this.onCreatePressed,
   });
 
   final bool isLoading;
@@ -399,6 +351,7 @@ class _WardrobeItemsGrid extends StatelessWidget {
   final List<Map<String, dynamic>> items;
   final Future<void> Function(String id)? onDelete;
   final void Function(Map<String, dynamic> item)? onEdit;
+  final VoidCallback? onCreatePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -415,24 +368,53 @@ class _WardrobeItemsGrid extends StatelessWidget {
         'Could not load items',
         style: TextStyle(color: Colors.white70, fontSize: 12),
       );
-    if (items.isEmpty)
-      return const Text(
-        'No items yet',
-        style: TextStyle(color: Colors.white70, fontSize: 12),
-      );
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = ((screenWidth - 60) / 125).floor().clamp(2, 6);
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        childAspectRatio: 0.8,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.0,
       ),
-      itemCount: items.length,
+      itemCount: items.length + 1,
       itemBuilder: (context, index) {
-        final item = items[index];
+        if (index == 0) {
+          return InkWell(
+            onTap: onCreatePressed,
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 4,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                ),
+                Container(
+                  color: Colors.black12,
+                  child: const DashedBox(
+                    color: Colors.black,
+                    strokeWidth: 7.0,
+                    gap: 11.1,
+                  ),
+                ),
+                Center(child: Icon(Icons.add, color: Colors.white, size: 30)),
+              ],
+            ),
+          );
+        }
+
+        final itemIndex = index - 1;
+        final item = items[itemIndex];
         final title = (item['name'] ?? item['title'] ?? '').toString();
         final wearType = (item['wear_type'] ?? '').toString();
         final id = (item['item_id'] ?? item['id'] ?? '').toString();
@@ -449,31 +431,40 @@ class _WardrobeItemsGrid extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.checkroom_outlined, color: Colors.white70),
-                    const SizedBox(height: 8),
-                    Text(
-                      title.isEmpty ? 'Untitled item' : title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                    if (wearType.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.checkroom_outlined,
+                        color: Colors.white70,
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        wearType,
-                        maxLines: 1,
+                        title.isEmpty ? 'Untitled item' : title,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 10,
+                          color: Colors.white,
+                          fontSize: 12,
                         ),
                       ),
+                      if (wearType.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          wearType,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
                 Positioned(
                   right: 6,
