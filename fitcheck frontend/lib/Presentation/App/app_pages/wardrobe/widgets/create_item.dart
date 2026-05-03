@@ -14,13 +14,15 @@ class _CreateItemTheme {
 }
 
 class CreateItem extends StatefulWidget {
-  const CreateItem({super.key, required this.repository});
+  const CreateItem({super.key, required this.repository, this.existingItem});
 
   final WardrobeRepository repository;
+  final Map<String, dynamic>? existingItem;
 
   static Future<bool> open(
     BuildContext context, {
     required WardrobeRepository repository,
+    Map<String, dynamic>? existingItem,
   }) async {
     final result = await showDialog<bool>(
       context: context,
@@ -33,7 +35,10 @@ class CreateItem extends StatefulWidget {
               horizontal: 18,
               vertical: 18,
             ),
-            child: CreateItem(repository: repository),
+            child: CreateItem(
+              repository: repository,
+              existingItem: existingItem,
+            ),
           ),
     );
     return result ?? false;
@@ -56,7 +61,55 @@ class _CreateItemState extends State<CreateItem> {
   bool _hasPhoto = false;
   bool _saving = false;
 
+  bool get _isEditMode => widget.existingItem != null;
+  String get _dialogTitle => _isEditMode ? 'Edit item' : 'Add new item';
+  String get _saveButtonText =>
+      _saving ? 'Saving...' : (_isEditMode ? 'Update item' : 'Save item');
+
+  String _readString(String key, String fallback) {
+    final value = widget.existingItem?[key];
+    final text = value?.toString().trim() ?? '';
+    return text.isEmpty ? fallback : text;
+  }
+
+  int _readInt(String key, int fallback) {
+    final value = widget.existingItem?[key];
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '') ?? fallback;
+  }
+
+  bool _readBool(String key, bool fallback) {
+    final value = widget.existingItem?[key];
+    if (value is bool) return value;
+    return fallback;
+  }
+
+  String _readId() {
+    return (widget.existingItem?['item_id'] ?? widget.existingItem?['id'] ?? '')
+        .toString()
+        .trim();
+  }
+
   @override
+  void initState() {
+    super.initState();
+    if (widget.existingItem != null) {
+      _titleCtrl.text = _readString('title', '');
+      _wearType = _readString('wear_type', WardrobeConstants.wearTypes.first);
+      _fabricMaterial = _readString(
+        'fabric_material',
+        WardrobeConstants.fabricMaterials.first,
+      );
+      _layerCategory = _readString(
+        'layer_category',
+        WardrobeConstants.layerCategories.first,
+      );
+      _warmthRating = _readInt('warmth_rating', 3);
+      _waterResistant = _readBool('water_resistant', false);
+      _hasPhoto = _readString('photo_url', '').isNotEmpty;
+    }
+  }
+
   void dispose() {
     _titleCtrl.dispose();
     super.dispose();
@@ -70,18 +123,39 @@ class _CreateItemState extends State<CreateItem> {
     if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
 
+    if (_isEditMode && _readId().isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot edit item without an id')),
+      );
+      return;
+    }
+
     setState(() => _saving = true);
 
     try {
-      await widget.repository.addClothingItem(
-        photoUrl: _hasPhoto ? 'local-upload-pending' : '',
-        title: _titleCtrl.text.trim(),
-        wearType: _wearType,
-        fabricMaterial: _fabricMaterial,
-        warmthRating: _warmthRating,
-        waterResistance: _waterResistant,
-        layerCategory: _layerCategory,
-      );
+      if (_isEditMode) {
+        await widget.repository.updateClothingItem(
+          id: _readId(),
+          photoUrl: _hasPhoto ? 'local-upload-pending' : null,
+          title: _titleCtrl.text.trim(),
+          wearType: _wearType,
+          fabricMaterial: _fabricMaterial,
+          warmthRating: _warmthRating,
+          waterResistance: _waterResistant,
+          layerCategory: _layerCategory,
+        );
+      } else {
+        await widget.repository.addClothingItem(
+          photoUrl: _hasPhoto ? 'local-upload-pending' : '',
+          title: _titleCtrl.text.trim(),
+          wearType: _wearType,
+          fabricMaterial: _fabricMaterial,
+          warmthRating: _warmthRating,
+          waterResistance: _waterResistant,
+          layerCategory: _layerCategory,
+        );
+      }
 
       if (!mounted) return;
       Navigator.of(context).pop(true);
@@ -116,7 +190,7 @@ class _CreateItemState extends State<CreateItem> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _Header(onClose: _cancel),
+              _Header(onClose: _cancel, title: _dialogTitle),
               Container(height: 1, color: _CreateItemTheme.border),
               Flexible(
                 child: SingleChildScrollView(
@@ -209,7 +283,7 @@ class _CreateItemState extends State<CreateItem> {
                     _SecondaryButton(text: "Cancel", onPressed: _cancel),
                     const SizedBox(width: 12),
                     _PrimaryButton(
-                      text: _saving ? "Saving..." : "Save item",
+                      text: _saveButtonText,
                       onPressed: _saving ? null : _save,
                     ),
                   ],
@@ -225,8 +299,9 @@ class _CreateItemState extends State<CreateItem> {
 
 class _Header extends StatelessWidget {
   final VoidCallback onClose;
+  final String title;
 
-  const _Header({required this.onClose});
+  const _Header({required this.onClose, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -234,10 +309,10 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(32, 22, 20, 18),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
-              "Add new item",
-              style: TextStyle(
+              title,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 28,
                 fontWeight: FontWeight.w600,
