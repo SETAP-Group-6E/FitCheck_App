@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_item.dart';
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outfit.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/dashed_box.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:fitcheck/Presentation/App/app_style/glass_frame.dart';
@@ -125,7 +126,39 @@ class _WardrobePageState extends State<WardrobePage> {
 
   Future<void> _deleteOutfit(String id) async {
     if (id.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Delete outfit?'),
+            content: const Text('This will remove the outfit permanently.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+    if (confirm != true) return;
+
+    // Optimistic update: remove locally first
+    final index = _outfits.indexWhere(
+      (m) => ((m['outfit_id'] ?? m['id'] ?? '').toString()) == id,
+    );
+    Map<String, dynamic>? removed;
+    if (index != -1) {
+      removed = _outfits.removeAt(index);
+      if (mounted) setState(() {});
+    }
+
     try {
+      debugPrint('[WardrobePage] deleting outfit id=$id');
       await _wardrobeRepository.removeOutfit(id: id);
       await _loadOutfits();
       if (mounted) {
@@ -134,10 +167,16 @@ class _WardrobePageState extends State<WardrobePage> {
         ).showSnackBar(const SnackBar(content: Text('Outfit deleted')));
       }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete outfit: ${e.toString()}')),
-      );
+      debugPrint('[WardrobePage] delete outfit error: $e');
+      // revert optimistic change
+      if (removed != null) {
+        _outfits.insert(index, removed);
+        if (mounted) setState(() {});
+      }
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
     }
   }
 
@@ -152,9 +191,13 @@ class _WardrobePageState extends State<WardrobePage> {
   }
 
   void _openEditOutfit(Map<String, dynamic> outfit) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Edit outfit - not implemented yet')),
-    );
+    CreateOutfitModal.open(
+      context,
+      repository: _wardrobeRepository,
+      existingOutfit: outfit,
+    ).then((didSave) {
+      if (didSave) _loadOutfits();
+    });
   }
 
   @override
