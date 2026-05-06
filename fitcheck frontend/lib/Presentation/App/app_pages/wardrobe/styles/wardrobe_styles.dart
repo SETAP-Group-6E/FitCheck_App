@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class WardrobeStyles {
-
   static const Color card = Color(0xFF171A20);
   static const Color border = Color(0xFF2A2F38);
   static const Color gold = Color(0xFFD4A017);
@@ -25,9 +24,7 @@ class WardrobeStyles {
 
   static BoxDecoration bottomBarDecoration = const BoxDecoration(
     color: card,
-    border: Border(
-      top: BorderSide(color: border),
-    ),
+    border: Border(top: BorderSide(color: border)),
   );
 
   static InputDecoration pillInputDecoration(String hintText) {
@@ -78,10 +75,7 @@ class WardrobeStyles {
     fontWeight: FontWeight.w600,
   );
 
-  static const TextStyle helperStyle = TextStyle(
-    color: muted,
-    fontSize: 12,
-  );
+  static const TextStyle helperStyle = TextStyle(color: muted, fontSize: 12);
 
   static const TextStyle textFieldStyle = TextStyle(
     color: textDark,
@@ -116,14 +110,23 @@ class WardrobeStyles {
 
   static CheckboxThemeData checkboxTheme = CheckboxThemeData(
     fillColor: WidgetStateProperty.resolveWith(
-      (states) => states.contains(WidgetState.selected)
-          ? gold
-          : Colors.transparent,
+      (states) =>
+          states.contains(WidgetState.selected) ? gold : Colors.transparent,
     ),
     side: const BorderSide(color: border, width: 1.5),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(4),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
     checkColor: WidgetStateProperty.all(Colors.white),
   );
+
+
+  static ButtonStyle dialogCancelButtonStyle = TextButton.styleFrom(
+    backgroundColor: gold,
+    foregroundColor: Colors.white,
+  );
+
+  static ButtonStyle dialogDeleteButtonStyle = TextButton.styleFrom(
+    backgroundColor: Colors.redAccent,
+    foregroundColor: Colors.white,
+  );
+
 }
