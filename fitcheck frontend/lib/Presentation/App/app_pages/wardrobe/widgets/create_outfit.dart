@@ -10,13 +10,19 @@ class _CreateOutfitTheme {
 }
 
 class CreateOutfitModal extends StatefulWidget {
-  const CreateOutfitModal({super.key, required this.repository});
+  const CreateOutfitModal({
+    super.key,
+    required this.repository,
+    this.existingOutfit,
+  });
 
   final WardrobeRepository repository;
+  final Map<String, dynamic>? existingOutfit;
 
   static Future<bool> open(
     BuildContext context, {
     required WardrobeRepository repository,
+    Map<String, dynamic>? existingOutfit,
   }) async {
     final result = await showDialog<bool>(
       context: context,
@@ -29,7 +35,10 @@ class CreateOutfitModal extends StatefulWidget {
               horizontal: 18,
               vertical: 18,
             ),
-            child: CreateOutfitModal(repository: repository),
+            child: CreateOutfitModal(
+              repository: repository,
+              existingOutfit: existingOutfit,
+            ),
           ),
     );
     return result ?? false;
@@ -49,10 +58,29 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
 
   bool _saving = false;
 
+  bool get _isEditMode => widget.existingOutfit != null;
+
   @override
   void initState() {
     super.initState();
     _loadItems();
+    if (_isEditMode) {
+      _prefillForm();
+    }
+  }
+
+  void _prefillForm() {
+    final outfit = widget.existingOutfit!;
+    _nameCtrl.text = (outfit['name'] ?? '').toString();
+    _descCtrl.text = (outfit['description'] ?? '').toString();
+    // Prefill selected items - items should be an array or comma-separated string
+    final items = outfit['items'] ?? [];
+    if (items is List) {
+      _selectedItemIds =
+          items
+              .map((item) => (item['item_id'] ?? item['id'] ?? '').toString())
+              .toSet();
+    }
   }
 
   Future<void> _loadItems() async {
@@ -105,21 +133,39 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
 
     setState(() => _saving = true);
     try {
-      await widget.repository.addOutfit(
-        name: _nameCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        isOwned: true,
-        clothingItemIds: _selectedItemIds.toList(),
-      );
+      if (_isEditMode) {
+        final outfitId =
+            (widget.existingOutfit!['outfit_id'] ??
+                    widget.existingOutfit!['id'] ??
+                    '')
+                .toString();
+        await widget.repository.updateOutfit(
+          id: outfitId,
+          name: _nameCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          clothingItemIds: _selectedItemIds.toList(),
+        );
+      } else {
+        await widget.repository.addOutfit(
+          name: _nameCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          isOwned: true,
+          clothingItemIds: _selectedItemIds.toList(),
+        );
+      }
 
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to save outfit: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to ${_isEditMode ? 'update' : 'save'} outfit: $e',
+          ),
+        ),
+      );
     }
   }
 
@@ -145,7 +191,10 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _Header(onClose: _cancel, title: "Create outfit"),
+              _Header(
+                onClose: _cancel,
+                title: _isEditMode ? "Edit outfit" : "Create outfit",
+              ),
               Container(height: 1, color: _CreateOutfitTheme.border),
               Flexible(
                 child: SingleChildScrollView(
@@ -304,7 +353,10 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                     _SecondaryButton(text: "Cancel", onPressed: _cancel),
                     const SizedBox(width: 12),
                     _PrimaryButton(
-                      text: _saving ? "Saving..." : "Save outfit",
+                      text:
+                          _saving
+                              ? (_isEditMode ? "Updating..." : "Saving...")
+                              : (_isEditMode ? "Update outfit" : "Save outfit"),
                       onPressed: _saving ? null : _save,
                     ),
                   ],
