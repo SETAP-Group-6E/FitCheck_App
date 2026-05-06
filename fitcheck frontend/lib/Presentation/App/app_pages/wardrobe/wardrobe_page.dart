@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_item.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outfit.dart';
@@ -8,6 +7,7 @@ import 'package:fitcheck/Presentation/App/app_style/widgets/dashed_box.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:fitcheck/Presentation/App/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/search_bar.dart';
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/styles/wardrobe_styles.dart';
 
 class WardrobePage extends StatefulWidget {
   const WardrobePage({super.key});
@@ -81,10 +81,12 @@ class _WardrobePageState extends State<WardrobePage> {
             content: const Text('This will remove the item permanently.'),
             actions: [
               TextButton(
+                style: WardrobeStyles.dialogCancelButtonStyle,
                 onPressed: () => Navigator.pop(context, false),
                 child: const Text('Cancel'),
               ),
               TextButton(
+                style: WardrobeStyles.dialogDeleteButtonStyle,
                 onPressed: () => Navigator.pop(context, true),
                 child: const Text('Delete'),
               ),
@@ -135,10 +137,12 @@ class _WardrobePageState extends State<WardrobePage> {
             content: const Text('This will remove the outfit permanently.'),
             actions: [
               TextButton(
+                style: WardrobeStyles.dialogCancelButtonStyle,
                 onPressed: () => Navigator.pop(context, false),
                 child: const Text('Cancel'),
               ),
               TextButton(
+                style: WardrobeStyles.dialogDeleteButtonStyle,
                 onPressed: () => Navigator.pop(context, true),
                 child: const Text('Delete'),
               ),
@@ -147,7 +151,6 @@ class _WardrobePageState extends State<WardrobePage> {
     );
     if (confirm != true) return;
 
-    // Optimistic update: remove locally first
     final index = _outfits.indexWhere(
       (m) => ((m['outfit_id'] ?? m['id'] ?? '').toString()) == id,
     );
@@ -168,7 +171,6 @@ class _WardrobePageState extends State<WardrobePage> {
       }
     } catch (e) {
       debugPrint('[WardrobePage] delete outfit error: $e');
-      // revert optimistic change
       if (removed != null) {
         _outfits.insert(index, removed);
         if (mounted) setState(() {});
