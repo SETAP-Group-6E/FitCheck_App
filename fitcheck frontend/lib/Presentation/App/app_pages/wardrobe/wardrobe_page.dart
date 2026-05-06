@@ -1,11 +1,13 @@
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_item.dart';
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outfit.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/dashed_box.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:fitcheck/Presentation/App/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/search_bar.dart';
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/styles/wardrobe_styles.dart';
 
 class WardrobePage extends StatefulWidget {
   const WardrobePage({super.key});
@@ -68,6 +70,138 @@ class _WardrobePageState extends State<WardrobePage> {
     }
   }
 
+  Future<void> _deleteItem(String id) async {
+    if (id.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Delete item?'),
+            content: const Text('This will remove the item permanently.'),
+            actions: [
+              TextButton(
+                style: WardrobeStyles.dialogCancelButtonStyle,
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                style: WardrobeStyles.dialogDeleteButtonStyle,
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+    if (confirm != true) return;
+
+    final index = _items.indexWhere(
+      (m) => ((m['item_id'] ?? m['id'] ?? '').toString()) == id,
+    );
+    Map<String, dynamic>? removed;
+    if (index != -1) {
+      removed = _items.removeAt(index);
+      if (mounted) setState(() {});
+    }
+
+    try {
+      debugPrint('[WardrobePage] deleting item id=$id');
+      await _wardrobeRepository.removeClothingItem(id: id);
+      await _loadItems();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Item deleted')));
+      }
+    } catch (e) {
+      debugPrint('[WardrobePage] delete error: $e');
+      if (removed != null) {
+        _items.insert(index, removed);
+        if (mounted) setState(() {});
+      }
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+    }
+  }
+
+  Future<void> _deleteOutfit(String id) async {
+    if (id.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Delete outfit?'),
+            content: const Text('This will remove the outfit permanently.'),
+            actions: [
+              TextButton(
+                style: WardrobeStyles.dialogCancelButtonStyle,
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                style: WardrobeStyles.dialogDeleteButtonStyle,
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+    if (confirm != true) return;
+
+    final index = _outfits.indexWhere(
+      (m) => ((m['outfit_id'] ?? m['id'] ?? '').toString()) == id,
+    );
+    Map<String, dynamic>? removed;
+    if (index != -1) {
+      removed = _outfits.removeAt(index);
+      if (mounted) setState(() {});
+    }
+
+    try {
+      debugPrint('[WardrobePage] deleting outfit id=$id');
+      await _wardrobeRepository.removeOutfit(id: id);
+      await _loadOutfits();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Outfit deleted')));
+      }
+    } catch (e) {
+      debugPrint('[WardrobePage] delete outfit error: $e');
+      if (removed != null) {
+        _outfits.insert(index, removed);
+        if (mounted) setState(() {});
+      }
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+    }
+  }
+
+  void _openEditItem(Map<String, dynamic> item) {
+    CreateItem.open(
+      context,
+      repository: _wardrobeRepository,
+      existingItem: item,
+    ).then((didSave) {
+      if (didSave) _loadItems();
+    });
+  }
+
+  void _openEditOutfit(Map<String, dynamic> outfit) {
+    CreateOutfitModal.open(
+      context,
+      repository: _wardrobeRepository,
+      existingOutfit: outfit,
+    ).then((didSave) {
+      if (didSave) _loadOutfits();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,9 +234,7 @@ class _WardrobePageState extends State<WardrobePage> {
                                         color: Colors.white,
                                         size: 20,
                                       ),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
+                                      onPressed: () => Navigator.pop(context),
                                     ),
                                   ),
                                 ),
@@ -171,9 +303,8 @@ class _WardrobePageState extends State<WardrobePage> {
                               ChoiceChip(
                                 label: const Text('Items'),
                                 selected: !_showOutfits,
-                                onSelected: (_) {
-                                  setState(() => _showOutfits = false);
-                                },
+                                onSelected:
+                                    (_) => setState(() => _showOutfits = false),
                                 selectedColor: const Color(0xFFD4A017),
                                 backgroundColor: const Color(0xFF2A2F38),
                                 labelStyle: TextStyle(
@@ -187,9 +318,8 @@ class _WardrobePageState extends State<WardrobePage> {
                               ChoiceChip(
                                 label: const Text('Outfits'),
                                 selected: _showOutfits,
-                                onSelected: (_) {
-                                  setState(() => _showOutfits = true);
-                                },
+                                onSelected:
+                                    (_) => setState(() => _showOutfits = true),
                                 selectedColor: const Color(0xFFD4A017),
                                 backgroundColor: const Color(0xFF2A2F38),
                                 labelStyle: TextStyle(
@@ -205,68 +335,22 @@ class _WardrobePageState extends State<WardrobePage> {
                         const SizedBox(height: 10),
                         if (!_showOutfits)
                           Padding(
-                            padding: const EdgeInsets.only(
-                              left: 40.0,
-                              right: 16.0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 30.0,
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Stack(
-                                  children: [
-                                    Container(
-                                      height: 125,
-                                      width: 125,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: Colors.white,
-                                          width: 4,
-                                          style: BorderStyle.solid,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 125,
-                                      width: 125,
-                                      color: Colors.black12,
-                                      child: const DashedBox(
-                                        color: Colors.black,
-                                        strokeWidth: 7.0,
-                                        gap: 11.1,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 125,
-                                      width: 125,
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.add,
-                                          color: Colors.white,
-                                          size: 30,
-                                        ),
-                                        onPressed: () async {
-                                          final didSave = await CreateItem.open(
-                                            context,
-                                            repository: _wardrobeRepository,
-                                          );
-                                          if (didSave) {
-                                            await _loadItems();
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: _WardrobeItemsGrid(
-                                    isLoading: _isLoading,
-                                    error: _error,
-                                    items: _items,
-                                  ),
-                                ),
-                              ],
+                            child: _WardrobeItemsGrid(
+                              isLoading: _isLoading,
+                              error: _error,
+                              items: _items,
+                              onDelete: _deleteItem,
+                              onEdit: _openEditItem,
+                              onCreatePressed: () async {
+                                final didSave = await CreateItem.open(
+                                  context,
+                                  repository: _wardrobeRepository,
+                                );
+                                if (didSave) await _loadItems();
+                              },
                             ),
                           )
                         else
@@ -278,6 +362,8 @@ class _WardrobePageState extends State<WardrobePage> {
                               isLoading: _isLoadingOutfits,
                               error: _outfitsError,
                               outfits: _outfits,
+                              onDelete: _deleteOutfit,
+                              onEdit: _openEditOutfit,
                             ),
                           ),
                         const SizedBox(height: 100),
@@ -295,20 +381,26 @@ class _WardrobePageState extends State<WardrobePage> {
   }
 }
 
-class _WardrobeOutfitsList extends StatelessWidget {
-  const _WardrobeOutfitsList({
+class _WardrobeItemsGrid extends StatelessWidget {
+  const _WardrobeItemsGrid({
     required this.isLoading,
     required this.error,
-    required this.outfits,
+    required this.items,
+    this.onDelete,
+    this.onEdit,
+    this.onCreatePressed,
   });
 
   final bool isLoading;
   final String? error;
-  final List<Map<String, dynamic>> outfits;
+  final List<Map<String, dynamic>> items;
+  final Future<void> Function(String id)? onDelete;
+  final void Function(Map<String, dynamic> item)? onEdit;
+  final VoidCallback? onCreatePressed;
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
+    if (isLoading)
       return const Center(
         child: SizedBox(
           height: 24,
@@ -316,21 +408,176 @@ class _WardrobeOutfitsList extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
       );
-    }
+    if (error != null)
+      return const Text(
+        'Could not load items',
+        style: TextStyle(color: Colors.white70, fontSize: 12),
+      );
 
-    if (error != null) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = ((screenWidth - 60) / 125).floor().clamp(2, 6);
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.0,
+      ),
+      itemCount: items.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return InkWell(
+            onTap: onCreatePressed,
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 4,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                ),
+                Container(
+                  color: Colors.black12,
+                  child: const DashedBox(
+                    color: Colors.black,
+                    strokeWidth: 7.0,
+                    gap: 11.1,
+                  ),
+                ),
+                Center(child: Icon(Icons.add, color: Colors.white, size: 30)),
+              ],
+            ),
+          );
+        }
+
+        final itemIndex = index - 1;
+        final item = items[itemIndex];
+        final title = (item['name'] ?? item['title'] ?? '').toString();
+        final wearType = (item['wear_type'] ?? '').toString();
+        final id = (item['item_id'] ?? item['id'] ?? '').toString();
+
+        return InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => onEdit?.call(item),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white24),
+            ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.checkroom_outlined,
+                        color: Colors.white70,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        title.isEmpty ? 'Untitled item' : title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                      if (wearType.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          wearType,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: SizedBox(
+                    height: 28,
+                    width: 28,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      onPressed:
+                          id.isEmpty
+                              ? null
+                              : () async => await onDelete?.call(id),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.redAccent,
+                        size: 18,
+                      ),
+                      tooltip: 'Delete item',
+                      visualDensity: VisualDensity.compact,
+                      splashRadius: 18,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _WardrobeOutfitsList extends StatelessWidget {
+  const _WardrobeOutfitsList({
+    required this.isLoading,
+    required this.error,
+    required this.outfits,
+    this.onDelete,
+    this.onEdit,
+  });
+
+  final bool isLoading;
+  final String? error;
+  final List<Map<String, dynamic>> outfits;
+  final Future<void> Function(String id)? onDelete;
+  final void Function(Map<String, dynamic> outfit)? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading)
+      return const Center(
+        child: SizedBox(
+          height: 24,
+          width: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    if (error != null)
       return const Text(
         'Could not load outfits',
         style: TextStyle(color: Colors.white70, fontSize: 12),
       );
-    }
-
-    if (outfits.isEmpty) {
+    if (outfits.isEmpty)
       return const Text(
         'No outfits yet',
         style: TextStyle(color: Colors.white70, fontSize: 12),
       );
-    }
 
     return ListView.separated(
       shrinkWrap: true,
@@ -342,142 +589,85 @@ class _WardrobeOutfitsList extends StatelessWidget {
         final name = (outfit['name'] ?? 'Untitled outfit').toString();
         final description = (outfit['description'] ?? '').toString();
         final isOwned = outfit['is_owned'] == true;
+        final id = (outfit['outfit_id'] ?? outfit['id'] ?? '').toString();
 
-        return Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white24),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+        return InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => onEdit?.call(outfit),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white24),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
+                    ),
+                    if (isOwned)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4A017),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: const Text(
+                          'Owned',
+                          style: TextStyle(color: Colors.white, fontSize: 11),
+                        ),
+                      ),
+                  ],
+                ),
+                if (description.trim().isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    description,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    height: 32,
+                    width: 32,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      onPressed:
+                          id.isEmpty
+                              ? null
+                              : () async => await onDelete?.call(id),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.redAccent,
+                        size: 18,
+                      ),
+                      tooltip: 'Delete outfit',
+                      visualDensity: VisualDensity.compact,
+                      splashRadius: 18,
                     ),
                   ),
-                  if (isOwned)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD4A017),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: const Text(
-                        'Owned',
-                        style: TextStyle(color: Colors.white, fontSize: 11),
-                      ),
-                    ),
-                ],
-              ),
-              if (description.trim().isNotEmpty) ...[
-                const SizedBox(height: 6),
-                Text(
-                  description,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
-            ],
+            ),
           ),
         );
       },
-    );
-  }
-}
-
-class _WardrobeItemsGrid extends StatelessWidget {
-  const _WardrobeItemsGrid({
-    required this.isLoading,
-    required this.error,
-    required this.items,
-  });
-
-  final bool isLoading;
-  final String? error;
-  final List<Map<String, dynamic>> items;
-
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(
-        child: SizedBox(
-          height: 24,
-          width: 24,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      );
-    }
-
-    if (error != null) {
-      return const Text(
-        'Could not load items',
-        style: TextStyle(color: Colors.white70, fontSize: 12),
-      );
-    }
-
-    if (items.isEmpty) {
-      return const Text(
-        'No items yet',
-        style: TextStyle(color: Colors.white70, fontSize: 12),
-      );
-    }
-
-    return SizedBox(
-      height: 125,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final item = items[index];
-          final title = (item['title'] ?? '').toString().trim();
-          final wearType = (item['wear_type'] ?? '').toString().trim();
-          return Container(
-            width: 125,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white24, width: 1.2),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.checkroom_outlined, color: Colors.white70),
-                const SizedBox(height: 8),
-                Text(
-                  title.isEmpty ? 'Untitled item' : title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-                if (wearType.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    wearType,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white70, fontSize: 10),
-                  ),
-                ],
-              ],
-            ),
-          );
-        },
-      ),
     );
   }
 }
