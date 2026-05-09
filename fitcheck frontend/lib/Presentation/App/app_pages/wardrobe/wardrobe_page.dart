@@ -8,6 +8,7 @@ import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dar
 import 'package:fitcheck/Presentation/App/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/search_bar.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/styles/wardrobe_styles.dart';
+import 'dart:async';
 
 class WardrobePage extends StatefulWidget {
   const WardrobePage({super.key});
@@ -25,6 +26,46 @@ class _WardrobePageState extends State<WardrobePage> {
   String? _outfitsError;
   List<Map<String, dynamic>> _outfits = [];
   bool _showOutfits = false;
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      setState(() {
+        _searchQuery = value.trim().toLowerCase();
+      });
+    });
+  }
+
+  List<Map<String, dynamic>> _filteredItems() {
+  if (_searchQuery.isEmpty) return _items;
+
+  return _items.where((item) {
+    final name = (item['name'] ?? item['title'] ?? '').toString().toLowerCase();
+    final wearType = (item['wear_type'] ?? '').toString().toLowerCase();
+    return name.contains(_searchQuery) || wearType.contains(_searchQuery);
+  }).toList();
+}
+
+List<Map<String, dynamic>> _filteredOutfits() {
+  if (_searchQuery.isEmpty) return _outfits;
+
+  return _outfits.where((outfit) {
+    final name = (outfit['name'] ?? '').toString().toLowerCase();
+    final description = (outfit['description'] ?? '').toString().toLowerCase();
+    return name.contains(_searchQuery) || description.contains(_searchQuery);
+  }).toList();
+}
 
   @override
   void initState() {
@@ -250,7 +291,10 @@ class _WardrobePageState extends State<WardrobePage> {
                                     ),
                                     child: Row(
                                       children: [
-                                        SearchBarRow(),
+                                        SearchBarRow(
+                                          controller: _searchController,
+                                          onChanged: _onSearchChanged,
+                                          ),
                                         SizedBox(
                                           child: IconButton(
                                             icon: const Icon(
@@ -341,7 +385,7 @@ class _WardrobePageState extends State<WardrobePage> {
                             child: _WardrobeItemsGrid(
                               isLoading: _isLoading,
                               error: _error,
-                              items: _items,
+                              items: _filteredItems(),
                               onDelete: _deleteItem,
                               onEdit: _openEditItem,
                               onCreatePressed: () async {
@@ -361,7 +405,7 @@ class _WardrobePageState extends State<WardrobePage> {
                             child: _WardrobeOutfitsList(
                               isLoading: _isLoadingOutfits,
                               error: _outfitsError,
-                              outfits: _outfits,
+                              outfits: _filteredOutfits(),
                               onDelete: _deleteOutfit,
                               onEdit: _openEditOutfit,
                             ),
