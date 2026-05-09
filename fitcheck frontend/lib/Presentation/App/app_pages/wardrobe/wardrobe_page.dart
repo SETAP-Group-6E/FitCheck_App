@@ -29,7 +29,27 @@ class _WardrobePageState extends State<WardrobePage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
   String _searchQuery = '';
+  Set<String> _selectedWearTypes = {};
+  Set<String> _selectedLayerCategories = {};
 
+  Map<String, int> _getWearTypeCounts() {
+    final counts = <String, int>{};
+    for (final item in _items) {
+      final wearType = (item['wear_type'] ?? 'Unknown').toString();
+      counts[wearType] = (counts[wearType] ?? 0) + 1;      
+    }
+    return counts;
+  }
+
+  
+  Map<String, int> _getLayerCategoryCounts() {
+    final counts = <String, int>{};
+    for (final item in _items) {
+      final layer = (item['layer_category'] ?? 'Unknown').toString();
+     counts[layer] = (counts[layer] ?? 0) + 1;
+    }
+    return counts;
+}
   @override
   void dispose() {
     _searchDebounce?.cancel();
@@ -47,26 +67,54 @@ class _WardrobePageState extends State<WardrobePage> {
     });
   }
 
-  List<Map<String, dynamic>> _filteredItems() {
-  if (_searchQuery.isEmpty) return _items;
+List<Map<String, dynamic>> _filteredItems() {
+  var result = _items;
 
-  return _items.where((item) {
-    final name = (item['name'] ?? item['title'] ?? '').toString().toLowerCase();
-    final wearType = (item['wear_type'] ?? '').toString().toLowerCase();
-    return name.contains(_searchQuery) || wearType.contains(_searchQuery);
-  }).toList();
+  if (_searchQuery.isNotEmpty) {
+    result = result.where((item) {
+      final name = (item['name'] ?? item['title'] ?? '').toString().toLowerCase();
+      final wearType = (item['wear_type'] ?? '').toString().toLowerCase();
+      return name.contains(_searchQuery) || wearType.contains(_searchQuery);
+    }).toList();
+  }
+
+  if (_selectedWearTypes.isNotEmpty) {
+    result = result.where((item) {
+      final wearType = (item['wear_type'] ?? '').toString();
+      return _selectedWearTypes.contains(wearType);
+    }).toList();
+  }
+
+  if (_selectedLayerCategories.isNotEmpty) {
+    result = result.where((item) {
+      final layer = (item['layer_category'] ?? '').toString();
+      return _selectedLayerCategories.contains(layer);
+    }).toList();
+  }
+
+  return result;
 }
 
 List<Map<String, dynamic>> _filteredOutfits() {
-  if (_searchQuery.isEmpty) return _outfits;
+  var result = _outfits;
 
-  return _outfits.where((outfit) {
-    final name = (outfit['name'] ?? '').toString().toLowerCase();
-    final description = (outfit['description'] ?? '').toString().toLowerCase();
-    return name.contains(_searchQuery) || description.contains(_searchQuery);
-  }).toList();
+  if (_searchQuery.isNotEmpty) {
+    result = result.where((outfit) {
+      final name = (outfit['name'] ?? '').toString().toLowerCase();
+      final description = (outfit['description'] ?? '').toString().toLowerCase();
+      return name.contains(_searchQuery) || description.contains(_searchQuery);
+    }).toList();
+  }
+
+  if (_selectedWearTypes.isNotEmpty) {
+    result = result.where((outfit) {
+      final wearType = (outfit['wear_type'] ?? '').toString();
+      return _selectedWearTypes.contains(wearType);
+    }).toList();
+  }
+
+  return result;
 }
-
   @override
   void initState() {
     super.initState();
@@ -294,7 +342,7 @@ List<Map<String, dynamic>> _filteredOutfits() {
                                         SearchBarRow(
                                           controller: _searchController,
                                           onChanged: _onSearchChanged,
-                                          ),
+                                        ),
                                         SizedBox(
                                           child: IconButton(
                                             icon: const Icon(
