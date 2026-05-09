@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class SearchBarRow extends StatefulWidget {
-  const SearchBarRow({super.key});
+  const SearchBarRow({
+    super.key,
+    this.controller,
+    this.onChanged,
+  });
+
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
 
   @override
   State<SearchBarRow> createState() => _SearchBarRowState();
@@ -21,6 +28,8 @@ class _SearchBarRowState extends State<SearchBarRow> {
           curve: Curves.ease,
           child: _expanded
               ? TextField(
+                  controller: widget.controller,
+                  onChanged: widget.onChanged,
                   decoration: InputDecoration(
                     hintText: "Search...",
                     border: InputBorder.none,
