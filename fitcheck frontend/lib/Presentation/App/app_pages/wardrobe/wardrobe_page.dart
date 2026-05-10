@@ -115,6 +115,95 @@ List<Map<String, dynamic>> _filteredOutfits() {
 
   return result;
 }
+void _showFilterModal() {
+  final wearTypeCounts = _getWearTypeCounts();
+  final layerCategoryCounts = _getLayerCategoryCounts();
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color(0xFF1A1F26),
+      title: const Text(
+        'Filter',
+        style: TextStyle(color: Colors.white),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Wear Type',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...wearTypeCounts.entries.map((entry) {
+              return CheckboxListTile(
+                title: Text(
+                  '${entry.key} (${entry.value})',
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                value: _selectedWearTypes.contains(entry.key),
+                onChanged: (selected) {
+                  setState(() {
+                    if (selected == true) {
+                      _selectedWearTypes.add(entry.key);
+                    } else {
+                      _selectedWearTypes.remove(entry.key);
+                    }
+                  });
+                },
+                activeColor: const Color(0xFFD4A017),
+                checkColor: Colors.black,
+              );
+            }),
+            const SizedBox(height: 16),
+            const Text(
+              'Layer Category',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...layerCategoryCounts.entries.map((entry) {
+              return CheckboxListTile(
+                title: Text(
+                  '${entry.key} (${entry.value})',
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                value: _selectedLayerCategories.contains(entry.key),
+                onChanged: (selected) {
+                  setState(() {
+                    if (selected == true) {
+                      _selectedLayerCategories.add(entry.key);
+                    } else {
+                      _selectedLayerCategories.remove(entry.key);
+                    }
+                  });
+                },
+                activeColor: const Color(0xFFD4A017),
+                checkColor: Colors.black,
+              );
+            }),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            'Done',
+            style: TextStyle(color: Color(0xFFD4A017)),
+          ),
+        ),
+      ],
+    ),
+  );
+}
   @override
   void initState() {
     super.initState();
@@ -350,7 +439,7 @@ List<Map<String, dynamic>> _filteredOutfits() {
                                               color: Colors.white,
                                               size: 20,
                                             ),
-                                            onPressed: () {},
+                                            onPressed: _showFilterModal,
                                           ),
                                         ),
                                         SizedBox(
