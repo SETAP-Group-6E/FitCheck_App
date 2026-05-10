@@ -6,9 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Presentation/auth/pages/register_page.dart';
 //import 'Presentation/app/app_pages/wardrobe_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env/dev.txt');
   const supabaseUrl = 'https://fsjkselzckrheqtqvzze.supabase.co';
   const supabaseAnonKey = 'sb_publishable_Qt6ShYvhFsUlQ4fY_LFl6A_aRLJ4Jnr';
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
@@ -144,8 +147,9 @@ class MyApp extends StatelessWidget {
             );
           case '/settings':
             final auth = Supabase.instance.client.auth;
-            final isLoggedIn = auth.currentSession != null && auth.currentUser != null;
-            
+            final isLoggedIn =
+                auth.currentSession != null && auth.currentUser != null;
+
             return PageRouteBuilder(
               settings: settings,
               transitionDuration: const Duration(milliseconds: 280),
