@@ -8,6 +8,8 @@ import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dar
 import 'package:fitcheck/Presentation/App/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/search_bar.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/styles/wardrobe_styles.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fitcheck/Data/services/weather_service.dart';
 import 'dart:async';
 
 class WardrobePage extends StatefulWidget {
@@ -31,25 +33,28 @@ class _WardrobePageState extends State<WardrobePage> {
   String _searchQuery = '';
   Set<String> _selectedWearTypes = {};
   Set<String> _selectedLayerCategories = {};
+  WeatherService? _weatherService;
+  Map<String, dynamic>? _currentWeather;
+  List<String> _recommendedTags = [];
 
   Map<String, int> _getWearTypeCounts() {
     final counts = <String, int>{};
     for (final item in _items) {
       final wearType = (item['wear_type'] ?? 'Unknown').toString();
-      counts[wearType] = (counts[wearType] ?? 0) + 1;      
+      counts[wearType] = (counts[wearType] ?? 0) + 1;
     }
     return counts;
   }
 
-  
   Map<String, int> _getLayerCategoryCounts() {
     final counts = <String, int>{};
     for (final item in _items) {
       final layer = (item['layer_category'] ?? 'Unknown').toString();
-     counts[layer] = (counts[layer] ?? 0) + 1;
+      counts[layer] = (counts[layer] ?? 0) + 1;
     }
     return counts;
-}
+  }
+
   @override
   void dispose() {
     _searchDebounce?.cancel();
@@ -67,149 +72,210 @@ class _WardrobePageState extends State<WardrobePage> {
     });
   }
 
-List<Map<String, dynamic>> _filteredItems() {
-  var result = _items;
+  List<Map<String, dynamic>> _filteredItems() {
+    var result = _items;
 
-  if (_searchQuery.isNotEmpty) {
-    result = result.where((item) {
-      final name = (item['name'] ?? item['title'] ?? '').toString().toLowerCase();
-      final wearType = (item['wear_type'] ?? '').toString().toLowerCase();
-      return name.contains(_searchQuery) || wearType.contains(_searchQuery);
-    }).toList();
+    if (_searchQuery.isNotEmpty) {
+      result =
+          result.where((item) {
+            final name =
+                (item['name'] ?? item['title'] ?? '').toString().toLowerCase();
+            final wearType = (item['wear_type'] ?? '').toString().toLowerCase();
+            return name.contains(_searchQuery) ||
+                wearType.contains(_searchQuery);
+          }).toList();
+    }
+
+    if (_selectedWearTypes.isNotEmpty) {
+      result =
+          result.where((item) {
+            final wearType = (item['wear_type'] ?? '').toString();
+            return _selectedWearTypes.contains(wearType);
+          }).toList();
+    }
+
+    if (_selectedLayerCategories.isNotEmpty) {
+      result =
+          result.where((item) {
+            final layer = (item['layer_category'] ?? '').toString();
+            return _selectedLayerCategories.contains(layer);
+          }).toList();
+    }
+
+    return result;
   }
 
-  if (_selectedWearTypes.isNotEmpty) {
-    result = result.where((item) {
-      final wearType = (item['wear_type'] ?? '').toString();
-      return _selectedWearTypes.contains(wearType);
-    }).toList();
+  List<Map<String, dynamic>> _filteredOutfits() {
+    var result = _outfits;
+
+    if (_searchQuery.isNotEmpty) {
+      result =
+          result.where((outfit) {
+            final name = (outfit['name'] ?? '').toString().toLowerCase();
+            final description =
+                (outfit['description'] ?? '').toString().toLowerCase();
+            return name.contains(_searchQuery) ||
+                description.contains(_searchQuery);
+          }).toList();
+    }
+
+    if (_selectedWearTypes.isNotEmpty) {
+      result =
+          result.where((outfit) {
+            final wearType = (outfit['wear_type'] ?? '').toString();
+            return _selectedWearTypes.contains(wearType);
+          }).toList();
+    }
+
+    return result;
   }
 
-  if (_selectedLayerCategories.isNotEmpty) {
-    result = result.where((item) {
-      final layer = (item['layer_category'] ?? '').toString();
-      return _selectedLayerCategories.contains(layer);
-    }).toList();
-  }
+  void _showFilterModal() {
+    final wearTypeCounts = _getWearTypeCounts();
+    final layerCategoryCounts = _getLayerCategoryCounts();
 
-  return result;
-}
-
-List<Map<String, dynamic>> _filteredOutfits() {
-  var result = _outfits;
-
-  if (_searchQuery.isNotEmpty) {
-    result = result.where((outfit) {
-      final name = (outfit['name'] ?? '').toString().toLowerCase();
-      final description = (outfit['description'] ?? '').toString().toLowerCase();
-      return name.contains(_searchQuery) || description.contains(_searchQuery);
-    }).toList();
-  }
-
-  if (_selectedWearTypes.isNotEmpty) {
-    result = result.where((outfit) {
-      final wearType = (outfit['wear_type'] ?? '').toString();
-      return _selectedWearTypes.contains(wearType);
-    }).toList();
-  }
-
-  return result;
-}
-void _showFilterModal() {
-  final wearTypeCounts = _getWearTypeCounts();
-  final layerCategoryCounts = _getLayerCategoryCounts();
-
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      backgroundColor: const Color(0xFF1A1F26),
-      title: const Text(
-        'Filter',
-        style: TextStyle(color: Colors.white),
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Wear Type',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFF1A1F26),
+            title: const Text('Filter', style: TextStyle(color: Colors.white)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Wear Type',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...wearTypeCounts.entries.map((entry) {
+                    return CheckboxListTile(
+                      title: Text(
+                        '${entry.key} (${entry.value})',
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                      value: _selectedWearTypes.contains(entry.key),
+                      onChanged: (selected) {
+                        setState(() {
+                          if (selected == true) {
+                            _selectedWearTypes.add(entry.key);
+                          } else {
+                            _selectedWearTypes.remove(entry.key);
+                          }
+                        });
+                      },
+                      activeColor: const Color(0xFFD4A017),
+                      checkColor: Colors.black,
+                    );
+                  }),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Layer Category',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...layerCategoryCounts.entries.map((entry) {
+                    return CheckboxListTile(
+                      title: Text(
+                        '${entry.key} (${entry.value})',
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                      value: _selectedLayerCategories.contains(entry.key),
+                      onChanged: (selected) {
+                        setState(() {
+                          if (selected == true) {
+                            _selectedLayerCategories.add(entry.key);
+                          } else {
+                            _selectedLayerCategories.remove(entry.key);
+                          }
+                        });
+                      },
+                      activeColor: const Color(0xFFD4A017),
+                      checkColor: Colors.black,
+                    );
+                  }),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            ...wearTypeCounts.entries.map((entry) {
-              return CheckboxListTile(
-                title: Text(
-                  '${entry.key} (${entry.value})',
-                  style: const TextStyle(color: Colors.white70),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Done',
+                  style: TextStyle(color: Color(0xFFD4A017)),
                 ),
-                value: _selectedWearTypes.contains(entry.key),
-                onChanged: (selected) {
-                  setState(() {
-                    if (selected == true) {
-                      _selectedWearTypes.add(entry.key);
-                    } else {
-                      _selectedWearTypes.remove(entry.key);
-                    }
-                  });
-                },
-                activeColor: const Color(0xFFD4A017),
-                checkColor: Colors.black,
-              );
-            }),
-            const SizedBox(height: 16),
-            const Text(
-              'Layer Category',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
               ),
-            ),
-            const SizedBox(height: 8),
-            ...layerCategoryCounts.entries.map((entry) {
-              return CheckboxListTile(
-                title: Text(
-                  '${entry.key} (${entry.value})',
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                value: _selectedLayerCategories.contains(entry.key),
-                onChanged: (selected) {
-                  setState(() {
-                    if (selected == true) {
-                      _selectedLayerCategories.add(entry.key);
-                    } else {
-                      _selectedLayerCategories.remove(entry.key);
-                    }
-                  });
-                },
-                activeColor: const Color(0xFFD4A017),
-                checkColor: Colors.black,
-              );
-            }),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            'Done',
-            style: TextStyle(color: Color(0xFFD4A017)),
+            ],
           ),
-        ),
-      ],
-    ),
-  );
-}
+    );
+  }
+
+  List<String> _recommendTagsFromWeather(Map<String, dynamic> w) {
+    final temp = (w['temp'] ?? 0.0) as double;
+    final cond = (w['condition'] ?? '').toString().toLowerCase();
+    final tags = <String>[];
+    if (temp >= 25)
+      tags.add('warm');
+    else if (temp >= 15)
+      tags.add('mild');
+    else
+      tags.add('cold');
+    if (cond.contains('rain') || cond.contains('drizzle')) tags.add('rain');
+    if (cond.contains('snow')) tags.add('snow');
+    if (cond.contains('clear')) tags.add('clear');
+    return tags;
+  }
+
+  Future<void> _loadWeatherAndRecommend() async {
+    final key = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
+    if (key.isEmpty) {
+      debugPrint('[WardrobePage] OPENWEATHER_API_KEY missing');
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Weather API key missing')),
+        );
+      return;
+    }
+    _weatherService ??= WeatherService(key);
+    try {
+      final w = await _weatherService!.getCurrentWeatherByCoords(
+        51.5074,
+        -0.1278,
+      );
+      if (!mounted) return;
+      setState(() {
+        _currentWeather = w;
+        _recommendedTags = _recommendTagsFromWeather(w);
+      });
+      debugPrint('[WardrobePage] Weather loaded: $w');
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Weather: ${w['temp']}C ${w['condition']}')),
+        );
+    } catch (e) {
+      debugPrint('[WardrobePage] Weather load error: $e');
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Weather fetch failed')));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _wardrobeRepository = SupabaseWardrobeRepository(Supabase.instance.client);
     _loadItems();
     _loadOutfits();
+    _loadWeatherAndRecommend();
   }
 
   Future<void> _loadItems() async {
@@ -477,6 +543,19 @@ void _showFilterModal() {
                             ),
                           ],
                         ),
+                        if (_recommendedTags.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 30.0,
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Weather ${_currentWeather?['temp']?.toStringAsFixed(0) ?? '--'}C (${_currentWeather?['condition'] ?? 'Unknown'}) | Recommended: ${_recommendedTags.join(', ')}',
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                            ),
+                          ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 30.0),
                           child: Row(
