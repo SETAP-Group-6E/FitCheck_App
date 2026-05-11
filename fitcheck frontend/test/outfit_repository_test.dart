@@ -105,6 +105,271 @@ void main() {
 
       await supabase.dispose();
     });
+
+    // Test Plan row 54: missing outfit id.
+    // Checks that outfit creation fails safely if Supabase returns no outfit_id.
+    test('throws an Exception when no outfit id is returned', () async {
+      final mockHttpClient = MockClient((request) async {
+        // Fake outfit insert response without outfit_id.
+        return http.Response(
+          jsonEncode({'name': 'Winter fit'}),
+          201,
+          headers: {'content-type': 'application/json'},
+          request: request,
+        );
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      await expectLater(
+        repository.addOutfit(
+          name: 'Winter fit',
+          description: 'Warm outfit',
+          isOwned: true,
+          clothingItemIds: ['item1'],
+        ),
+        throwsA(
+          isA<Exception>().having(
+            (error) => error.toString(),
+            'message',
+            contains('Failed to create outfit'),
+          ),
+        ),
+      );
+
+      await supabase.dispose();
+    });
+  });
+
+  group('SupabaseWardrobeRepository updateOutfit', () {
+    // Test Plan row 57: replace outfit items.
+    // Checks that old links are removed and the new item link is inserted.
+    test('replaces outfit item links', () async {
+      final databaseRequests = <http.Request>[];
+
+      final mockHttpClient = MockClient((request) async {
+        databaseRequests.add(request);
+
+        // Fake successful update/delete/insert responses.
+        return http.Response('', 204, request: request);
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      await repository.updateOutfit(
+        id: 'outfit1',
+        name: 'Updated fit',
+        description: 'Updated description',
+        isOwned: false,
+        clothingItemIds: ['item2'],
+      );
+
+      expect(databaseRequests, hasLength(3));
+
+      final outfitUpdateBody =
+          jsonDecode(databaseRequests[0].body) as Map<String, dynamic>;
+      expect(outfitUpdateBody['name'], 'Updated fit');
+      expect(outfitUpdateBody['description'], 'Updated description');
+      expect(outfitUpdateBody['is_owned'], false);
+      expect(
+        databaseRequests[0].url.queryParameters['outfit_id'],
+        'eq.outfit1',
+      );
+      expect(databaseRequests[0].url.queryParameters['user_id'], 'eq.user-123');
+
+      expect(databaseRequests[1].url.path.endsWith('/outfit_item'), true);
+      expect(
+        databaseRequests[1].url.queryParameters['outfit_id'],
+        'eq.outfit1',
+      );
+      expect(databaseRequests[1].url.queryParameters['user_id'], 'eq.user-123');
+
+      final newLinkBody = jsonDecode(databaseRequests[2].body) as List<dynamic>;
+      expect(newLinkBody, hasLength(1));
+      expect(newLinkBody.first['outfit_id'], 'outfit1');
+      expect(newLinkBody.first['item_id'], 'item2');
+      expect(newLinkBody.first['user_id'], 'user-123');
+
+      await supabase.dispose();
+    });
+
+    // Test Plan row 60: clear outfit items.
+    // Checks that old links are removed and no new links are inserted.
+    test('clears all outfit item links', () async {
+      final databaseRequests = <http.Request>[];
+
+      final mockHttpClient = MockClient((request) async {
+        databaseRequests.add(request);
+
+        // Fake successful outfit_item delete response.
+        return http.Response('', 204, request: request);
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      await repository.updateOutfit(id: 'outfit1', clothingItemIds: <String>[]);
+
+      expect(databaseRequests, hasLength(1));
+      expect(databaseRequests[0].url.path.endsWith('/outfit_item'), true);
+      expect(
+        databaseRequests[0].url.queryParameters['outfit_id'],
+        'eq.outfit1',
+      );
+      expect(databaseRequests[0].url.queryParameters['user_id'], 'eq.user-123');
+
+      await supabase.dispose();
+    });
+
+    // Test Plan row 63: different user outfit.
+    // Checks that outfit updates are filtered by outfit id and current user id.
+    test('uses the current user id when updating an outfit', () async {
+      http.Request? capturedRequest;
+
+      final mockHttpClient = MockClient((request) async {
+        capturedRequest = request;
+
+        // Fake successful database update response.
+        return http.Response('', 204, request: request);
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      await repository.updateOutfit(
+        id: 'outfit-owned-by-someone-else',
+        name: 'New outfit name',
+      );
+
+      expect(capturedRequest, isNotNull);
+      expect(
+        capturedRequest!.url.queryParameters['outfit_id'],
+        'eq.outfit-owned-by-someone-else',
+      );
+      expect(capturedRequest!.url.queryParameters['user_id'], 'eq.user-123');
+
+      await supabase.dispose();
+    });
+  });
+
+  group('SupabaseWardrobeRepository removeOutfit', () {
+    // Test Plan row 66: valid outfit deletion.
+    // Checks that outfit links are deleted before the outfit row.
+    test('deletes outfit item links before deleting the outfit', () async {
+      final databaseRequests = <http.Request>[];
+
+      final mockHttpClient = MockClient((request) async {
+        databaseRequests.add(request);
+
+        // Fake successful database delete response.
+        return http.Response('', 204, request: request);
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      await repository.removeOutfit(id: 'outfit1');
+
+      expect(databaseRequests, hasLength(2));
+      expect(databaseRequests[0].url.path.endsWith('/outfit_item'), true);
+      expect(databaseRequests[1].url.path.endsWith('/outfit'), true);
+      expect(
+        databaseRequests[0].url.queryParameters['outfit_id'],
+        'eq.outfit1',
+      );
+      expect(
+        databaseRequests[1].url.queryParameters['outfit_id'],
+        'eq.outfit1',
+      );
+      expect(databaseRequests[0].url.queryParameters['user_id'], 'eq.user-123');
+      expect(databaseRequests[1].url.queryParameters['user_id'], 'eq.user-123');
+
+      await supabase.dispose();
+    });
+
+    // Test Plan row 69: database delete error.
+    // Checks that removeOutfit passes a database error back to the app.
+    test('throws a PostgrestException when outfit delete fails', () async {
+      final mockHttpClient = MockClient((request) async {
+        // Fake failed database delete response.
+        return http.Response(
+          jsonEncode({
+            'message': 'Delete failed',
+            'details': 'Fake database error for test',
+            'hint': null,
+            'code': 'TEST_ERROR',
+          }),
+          500,
+          headers: {'content-type': 'application/json'},
+          request: request,
+        );
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      await expectLater(
+        repository.removeOutfit(id: 'outfit1'),
+        throwsA(isA<PostgrestException>()),
+      );
+
+      await supabase.dispose();
+    });
+  });
+
+  group('SupabaseWardrobeRepository getOutfits', () {
+    // Test Plan row 72: existing outfits.
+    // Checks that outfit rows returned by the database are returned by the repository.
+    test('returns existing outfits', () async {
+      final mockHttpClient = MockClient((request) async {
+        // Fake database response with two outfit rows.
+        return http.Response(
+          jsonEncode([
+            {'outfit_id': 'outfit1', 'name': 'Winter fit'},
+            {'outfit_id': 'outfit2', 'name': 'Summer fit'},
+          ]),
+          200,
+          headers: {'content-type': 'application/json'},
+          request: request,
+        );
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      final outfits = await repository.getOutfits();
+
+      expect(outfits, hasLength(2));
+      expect(outfits[0]['name'], 'Winter fit');
+      expect(outfits[1]['name'], 'Summer fit');
+
+      await supabase.dispose();
+    });
+
+    // Test Plan row 75: empty outfit list.
+    // Checks that the repository returns an empty list when no outfits exist.
+    test('returns an empty list when there are no outfits', () async {
+      final mockHttpClient = MockClient((request) async {
+        // Fake database response with no outfits.
+        return http.Response(
+          jsonEncode([]),
+          200,
+          headers: {'content-type': 'application/json'},
+          request: request,
+        );
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      final outfits = await repository.getOutfits();
+
+      expect(outfits, isEmpty);
+
+      await supabase.dispose();
+    });
   });
 }
 
