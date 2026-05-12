@@ -45,6 +45,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Local environment files
+
 .env/
 .env/dev.txt
