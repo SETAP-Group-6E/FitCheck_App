@@ -43,7 +43,7 @@ class _SearchBarRowState extends State<SearchBarRow> {
           width: 50, 
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.black,
+            color: Theme.of(context).scaffoldBackgroundColor,
             borderRadius: BorderRadius.circular(10),
           ),
           child: IconButton(

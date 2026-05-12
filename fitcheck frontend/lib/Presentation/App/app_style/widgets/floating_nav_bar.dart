@@ -15,7 +15,7 @@ class FloatingNavbar extends StatefulWidget {
     super.key,
     this.width = 480,
     this.height = 70,
-    this.bottomPadding = 5,
+    this.bottomPadding = 0,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
     this.onOutfitCreated,
   });
@@ -54,6 +54,13 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
     Navigator.pushNamed(context, routeName);
   }
 
+  void _openSettingsOrLogin(BuildContext context) {
+    final auth = Supabase.instance.client.auth;
+    final isLoggedIn =
+        auth.currentSession != null && auth.currentUser != null;
+    _navigateIfNotCurrent(context, isLoggedIn ? '/settings' : '/login');
+  }
+
   Widget _defaultAvatar(BuildContext context) {
     return Container(
       width: 35,
@@ -68,7 +75,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
           color: Colors.black87,
           iconSize: 20,
           onPressed: () {
-            _navigateIfNotCurrent(context, '/settings');
+            _openSettingsOrLogin(context);
           },
         ),
       ),
@@ -92,7 +99,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
       bottom: widget.bottomPadding,
       child: Center(
         child: Container(
-          color: Colors.black,
+          color: Theme.of(context).scaffoldBackgroundColor,
           width: widget.width,
           height: widget.height,
           child: Row(
@@ -164,7 +171,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () {
-                                  _navigateIfNotCurrent(context, '/settings');
+                                  _openSettingsOrLogin(context);
                                 },
                               ),
                             ),

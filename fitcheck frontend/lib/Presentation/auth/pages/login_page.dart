@@ -15,7 +15,7 @@ class LoginPage extends ConsumerWidget {
     final passwordController = TextEditingController();
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Row(
           children: [
@@ -108,7 +108,7 @@ class LoginPage extends ConsumerWidget {
                                 MaterialPageRoute(
                                   builder: (context) => HomePage(),
                                 ),
-                              );
+                                );
                             }
                           } catch (e) {
                             if (context.mounted) {

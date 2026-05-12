@@ -30,7 +30,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
     const double topBarHeight = 120;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 470),
@@ -41,7 +41,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
                 child: Container(
                   height: topBarHeight,
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                  color: Colors.black,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   child: Row(
                     children: [
                       _circleIconButton(

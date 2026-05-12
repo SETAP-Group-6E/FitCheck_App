@@ -2,6 +2,7 @@ import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/wardrobe_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/settings/settings_page.dart';
+import 'package:fitcheck/Presentation/App/theme/app_theme_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Presentation/auth/pages/register_page.dart';
@@ -18,18 +19,17 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(appThemeModeProvider);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'FitCheck',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        scaffoldBackgroundColor: Colors.black,
-      ),
+      theme: buildAppTheme(mode),
       home: HomePage(),
 
       onGenerateRoute: (settings) {

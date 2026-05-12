@@ -19,7 +19,7 @@ class RegisterPage extends ConsumerWidget {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Row(
           children: [
