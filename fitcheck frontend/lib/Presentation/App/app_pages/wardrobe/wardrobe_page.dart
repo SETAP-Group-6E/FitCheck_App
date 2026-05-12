@@ -866,6 +866,7 @@ class _WardrobeOutfitsList extends StatelessWidget {
         final name = (outfit['name'] ?? 'Untitled outfit').toString();
         final description = (outfit['description'] ?? '').toString();
         final isOwned = outfit['is_owned'] == true;
+        final photoUrl = (outfit['outfit_photo_url'] ?? '').toString();
         final id = (outfit['outfit_id'] ?? outfit['id'] ?? '').toString();
 
         return InkWell(
@@ -881,6 +882,18 @@ class _WardrobeOutfitsList extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (photoUrl.isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      photoUrl,
+                      height: 140,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
+                if (photoUrl.isNotEmpty) const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
