@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
+import '../constants/wardrobe_constants.dart';
 
 class _CreateOutfitTheme {
   static const Color card = Color(0xFF171A20);
@@ -9,14 +10,19 @@ class _CreateOutfitTheme {
 }
 
 class CreateOutfitModal extends StatefulWidget {
-  const CreateOutfitModal({super.key, required this.repository});
+  const CreateOutfitModal({
+    super.key,
+    required this.repository,
+    this.existingOutfit,
+  });
 
   final WardrobeRepository repository;
+  final Map<String, dynamic>? existingOutfit;
 
-  /// Opens the modal and returns true if the user pressed "Save outfit"
   static Future<bool> open(
     BuildContext context, {
     required WardrobeRepository repository,
+    Map<String, dynamic>? existingOutfit,
   }) async {
     final result = await showDialog<bool>(
       context: context,
@@ -25,8 +31,14 @@ class CreateOutfitModal extends StatefulWidget {
       builder:
           (_) => Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-            child: CreateOutfitModal(repository: repository),
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 18,
+            ),
+            child: CreateOutfitModal(
+              repository: repository,
+              existingOutfit: existingOutfit,
+            ),
           ),
     );
     return result ?? false;
@@ -40,9 +52,52 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
+  List<Map<String, dynamic>> _items = [];
+  Set<String> _selectedItemIds = {};
+  bool _loadingItems = true;
 
-  bool _isOwned = false;
   bool _saving = false;
+
+  bool get _isEditMode => widget.existingOutfit != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadItems();
+    if (_isEditMode) {
+      _prefillForm();
+    }
+  }
+
+  void _prefillForm() {
+    final outfit = widget.existingOutfit!;
+    _nameCtrl.text = (outfit['name'] ?? '').toString();
+    _descCtrl.text = (outfit['description'] ?? '').toString();
+    // Prefill selected items - items should be an array or comma-separated string
+    final items = outfit['items'] ?? [];
+    if (items is List) {
+      _selectedItemIds =
+          items
+              .map((item) => (item['item_id'] ?? item['id'] ?? '').toString())
+              .toSet();
+    }
+  }
+
+  Future<void> _loadItems() async {
+    try {
+      final items = await widget.repository.getClothingItems();
+      if (!mounted) return;
+      setState(() {
+        _items = items;
+        _loadingItems = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loadingItems = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -53,27 +108,64 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
 
   void _cancel() => Navigator.of(context).pop(false);
 
+  void _toggleItemSelection(String itemId) {
+    if (itemId.isEmpty) return;
+    setState(() {
+      if (_selectedItemIds.contains(itemId)) {
+        _selectedItemIds.remove(itemId);
+      } else {
+        _selectedItemIds.add(itemId);
+      }
+    });
+  }
+
   Future<void> _save() async {
     if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedItemIds.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Select at least one item for this outfit'),
+        ),
+      );
+      return;
+    }
 
     setState(() => _saving = true);
     try {
-      await widget.repository.addOutfit(
-        name: _nameCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        isOwned: _isOwned,
-        clothingItemIds: const [],
-      );
+      if (_isEditMode) {
+        final outfitId =
+            (widget.existingOutfit!['outfit_id'] ??
+                    widget.existingOutfit!['id'] ??
+                    '')
+                .toString();
+        await widget.repository.updateOutfit(
+          id: outfitId,
+          name: _nameCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          clothingItemIds: _selectedItemIds.toList(),
+        );
+      } else {
+        await widget.repository.addOutfit(
+          name: _nameCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          isOwned: true,
+          clothingItemIds: _selectedItemIds.toList(),
+        );
+      }
 
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to save outfit: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to ${_isEditMode ? 'update' : 'save'} outfit: $e',
+          ),
+        ),
+      );
     }
   }
 
@@ -99,9 +191,11 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _Header(onClose: _cancel, title: "Create outfit"),
+              _Header(
+                onClose: _cancel,
+                title: _isEditMode ? "Edit outfit" : "Create outfit",
+              ),
               Container(height: 1, color: _CreateOutfitTheme.border),
-
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(32, 24, 32, 16),
@@ -114,7 +208,7 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                           label: "Outfit name",
                           child: _PillTextField(
                             controller: _nameCtrl,
-                            hintText: "e.g. Winter street fit",
+                            hintText: WardrobeConstants.defaultOutfitNameHint,
                             validator: (v) {
                               if (v == null || v.trim().isEmpty) {
                                 return "Outfit name is required";
@@ -124,33 +218,127 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                           ),
                         ),
                         const SizedBox(height: 16),
-
                         _Field(
                           label: "Description",
-                          helper:
-                              "Optional notes (style, weather, occasion, etc.)",
+                          helper: WardrobeConstants.outfitDescriptionHelper,
                           child: _TextArea(
                             controller: _descCtrl,
                             hintText:
-                                "Add a short description for this outfit...",
+                                WardrobeConstants.defaultOutfitDescriptionHint,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
+                        _Field(
+                          label: 'Select wardrobe items',
+                          helper:
+                              'Pick one or more items to include in this outfit',
+                          child:
+                              _loadingItems
+                                  ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  : _items.isEmpty
+                                  ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 8),
+                                    child: Text(
+                                      'No wardrobe items found.',
+                                      style: TextStyle(
+                                        color: _CreateOutfitTheme.muted,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  )
+                                  : Container(
+                                    constraints: const BoxConstraints(
+                                      maxHeight: 220,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: _CreateOutfitTheme.border,
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: ListView.builder(
+                                      itemCount: _items.length,
+                                      itemBuilder: (context, index) {
+                                        final item = _items[index];
+                                        final itemId =
+                                            (item['item_id'] ??
+                                                    item['id'] ??
+                                                    '')
+                                                .toString();
+                                        final title =
+                                            (item['title'] ?? 'Untitled item')
+                                                .toString();
+                                        final selected = _selectedItemIds
+                                            .contains(itemId);
 
-                        _CheckboxRow(
-                          title: "Owned",
-                          subtitle: "Tick if you currently own this outfit",
-                          value: _isOwned,
-                          onChanged: (v) => setState(() => _isOwned = v),
+                                        return Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            onTap:
+                                                itemId.isEmpty
+                                                    ? null
+                                                    : () =>
+                                                        _toggleItemSelection(
+                                                          itemId,
+                                                        ),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 2,
+                                                  ),
+                                              child: Row(
+                                                children: [
+                                                  Checkbox(
+                                                    value: selected,
+                                                    onChanged:
+                                                        itemId.isEmpty
+                                                            ? null
+                                                            : (_) =>
+                                                                _toggleItemSelection(
+                                                                  itemId,
+                                                                ),
+                                                    activeColor:
+                                                        _CreateOutfitTheme.gold,
+                                                  ),
+                                                  Expanded(
+                                                    child: Text(
+                                                      title,
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
                         ),
-
                         const SizedBox(height: 24),
                       ],
                     ),
                   ),
                 ),
               ),
-
               Container(
                 padding: const EdgeInsets.fromLTRB(32, 12, 32, 20),
                 decoration: BoxDecoration(
@@ -165,7 +353,10 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                     _SecondaryButton(text: "Cancel", onPressed: _cancel),
                     const SizedBox(width: 12),
                     _PrimaryButton(
-                      text: _saving ? "Saving..." : "Save outfit",
+                      text:
+                          _saving
+                              ? (_isEditMode ? "Updating..." : "Saving...")
+                              : (_isEditMode ? "Update outfit" : "Save outfit"),
                       onPressed: _saving ? null : _save,
                     ),
                   ],
@@ -179,11 +370,10 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
   }
 }
 
-/* ---------------- UI PARTS ---------------- */
-
 class _Header extends StatelessWidget {
   final VoidCallback onClose;
   final String title;
+
   const _Header({required this.onClose, required this.title});
 
   @override
@@ -222,6 +412,7 @@ class _Field extends StatelessWidget {
   final String label;
   final String? helper;
   final Widget child;
+
   const _Field({required this.label, this.helper, required this.child});
 
   @override
@@ -345,84 +536,10 @@ class _TextArea extends StatelessWidget {
   }
 }
 
-class _CheckboxRow extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _CheckboxRow({
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Theme(
-          data: Theme.of(context).copyWith(
-            unselectedWidgetColor: _CreateOutfitTheme.border,
-            checkboxTheme: CheckboxThemeData(
-              fillColor: WidgetStateProperty.resolveWith((states) {
-                return states.contains(WidgetState.selected)
-                    ? _CreateOutfitTheme.gold
-                    : Colors.transparent;
-              }),
-              side: const BorderSide(
-                color: _CreateOutfitTheme.border,
-                width: 1.5,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-              checkColor: WidgetStateProperty.all(Colors.white),
-            ),
-          ),
-          child: Semantics(
-            enabled: true,
-            label: title,
-            child: Checkbox(
-              value: value,
-              onChanged: (v) => onChanged(v ?? false),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  color: _CreateOutfitTheme.muted,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
+
   const _PrimaryButton({required this.text, required this.onPressed});
 
   static const gold = Color(0xFFD4A017);
@@ -449,6 +566,7 @@ class _PrimaryButton extends StatelessWidget {
 class _SecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
+
   const _SecondaryButton({required this.text, required this.onPressed});
 
   static const border = Color(0xFF2A2F38);

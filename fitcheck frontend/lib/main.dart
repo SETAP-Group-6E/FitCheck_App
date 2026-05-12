@@ -1,20 +1,20 @@
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
-import 'package:fitcheck/Presentation/App/app_pages/wardrobe_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/wardrobe/wardrobe_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/settings/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Presentation/auth/pages/register_page.dart';
 //import 'Presentation/app/app_pages/wardrobe_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env/dev.txt');
   const supabaseUrl = 'https://fsjkselzckrheqtqvzze.supabase.co';
   const supabaseAnonKey = 'sb_publishable_Qt6ShYvhFsUlQ4fY_LFl6A_aRLJ4Jnr';
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
-  );
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -28,20 +28,214 @@ class MyApp extends StatelessWidget {
       title: 'FitCheck',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: Colors.black,
       ),
-      
-       home: const HomePage(),
-      
+      home: HomePage(),
 
-      routes: {
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/homepage':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 220),
+              reverseTransitionDuration: const Duration(milliseconds: 180),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) => HomePage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeInQuart,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    ),
+                    FadeTransition(opacity: animation, child: child),
+                  ],
+                );
+              },
+            );
 
-        '/homepage': (context) => const HomePage(),
-        '/register': (context) => const RegisterPage(),
-        '/login': (context) => const LoginPage(),
-        '/wardrobe': (context) => const WardrobePage(),
+          case '/register':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 500),
+              reverseTransitionDuration: const Duration(milliseconds: 200),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) =>
+                      const RegisterPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOut));
 
-      }
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    ),
+                    SlideTransition(
+                      position: animation.drive(slideTween),
+                      child: child,
+                    ),
+                  ],
+                );
+              },
+            );
+          case '/login':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 400),
+              reverseTransitionDuration: const Duration(milliseconds: 200),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) => const LoginPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOut));
+
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    ),
+                    SlideTransition(
+                      position: animation.drive(slideTween),
+                      child: child,
+                    ),
+                  ],
+                );
+              },
+            );
+          case '/settings':
+            final auth = Supabase.instance.client.auth;
+            final isLoggedIn =
+                auth.currentSession != null && auth.currentUser != null;
+
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 280),
+              reverseTransitionDuration: const Duration(milliseconds: 220),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) =>
+                      isLoggedIn ? const SettingsPage() : const LoginPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutCubic));
+
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    ),
+                    SlideTransition(
+                      position: animation.drive(slideTween),
+                      child: child,
+                    ),
+                  ],
+                );
+              },
+            );
+          case '/wardrobe':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 220),
+              reverseTransitionDuration: const Duration(milliseconds: 180),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) =>
+                      const WardrobePage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final fadeCurve = CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeInOut,
+                );
+                final opacityTween = Tween<double>(begin: 0.85, end: 1.0);
+
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    ),
+                    FadeTransition(
+                      opacity: fadeCurve.drive(opacityTween),
+                      child: child,
+                    ),
+                  ],
+                );
+              },
+            );
+          default:
+            return null;
+        }
+      },
     );
   }
 }
 
+// flutter run -d chrome --web-port 62597

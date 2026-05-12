@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
+import '../constants/wardrobe_constants.dart';
 
 class _CreateItemTheme {
   static const Color card = Color(0xFF171A20);
@@ -13,23 +14,31 @@ class _CreateItemTheme {
 }
 
 class CreateItem extends StatefulWidget {
-  const CreateItem({super.key, required this.repository});
+  const CreateItem({super.key, required this.repository, this.existingItem});
 
   final WardrobeRepository repository;
+  final Map<String, dynamic>? existingItem;
 
   static Future<bool> open(
     BuildContext context, {
     required WardrobeRepository repository,
+    Map<String, dynamic>? existingItem,
   }) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.6),
+      barrierColor: Colors.black.withOpacity(0.6),
       builder:
           (_) => Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-            child: CreateItem(repository: repository),
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 18,
+            ),
+            child: CreateItem(
+              repository: repository,
+              existingItem: existingItem,
+            ),
           ),
     );
     return result ?? false;
@@ -40,40 +49,67 @@ class CreateItem extends StatefulWidget {
 }
 
 class _CreateItemState extends State<CreateItem> {
-  static const wearTypes = <String>[
-    "Smart",
-    "Casual",
-    "Formal",
-  ];
-  static const fabricMaterials = <String>[
-    "Cotton",
-    "Denim",
-    "Wool",
-    "Leather",
-    "Polyester",
-    "Nylon",
-    "Other",
-  ];
-  static const layerCategories = <String>[
-    "coat",
-    "jumper",
-    "sweater",
-    "Single layer",
-  ];
-
   final _formKey = GlobalKey<FormState>();
   final _titleCtrl = TextEditingController();
 
-  String _wearType = wearTypes.first;
-  String _fabricMaterial = fabricMaterials.first;
-  String _layerCategory = layerCategories.first;
+  String _wearType = WardrobeConstants.wearTypes.first;
+  String _fabricMaterial = WardrobeConstants.fabricMaterials.first;
+  String _layerCategory = WardrobeConstants.layerCategories.first;
   int _warmthRating = 3;
   bool _waterResistant = false;
 
   bool _hasPhoto = false;
   bool _saving = false;
 
+  bool get _isEditMode => widget.existingItem != null;
+  String get _dialogTitle => _isEditMode ? 'Edit item' : 'Add new item';
+  String get _saveButtonText =>
+      _saving ? 'Saving...' : (_isEditMode ? 'Update item' : 'Save item');
+
+  String _readString(String key, String fallback) {
+    final value = widget.existingItem?[key];
+    final text = value?.toString().trim() ?? '';
+    return text.isEmpty ? fallback : text;
+  }
+
+  int _readInt(String key, int fallback) {
+    final value = widget.existingItem?[key];
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '') ?? fallback;
+  }
+
+  bool _readBool(String key, bool fallback) {
+    final value = widget.existingItem?[key];
+    if (value is bool) return value;
+    return fallback;
+  }
+
+  String _readId() {
+    return (widget.existingItem?['item_id'] ?? widget.existingItem?['id'] ?? '')
+        .toString()
+        .trim();
+  }
+
   @override
+  void initState() {
+    super.initState();
+    if (widget.existingItem != null) {
+      _titleCtrl.text = _readString('title', '');
+      _wearType = _readString('wear_type', WardrobeConstants.wearTypes.first);
+      _fabricMaterial = _readString(
+        'fabric_material',
+        WardrobeConstants.fabricMaterials.first,
+      );
+      _layerCategory = _readString(
+        'layer_category',
+        WardrobeConstants.layerCategories.first,
+      );
+      _warmthRating = _readInt('warmth_rating', 3);
+      _waterResistant = _readBool('water_resistant', false);
+      _hasPhoto = _readString('photo_url', '').isNotEmpty;
+    }
+  }
+
   void dispose() {
     _titleCtrl.dispose();
     super.dispose();
@@ -81,25 +117,45 @@ class _CreateItemState extends State<CreateItem> {
 
   void _cancel() => Navigator.of(context).pop(false);
 
-  void _fakePickImage() {
-    setState(() => _hasPhoto = true);
-  }
+  void _fakePickImage() => setState(() => _hasPhoto = true);
 
   Future<void> _save() async {
     if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _saving = true);
-    try {
-      await widget.repository.addClothingItem(
-        photoUrl: _hasPhoto ? 'local-upload-pending' : '',
-        title: _titleCtrl.text.trim(),
-        wearType: _wearType,
-        fabricMaterial: _fabricMaterial,
-        warmthRating: _warmthRating,
-        waterResistance: _waterResistant,
-        layerCategory: _layerCategory,
+    if (_isEditMode && _readId().isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot edit item without an id')),
       );
+      return;
+    }
+
+    setState(() => _saving = true);
+
+    try {
+      if (_isEditMode) {
+        await widget.repository.updateClothingItem(
+          id: _readId(),
+          photoUrl: _hasPhoto ? 'local-upload-pending' : null,
+          title: _titleCtrl.text.trim(),
+          wearType: _wearType,
+          fabricMaterial: _fabricMaterial,
+          warmthRating: _warmthRating,
+          waterResistance: _waterResistant,
+          layerCategory: _layerCategory,
+        );
+      } else {
+        await widget.repository.addClothingItem(
+          photoUrl: _hasPhoto ? 'local-upload-pending' : '',
+          title: _titleCtrl.text.trim(),
+          wearType: _wearType,
+          fabricMaterial: _fabricMaterial,
+          warmthRating: _warmthRating,
+          waterResistance: _waterResistant,
+          layerCategory: _layerCategory,
+        );
+      }
 
       if (!mounted) return;
       Navigator.of(context).pop(true);
@@ -123,7 +179,7 @@ class _CreateItemState extends State<CreateItem> {
           border: Border.all(color: _CreateItemTheme.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
+              color: Colors.black.withOpacity(0.25),
               blurRadius: 30,
               offset: const Offset(0, 10),
             ),
@@ -134,7 +190,7 @@ class _CreateItemState extends State<CreateItem> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _Header(onClose: _cancel),
+              _Header(onClose: _cancel, title: _dialogTitle),
               Container(height: 1, color: _CreateItemTheme.border),
               Flexible(
                 child: SingleChildScrollView(
@@ -155,7 +211,7 @@ class _CreateItemState extends State<CreateItem> {
                           label: "Item name",
                           child: _PillTextField(
                             controller: _titleCtrl,
-                            hintText: "e.g. Black puffer jacket",
+                            hintText: WardrobeConstants.defaultItemNameHint,
                             validator:
                                 (v) =>
                                     (v == null || v.trim().isEmpty)
@@ -168,7 +224,7 @@ class _CreateItemState extends State<CreateItem> {
                           label: "Wear type",
                           child: _PillDropdown(
                             value: _wearType,
-                            items: wearTypes,
+                            items: WardrobeConstants.wearTypes,
                             onChanged: (v) => setState(() => _wearType = v),
                           ),
                         ),
@@ -177,7 +233,7 @@ class _CreateItemState extends State<CreateItem> {
                           label: "Fabric material",
                           child: _PillDropdown(
                             value: _fabricMaterial,
-                            items: fabricMaterials,
+                            items: WardrobeConstants.fabricMaterials,
                             onChanged:
                                 (v) => setState(() => _fabricMaterial = v),
                           ),
@@ -188,7 +244,7 @@ class _CreateItemState extends State<CreateItem> {
                           helper: "Used for outfit layering logic",
                           child: _PillDropdown(
                             value: _layerCategory,
-                            items: layerCategories,
+                            items: WardrobeConstants.layerCategories,
                             onChanged:
                                 (v) => setState(() => _layerCategory = v),
                           ),
@@ -227,7 +283,7 @@ class _CreateItemState extends State<CreateItem> {
                     _SecondaryButton(text: "Cancel", onPressed: _cancel),
                     const SizedBox(width: 12),
                     _PrimaryButton(
-                      text: _saving ? "Saving..." : "Save item",
+                      text: _saveButtonText,
                       onPressed: _saving ? null : _save,
                     ),
                   ],
@@ -243,7 +299,9 @@ class _CreateItemState extends State<CreateItem> {
 
 class _Header extends StatelessWidget {
   final VoidCallback onClose;
-  const _Header({required this.onClose});
+  final String title;
+
+  const _Header({required this.onClose, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -251,25 +309,21 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(32, 22, 20, 18),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
-              "Add new item",
-              style: TextStyle(
+              title,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 28,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          Semantics(
-            button: true,
-            label: "Close dialog",
-            child: IconButton(
-              onPressed: onClose,
-              icon: const Icon(Icons.close),
-              color: _CreateItemTheme.muted,
-              splashRadius: 20,
-            ),
+          IconButton(
+            onPressed: onClose,
+            icon: const Icon(Icons.close),
+            color: _CreateItemTheme.muted,
+            splashRadius: 20,
           ),
         ],
       ),
@@ -279,6 +333,7 @@ class _Header extends StatelessWidget {
 
 class _Label extends StatelessWidget {
   final String text;
+
   const _Label(this.text);
 
   @override
@@ -298,6 +353,7 @@ class _Field extends StatelessWidget {
   final String label;
   final String? helper;
   final Widget child;
+
   const _Field({required this.label, this.helper, required this.child});
 
   @override
@@ -331,6 +387,7 @@ class _PillTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final String? Function(String?)? validator;
+
   const _PillTextField({
     required this.controller,
     required this.hintText,
@@ -364,6 +421,15 @@ class _PillTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           borderSide: const BorderSide(color: _CreateItemTheme.gold, width: 2),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(999),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(999),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+        ),
+        errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 12),
       ),
     );
   }
@@ -373,6 +439,7 @@ class _PillDropdown extends StatelessWidget {
   final String value;
   final List<String> items;
   final ValueChanged<String> onChanged;
+
   const _PillDropdown({
     required this.value,
     required this.items,
@@ -392,15 +459,26 @@ class _PillDropdown extends StatelessWidget {
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          dropdownColor: _CreateItemTheme.bg,
-          iconEnabledColor: _CreateItemTheme.muted,
+          dropdownColor: _CreateItemTheme.inputFill,
+          iconEnabledColor: _CreateItemTheme.textHint,
           style: const TextStyle(
             color: _CreateItemTheme.textDark,
             fontSize: 14,
           ),
           items:
               items
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                  .map(
+                    (s) => DropdownMenuItem(
+                      value: s,
+                      child: Text(
+                        s,
+                        style: const TextStyle(
+                          color: _CreateItemTheme.textDark,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  )
                   .toList(),
           onChanged: (v) => onChanged(v ?? value),
         ),
@@ -412,6 +490,7 @@ class _PillDropdown extends StatelessWidget {
 class _WarmthSlider extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
+
   const _WarmthSlider({required this.value, required this.onChanged});
 
   @override
@@ -428,15 +507,17 @@ class _WarmthSlider extends StatelessWidget {
                   activeTrackColor: _CreateItemTheme.gold,
                   inactiveTrackColor: _CreateItemTheme.border,
                   thumbColor: Colors.white,
-                  overlayColor: _CreateItemTheme.gold.withValues(alpha: 0.15),
+                  overlayColor: _CreateItemTheme.gold.withOpacity(0.15),
                   thumbShape: const RoundSliderThumbShape(
                     enabledThumbRadius: 9,
                   ),
                 ),
                 child: Slider(
-                  min: 1,
-                  max: 5,
-                  divisions: 4,
+                  min: WardrobeConstants.minWarmthRating.toDouble(),
+                  max: WardrobeConstants.maxWarmthRating.toDouble(),
+                  divisions:
+                      WardrobeConstants.maxWarmthRating -
+                      WardrobeConstants.minWarmthRating,
                   value: value.toDouble(),
                   onChanged: (v) => onChanged(v.round()),
                 ),
@@ -475,6 +556,7 @@ class _CheckboxRow extends StatelessWidget {
   final String subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
+
   const _CheckboxRow({
     required this.title,
     required this.subtitle,
@@ -491,9 +573,9 @@ class _CheckboxRow extends StatelessWidget {
           data: Theme.of(context).copyWith(
             unselectedWidgetColor: _CreateItemTheme.border,
             checkboxTheme: CheckboxThemeData(
-              fillColor: WidgetStateProperty.resolveWith(
+              fillColor: MaterialStateProperty.resolveWith(
                 (states) =>
-                    states.contains(WidgetState.selected)
+                    states.contains(MaterialState.selected)
                         ? _CreateItemTheme.gold
                         : Colors.transparent,
               ),
@@ -504,16 +586,12 @@ class _CheckboxRow extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(4),
               ),
-              checkColor: WidgetStateProperty.all(Colors.white),
+              checkColor: MaterialStateProperty.all(Colors.white),
             ),
           ),
-          child: Semantics(
-            enabled: true,
-            label: title,
-            child: Checkbox(
-              value: value,
-              onChanged: (v) => onChanged(v ?? false),
-            ),
+          child: Checkbox(
+            value: value,
+            onChanged: (v) => onChanged(v ?? false),
           ),
         ),
         const SizedBox(width: 12),
@@ -548,6 +626,7 @@ class _CheckboxRow extends StatelessWidget {
 class _PhotoBoxUIOnly extends StatelessWidget {
   final bool hasPhoto;
   final VoidCallback onUpload;
+
   const _PhotoBoxUIOnly({required this.hasPhoto, required this.onUpload});
 
   @override
@@ -565,26 +644,19 @@ class _PhotoBoxUIOnly extends StatelessWidget {
           ),
           child:
               hasPhoto
-                  ? ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.image,
-                        size: 64,
-                        color: _CreateItemTheme.muted,
-                      ),
+                  ? const Center(
+                    child: Icon(
+                      Icons.image,
+                      size: 64,
+                      color: _CreateItemTheme.muted,
                     ),
                   )
-                  : Center(
-                    child: Semantics(
-                      label: "Photo upload area",
-                      child: Text(
-                        "Upload item photo",
-                        style: const TextStyle(
-                          color: _CreateItemTheme.muted,
-                          fontSize: 13,
-                        ),
+                  : const Center(
+                    child: Text(
+                      "Upload item photo",
+                      style: TextStyle(
+                        color: _CreateItemTheme.muted,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -612,6 +684,7 @@ class _PhotoBoxUIOnly extends StatelessWidget {
 class _PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
+
   const _PrimaryButton({required this.text, required this.onPressed});
 
   @override
@@ -636,6 +709,7 @@ class _PrimaryButton extends StatelessWidget {
 class _SecondaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
+
   const _SecondaryButton({required this.text, required this.onPressed});
 
   @override
