@@ -149,7 +149,39 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
   Future<List<Map<String, dynamic>>> getOutfits() async {
     final userId = _currentUserIdOrThrow();
     final data = await _supabase.from('outfit').select().eq('user_id', userId);
-    return List<Map<String, dynamic>>.from(data as List);
+    final outfits = List<Map<String, dynamic>>.from(data as List);
+
+    final linksData = await _supabase
+        .from('outfit_item')
+        .select()
+        .eq('user_id', userId);
+    final links = List<Map<String, dynamic>>.from(linksData as List);
+
+    final itemsData = await _supabase
+        .from('item')
+        .select()
+        .eq('user_id', userId);
+    final itemsList = List<Map<String, dynamic>>.from(itemsData as List);
+    final Map<String, Map<String, dynamic>> itemById = {};
+    for (final it in itemsList) {
+      final iid = (it['item_id'] ?? it['id'] ?? '').toString();
+      itemById[iid] = Map<String, dynamic>.from(it);
+    }
+
+    final Map<String, List<Map<String, dynamic>>> grouped = {};
+    for (final link in links) {
+      final outfitId = (link['outfit_id'] ?? '').toString();
+      final itemId = (link['item_id'] ?? '').toString();
+      final itemRecord = itemById[itemId] ?? {'item_id': itemId};
+      grouped.putIfAbsent(outfitId, () => []).add(itemRecord);
+    }
+
+    for (final outfit in outfits) {
+      final oid = (outfit['outfit_id'] ?? outfit['id'] ?? '').toString();
+      outfit['items'] = grouped[oid] ?? <Map<String, dynamic>>[];
+    }
+
+    return outfits;
   }
 
   @override
