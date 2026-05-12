@@ -34,7 +34,7 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
       'layer_category': layerCategory,
     };
 
-    if (photoUrl.trim().isNotEmpty) data['photo_url'] = photoUrl;
+    if (photoUrl.trim().isNotEmpty) data['item_photo_url'] = photoUrl;
 
     await _supabase.from('item').insert(data);
   }
@@ -71,7 +71,7 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     final updateData = <String, dynamic>{};
 
     if (photoUrl != null && photoUrl.trim().isNotEmpty)
-      updateData['photo_url'] = photoUrl;
+      updateData['item_photo_url'] = photoUrl;
     if (title != null) updateData['title'] = title;
     if (wearType != null) updateData['wear_type'] = wearType;
     if (fabricMaterial != null) updateData['fabric_material'] = fabricMaterial;
