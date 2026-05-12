@@ -722,6 +722,7 @@ class _WardrobeItemsGrid extends StatelessWidget {
         final item = items[itemIndex];
         final title = (item['name'] ?? item['title'] ?? '').toString();
         final wearType = (item['wear_type'] ?? '').toString();
+        final photoUrl = (item['item_photo_url'] ?? '').toString();
         final id = (item['item_id'] ?? item['id'] ?? '').toString();
 
         return InkWell(
@@ -741,10 +742,26 @@ class _WardrobeItemsGrid extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.checkroom_outlined,
-                        color: Colors.white70,
-                      ),
+                      if (photoUrl.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            photoUrl,
+                            width: 54,
+                            height: 54,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (_, __, ___) => const Icon(
+                                  Icons.checkroom_outlined,
+                                  color: Colors.white70,
+                                ),
+                          ),
+                        )
+                      else
+                        const Icon(
+                          Icons.checkroom_outlined,
+                          color: Colors.white70,
+                        ),
                       const SizedBox(height: 8),
                       Text(
                         title.isEmpty ? 'Untitled item' : title,
