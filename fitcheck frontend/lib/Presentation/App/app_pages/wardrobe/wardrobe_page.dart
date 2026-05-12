@@ -901,6 +901,56 @@ class _WardrobeOutfitsList extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 8),
+                if ((outfit['items'] is List) &&
+                    (outfit['items'] as List).isNotEmpty) ...[
+                  SizedBox(
+                    height: 64,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: (outfit['items'] as List).length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, i) {
+                        final it = Map<String, dynamic>.from(
+                          (outfit['items'] as List)[i] as Map<String, dynamic>,
+                        );
+                        final title =
+                            (it['name'] ?? it['title'] ?? '').toString();
+                        return Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.04),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.white12),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.checkroom_outlined,
+                                color: Colors.white70,
+                                size: 20,
+                              ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                width: 80,
+                                child: Text(
+                                  title.isEmpty ? 'Untitled' : title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(
