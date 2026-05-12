@@ -94,6 +94,7 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     required String name,
     required String description,
     required bool isOwned,
+    String? photoUrl,
     required List<String> clothingItemIds,
   }) async {
     final userId = _currentUserIdOrThrow();
@@ -103,6 +104,10 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
       'description': description,
       'is_owned': isOwned,
     };
+
+    if (photoUrl != null && photoUrl.trim().isNotEmpty) {
+      data['outfit_photo_url'] = photoUrl;
+    }
 
     final response =
         await _supabase
@@ -190,6 +195,7 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     String? name,
     String? description,
     bool? isOwned,
+    String? photoUrl,
     List<String>? clothingItemIds,
   }) async {
     final userId = _currentUserIdOrThrow();
@@ -197,6 +203,9 @@ class SupabaseWardrobeRepository implements WardrobeRepository {
     if (name != null) updateData['name'] = name;
     if (description != null) updateData['description'] = description;
     if (isOwned != null) updateData['is_owned'] = isOwned;
+    if (photoUrl != null && photoUrl.trim().isNotEmpty) {
+      updateData['outfit_photo_url'] = photoUrl;
+    }
 
     if (updateData.isNotEmpty) {
       await _supabase
