@@ -28,6 +28,7 @@ abstract class WardrobeRepository {
     required String name,
     required String description,
     required bool isOwned,
+    String? photoUrl,
     required List<String> clothingItemIds,
   });
 
@@ -40,6 +41,7 @@ abstract class WardrobeRepository {
     String? name,
     String? description,
     bool? isOwned,
+    String? photoUrl,
     List<String>? clothingItemIds,
   });
 }
