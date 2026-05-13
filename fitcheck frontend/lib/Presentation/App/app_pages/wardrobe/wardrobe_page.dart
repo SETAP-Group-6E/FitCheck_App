@@ -461,21 +461,23 @@ class _WardrobePageState extends State<WardrobePage> {
                           child: Row(
                             children: [
                               SizedBox(
-                                child: GlassFrame(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromRGBO(0, 0, 0, 0.2),
-                                      borderRadius: BorderRadius.circular(1),
+                                // Removed GlassFrame wrapper: render the back
+                                // button directly with the same compact
+                                // container styling so it visually matches but
+                                // without the frosted glass effect.
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromRGBO(0, 0, 0, 0.2),
+                                    borderRadius: BorderRadius.circular(1),
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.arrow_back_ios_sharp,
+                                      color: Colors.white,
+                                      size: 20,
                                     ),
-                                    child: IconButton(
-                                      icon: const Icon(
-                                        Icons.arrow_back_ios_sharp,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      onPressed: () => Navigator.pop(context),
-                                    ),
+                                    onPressed: () => Navigator.pop(context),
                                   ),
                                 ),
                               ),

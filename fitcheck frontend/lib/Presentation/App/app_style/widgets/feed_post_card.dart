@@ -1,3 +1,6 @@
+// FeedPostCard: UI widget representing a single feed post card. Shows
+// the image carousel, caption, like/comment controls and integrates
+// with Supabase for likes and realtime comment counts.
 import 'dart:async';
 import 'package:flutter/gestures.dart';
 
@@ -30,7 +33,10 @@ class FeedPostCard extends StatefulWidget {
 }
 
 class _FeedPostCardState extends State<FeedPostCard> {
+  // Controller for the image carousel pager
   final PageController _pageController = PageController();
+
+  // UI state
   int _currentPage = 0;
   int _likeCount = 0;
   bool _liked = false;
@@ -38,17 +44,22 @@ class _FeedPostCardState extends State<FeedPostCard> {
   int _commentCount = 0;
   bool _loadingComments = true;
   bool _captionExpanded = false;
+
+  // Repository used to fetch comment counts and related data
   final _commentRepo = SupabaseCommentRepository();
+
+  // Realtime subscription for comment count updates (optional)
   StreamSubscription<List<Map<String, dynamic>>>? _commentsSub;
-  // comments removed: UI and backend calls disabled
 
 
   @override
   void initState() {
     super.initState();
+    // Load initial like/comment counts
     _loadLikes();
     _loadComments();
-    // subscribe to realtime comment changes for this post
+    // Subscribe to realtime comment changes for this post so the
+    // comment count updates automatically while the card is visible.
     try {
       _commentsSub = Supabase.instance.client
           .from('comments')
@@ -88,6 +99,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
       final list = List<Map<String, dynamic>>.from(rows as List? ?? []);
       final user = supabase.auth.currentUser;
       setState(() {
+        // Update in-memory like counter and whether the current user has
+        // liked this post (used to toggle heart state optimistically).
         _likeCount = list.length;
         _liked = user != null && list.any((r) => (r['user_id'] ?? r['userId'] ?? '') == user.id);
         _loadingLikes = false;
@@ -105,6 +118,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;
     if (user == null) {
+      // Require authentication to like; show a small toast and
+      // navigate to login flow.
       showAppMessage(context, 'Please log in to like posts.');
       Navigator.pushNamed(context, '/login');
       return;
@@ -128,6 +143,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
       final err = e.toString();
       // ignore: avoid_print
       print('Like action error: $err\n$st');
+        // Surface a helpful message for RLS/permission problems, or a
+        // generic failure message otherwise.
         final message = err.contains('42501') || err.toLowerCase().contains('permission denied')
           ? 'Like action failed: permission denied (check Supabase RLS for table post_likes)'
           : 'Like action failed. See console for details.';
@@ -138,12 +155,16 @@ class _FeedPostCardState extends State<FeedPostCard> {
   Future<void> _performDbLike(bool like, SupabaseClient supabase, String userId) async {
     try {
       if (like) {
+        // Insert a like row. Use `storage_key` (text) to reference media
+        // stored in Supabase Storage; `post_id` remains null for
+        // storage-backed posts.
         await supabase.from('post_likes').insert({
           'post_id': null,
           'storage_key': widget.postId,
           'user_id': userId,
         });
       } else {
+        // Remove the like row for this user/storage_key combination.
         await supabase.from('post_likes').delete().eq('storage_key', widget.postId).eq('user_id', userId);
       }
     } catch (e, st) {
@@ -179,6 +200,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                       ? const Icon(Icons.person, color: Colors.white)
                       : null,
                 ),
+                // Poster identity block (avatar, username, time)
                 title: Text(
                   widget.username,
                   style: const TextStyle(
@@ -191,6 +213,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   style: const TextStyle(color: Colors.white70),
                 ),
               ),
+              // Image carousel (square aspect ratio). Uses a PageView so
+              // multiple images are swipeable.
               if (widget.imageUrls.isNotEmpty)
                 ClipRRect(
                   child: AspectRatio(
@@ -222,6 +246,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     ),
                   ),
                 ),
+              // Page indicator dots when there are multiple images.
               if (widget.imageUrls.length > 1)
                 Padding(
                   padding: const EdgeInsets.only(top: 8, bottom: 2),
@@ -251,9 +276,11 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      // Like + Comment buttons + counters
+                      // Action row: like/comment buttons and counters.
                       Row(
                         children: [
+                          // Like button (tappable heart). Uses optimistic UI
+                          // update then calls into Supabase.
                           IconButton(
                             padding: const EdgeInsets.all(8),
                             constraints: const BoxConstraints(),
@@ -273,6 +300,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                               ),
                             ),
 
+                          // Comment button opens the slide-up comments sheet.
                           IconButton(
                             padding: const EdgeInsets.all(8),
                             constraints: const BoxConstraints(),

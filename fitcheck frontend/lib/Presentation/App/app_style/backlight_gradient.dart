@@ -1,3 +1,6 @@
+// BacklightGradient: layered radial gradients with blur used as
+// a decorative background for screens and cards.
+// - Provides two configurable "lights" and a backdrop blur.
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -56,23 +59,26 @@ class BacklightGradient extends StatelessWidget {
       children: [
 
         // Base
+        // Solid background layer sits below the radial lights.
         Container(color: colorBg),
 
-        // light 1
+        // First radial light: typically used as the main vignette
+        // contributing the primary coloration behind the UI.
         _buildBacklight(
           colors: light1,
           alignment: light1Alignment,
           radius: light1Radius,
         ),
 
-        // light 2
+        // Secondary radial light: adds depth and a secondary tint.
         _buildBacklight(
           colors: light2,
           alignment: light2Alignment,
           radius: light2Radius,
         ),
 
-        // Blur
+        // Soft blur overlay: subtle backdrop blur to blend the lights
+        // and reduce contrast for foreground content.
         BackdropFilter(
           filter: ImageFilter.blur(
             sigmaX: blur,
@@ -83,7 +89,8 @@ class BacklightGradient extends StatelessWidget {
           ),
         ),
 
-        // UI
+        // Foreground UI: the provided child is rendered on top of the
+        // decorative backlight layers.
         child,
       ],
     );

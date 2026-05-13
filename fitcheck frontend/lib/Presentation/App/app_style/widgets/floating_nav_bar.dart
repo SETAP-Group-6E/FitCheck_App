@@ -1,3 +1,6 @@
+// FloatingNavbar: bottom-centered navigation bar used across main
+// screens. Provides primary navigation icons, a central create action
+// and a compact avatar that links to settings or login.
 import 'dart:async';
 import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outfit.dart';
@@ -92,6 +95,11 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
             : Supabase.instance.client.storage
                 .from('Avatars')
                 .getPublicUrl('$userId/avatar.jpg?t=$cacheBuster');
+
+    // The avatar URL uses a cache-busting query so updates appear
+    // immediately after users change their profile picture. If the
+    // user is unauthenticated we render a small default avatar that
+    // links to the login/settings route.
 
     return Positioned(
       left: 0,

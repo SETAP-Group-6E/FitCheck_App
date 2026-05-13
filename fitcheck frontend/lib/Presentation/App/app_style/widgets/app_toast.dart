@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// Lightweight overlay message used instead of SnackBar for a cleaner look.
+// App toast helper: lightweight overlay message used instead of
+// `SnackBar` for a cleaner, less intrusive notification UX. Animates
+// fade in/out, supports short durations and an error state.
 void showAppMessage(BuildContext context, String message, {bool error = false, Duration duration = const Duration(seconds: 1)}) {
   final overlay = Overlay.of(context);
   if (overlay == null) return;
+  // Local visibility flag used by the StatefulBuilder to trigger
+  // AnimatedOpacity transitions when the overlay shows/hides.
   bool _visible = false;
 
   final entry = OverlayEntry(builder: (ctx) {
@@ -15,12 +19,15 @@ void showAppMessage(BuildContext context, String message, {bool error = false, D
       child: Material(
         color: Colors.transparent,
         child: StatefulBuilder(builder: (c, setState) {
+          // AnimatedOpacity provides the fade-in/out animation.
           return AnimatedOpacity(
             opacity: _visible ? 1 : 0,
             duration: const Duration(milliseconds: 200),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
+                // Error messages use a red accent, otherwise a dark
+                // translucent background for better contrast.
                 color: error ? Colors.redAccent.shade200 : Colors.black87,
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -35,15 +42,18 @@ void showAppMessage(BuildContext context, String message, {bool error = false, D
     );
   });
 
+  // Insert overlay entry and schedule show/hide lifecycle. We delay the
+  // initial show slightly so rapid sequences of UI changes feel smoother.
   overlay.insert(entry);
 
-  // wait a short time before showing the toast (gives UI a moment)
   const showDelay = Duration(milliseconds: 300);
   Future.delayed(showDelay, () {
+    // Mark visible to start the fade-in animation
     _visible = true;
     entry.markNeedsBuild();
 
-    // schedule fade out and removal after the visible duration
+    // After the requested visible duration, fade out then remove the
+    // overlay entry completely.
     Future.delayed(duration, () {
       _visible = false;
       entry.markNeedsBuild();

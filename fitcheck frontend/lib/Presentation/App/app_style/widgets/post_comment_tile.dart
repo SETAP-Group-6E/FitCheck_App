@@ -1,3 +1,5 @@
+// PostCommentTile: compact comment display used in comment lists and
+// the comments sheet. Shows avatar, username, time label and message.
 import 'package:flutter/material.dart';
 
 class PostCommentTile extends StatelessWidget {
@@ -16,6 +18,10 @@ class PostCommentTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+            // Avatar: if a profile image URL is provided we show a
+            // NetworkImage; otherwise a simple placeholder avatar is
+            // displayed. Radius and sizes are small to keep list rows
+            // compact.
             profileImageUrl != null && profileImageUrl!.isNotEmpty
               ? CircleAvatar(radius: 14, backgroundColor: Colors.white24, backgroundImage: NetworkImage(profileImageUrl!))
               : const CircleAvatar(radius: 14, backgroundColor: Colors.white24, child: Icon(Icons.person, size: 16, color: Colors.white)),
@@ -32,6 +38,8 @@ class PostCommentTile extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
+                // Comment body: allow natural wrapping and use a slightly
+                // muted color to distinguish it from the username line.
                 Text(body, style: const TextStyle(color: Colors.white70)),
               ],
             ),
