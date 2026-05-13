@@ -1,3 +1,7 @@
+// Wardrobe page: displays user's wardrobe items and outfits, with search
+// and filter controls and outfit creation flows. Integrates with
+// Supabase via `SupabaseWardrobeRepository` and optionally uses
+// `WeatherService` to suggest items.
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
@@ -9,6 +13,7 @@ import 'package:fitcheck/Presentation/App/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/search_bar.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/styles/wardrobe_styles.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../app_style/widgets/app_toast.dart';
 import 'package:fitcheck/Data/services/weather_service.dart';
 import 'dart:async';
 
@@ -236,12 +241,10 @@ class _WardrobePageState extends State<WardrobePage> {
 
   Future<void> _loadWeatherAndRecommend() async {
     final key = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
-    if (key.isEmpty) {
+      if (key.isEmpty) {
       debugPrint('[WardrobePage] OPENWEATHER_API_KEY missing');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Weather API key missing')),
-        );
+        showAppMessage(context, 'Weather API key missing', error: true);
       }
       return;
     }
@@ -258,16 +261,12 @@ class _WardrobePageState extends State<WardrobePage> {
       });
       debugPrint('[WardrobePage] Weather loaded: $w');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Weather: ${w['temp']}C ${w['condition']}')),
-        );
+        showAppMessage(context, 'Weather: ${w['temp']}C ${w['condition']}');
       }
     } catch (e) {
       debugPrint('[WardrobePage] Weather load error: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Weather fetch failed')));
+        showAppMessage(context, 'Weather fetch failed', error: true);
       }
     }
   }
@@ -356,9 +355,7 @@ class _WardrobePageState extends State<WardrobePage> {
       await _wardrobeRepository.removeClothingItem(id: id);
       await _loadItems();
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Item deleted')));
+        showAppMessage(context, 'Item deleted');
       }
     } catch (e) {
       debugPrint('[WardrobePage] delete error: $e');
@@ -367,9 +364,7 @@ class _WardrobePageState extends State<WardrobePage> {
         if (mounted) setState(() {});
       }
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+        showAppMessage(context, 'Delete failed: $e', error: true);
       }
     }
   }
@@ -413,9 +408,7 @@ class _WardrobePageState extends State<WardrobePage> {
       await _wardrobeRepository.removeOutfit(id: id);
       await _loadOutfits();
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Outfit deleted')));
+        showAppMessage(context, 'Outfit deleted');
       }
     } catch (e) {
       debugPrint('[WardrobePage] delete outfit error: $e');
@@ -424,9 +417,7 @@ class _WardrobePageState extends State<WardrobePage> {
         if (mounted) setState(() {});
       }
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+        showAppMessage(context, 'Delete failed: $e', error: true);
       }
     }
   }

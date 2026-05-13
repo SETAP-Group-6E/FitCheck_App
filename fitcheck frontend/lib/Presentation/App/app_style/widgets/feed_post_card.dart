@@ -5,6 +5,7 @@ import 'package:fitcheck/Data/repositories/supabase_comment_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app_pages/post_comments_sheet.dart';
+import 'app_toast.dart';
 
 class FeedPostCard extends StatefulWidget {
   const FeedPostCard({
@@ -104,7 +105,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to like posts.')));
+      showAppMessage(context, 'Please log in to like posts.');
       Navigator.pushNamed(context, '/login');
       return;
     }
@@ -127,10 +128,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
       final err = e.toString();
       // ignore: avoid_print
       print('Like action error: $err\n$st');
-      final message = err.contains('42501') || err.toLowerCase().contains('permission denied')
+        final message = err.contains('42501') || err.toLowerCase().contains('permission denied')
           ? 'Like action failed: permission denied (check Supabase RLS for table post_likes)'
           : 'Like action failed. See console for details.';
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        showAppMessage(context, message, error: true);
     }
   }
 

@@ -1,6 +1,10 @@
+// PostDetailPage: shows a single post's caption and full comments list.
+// - Allows authenticated users to add comments.
+// - Loads caption from `post` table and comments via repository.
 import 'package:fitcheck/Presentation/App/app_style/widgets/post_comment_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../app_style/widgets/app_toast.dart';
 import '../../../Data/repositories/supabase_comment_repository.dart';
 
 // PostDetailPage
@@ -68,7 +72,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to comment.')));
+      showAppMessage(context, 'Please log in to comment.');
       Navigator.pushNamed(context, '/login');
       return;
     }
@@ -82,7 +86,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
       await _loadComments();
     } catch (e) {
       debugPrint('Error adding comment: $e');
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to post comment.')));
+      showAppMessage(context, 'Failed to post comment.', error: true);
     }
   }
 

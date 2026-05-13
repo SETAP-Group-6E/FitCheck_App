@@ -1,8 +1,12 @@
+// Comments sheet: slide-up, realtime comments streamer for a post (by storage_key).
+// - Shows comments in realtime and provides an input for authenticated users.
+// - Uses `SupabaseCommentRepository` for data operations.
 import 'package:flutter/material.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/post_comment_tile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
 import '../../../Data/repositories/supabase_comment_repository.dart';
+import '../app_style/widgets/app_toast.dart';
 
 class PostCommentsSheet extends StatefulWidget {
   const PostCommentsSheet({super.key, required this.postId, this.caption, this.timeLabel});
@@ -56,7 +60,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
       _comments = [];
       // ignore: avoid_print
       print('Failed to load comments for ${widget.postId}: $e');
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to load comments')));
+      if (mounted) showAppMessage(context, 'Failed to load comments', error: true);
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -65,7 +69,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to comment.')));
+      showAppMessage(context, 'Please log in to comment.');
       return;
     }
 
@@ -88,7 +92,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
             );
           } catch (_) {}
         });
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Comment posted')));
+        if (mounted) showAppMessage(context, 'Comment posted');
       } else {
         // fallback optimistic append if insert returned nothing
         final newComment = {
@@ -104,7 +108,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
     } catch (e) {
       // ignore: avoid_print
       print('Failed to post comment: $e');
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to post comment.')));
+      if (mounted) showAppMessage(context, 'Failed to post comment.', error: true);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -173,39 +177,57 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 40,
-                        child: TextField(
-                          controller: _controller,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            hintText: 'Write a comment...',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                child: Builder(builder: (context) {
+                  final supabase = Supabase.instance.client;
+                  final user = supabase.auth.currentUser;
+                  if (user == null) {
+                    return Row(
+                      children: [
+                        const Expanded(
+                          child: Text('Sign in to post comments', style: TextStyle(color: Colors.white70)),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pushNamed(context, '/login'),
+                          child: const Text('Sign in', style: TextStyle(color: Color(0xFFD99C13))),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 40,
+                          child: TextField(
+                            controller: _controller,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              hintText: 'Write a comment...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                              hintStyle: TextStyle(color: Colors.white54),
                             ),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                            hintStyle: TextStyle(color: Colors.white54),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-                      child: _submitting
-                          ? const SizedBox(key: ValueKey('loading'), width: 36, height: 36, child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))))
-                          : IconButton(
-                              key: const ValueKey('send'),
-                              onPressed: _submit,
-                              icon: const Icon(Icons.arrow_forward, color: Colors.white70),
-                            ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 8),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+                        child: _submitting
+                            ? const SizedBox(key: ValueKey('loading'), width: 36, height: 36, child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))))
+                            : IconButton(
+                                key: const ValueKey('send'),
+                                onPressed: _submit,
+                                icon: const Icon(Icons.arrow_forward, color: Colors.white70),
+                              ),
+                      ),
+                    ],
+                  );
+                }),
               ),
             ],
           ),

@@ -1,9 +1,12 @@
+// Post drafting page: pick/crop images, enter caption, and upload post media.
+// - Uploads images to Supabase Storage and inserts a `post` row with metadata.
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'crop_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../app_style/widgets/app_toast.dart';
 
 class PostDraftingPage extends StatefulWidget {
 	const PostDraftingPage({super.key});
@@ -49,9 +52,7 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 
 		final user = Supabase.instance.client.auth.currentUser;
 		if (user == null) {
-			ScaffoldMessenger.of(context).showSnackBar(
-				const SnackBar(content: Text('Please log in to upload images.')),
-			);
+			showAppMessage(context, 'Please log in to upload images.');
 			return;
 		}
 
@@ -92,13 +93,13 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 							// ignore: avoid_print
 							print('Inserted post row: $inserted');
 							if (inserted == null) {
-								if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Post metadata not saved (no DB row)')));
+								if (mounted) showAppMessage(context, 'Post metadata not saved (no DB row)');
 							}
 						} catch (e) {
 							// surface DB errors instead of silently ignoring
 							// ignore: avoid_print
 							print('Failed to insert post row: $e');
-							if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save post metadata: $e')));
+							if (mounted) showAppMessage(context, 'Failed to save post metadata: $e', error: true);
 						}
 
 			if (!mounted) {
@@ -108,9 +109,7 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 			Navigator.pop(context, true);
 		} catch (e) {
 			if (mounted) {
-				ScaffoldMessenger.of(
-					context,
-				).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+				showAppMessage(context, 'Upload failed: $e', error: true);
 			}
 		} finally {
 			if (mounted) {

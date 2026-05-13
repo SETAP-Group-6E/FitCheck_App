@@ -1,3 +1,4 @@
+// Terms & Conditions page: presents app terms and basic usage guidance.
 import 'package:flutter/material.dart';
 
 class TermsConditionsPage extends StatelessWidget {

@@ -1,8 +1,14 @@
 
+// Settings page: profile + app preferences and account actions
+// - Redirects to homepage when user signs out
+// - Shows avatar with upload action on hover
+// - Provides navigation to various settings screens (password, privacy, etc.)
+// - Uses Supabase for auth and storage access
 import 'dart:async';
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:fitcheck/Presentation/App/app_style/pfp.dart';
 import 'package:flutter/material.dart';
+import '../../app_style/widgets/app_toast.dart';
 import 'package:fitcheck/Presentation/App/app_pages/settings/about_us_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/settings/change_password_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/settings/contact_us_page.dart';
@@ -16,6 +22,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
 class SettingsPage extends ConsumerStatefulWidget {
+  /// Main settings screen widget.
+  ///
+  /// This page requires an authenticated user — it will redirect to the
+  /// homepage if the session becomes unauthenticated.
   const SettingsPage({super.key});
 
   @override
@@ -37,13 +47,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void initState() {
     super.initState();
     _refreshAvatarUrl();
+    // Listen for auth state changes so we can react (for example, if the
+    // user signs out from another tab). When no longer authenticated we
+    // navigate back to the public homepage to avoid showing protected UI.
     _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       final auth = Supabase.instance.client.auth;
-      final isLoggedIn =
-          auth.currentSession != null && auth.currentUser != null;
+      final isLoggedIn = auth.currentSession != null && auth.currentUser != null;
       if (!isLoggedIn) {
         Navigator.pushNamedAndRemoveUntil(context, '/homepage', (route) => false);
       }
@@ -58,14 +68,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   void _refreshAvatarUrl() {
     final userId = Supabase.instance.client.auth.currentUser?.id;
+    // Build a cache-busted public URL for the user's avatar stored in the
+    // `Avatars` storage bucket. If there's no current user, clear the URL.
     if (userId == null) {
       _avatarUrl = null;
       return;
     }
 
-    final baseUrl = Supabase.instance.client.storage
-        .from('Avatars')
-        .getPublicUrl('$userId/avatar.jpg');
+    final baseUrl = Supabase.instance.client.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg');
+    // Add a timestamp query param to prevent the image from being cached
+    // after an upload so the UI shows the newest avatar immediately.
     _avatarUrl = '$baseUrl?t=${DateTime.now().millisecondsSinceEpoch}';
   }
 
@@ -73,9 +85,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   
   Widget build(BuildContext context) {
     final supabase = Supabase.instance.client;
-    final isLoggedIn =
-        supabase.auth.currentSession != null &&
-        supabase.auth.currentUser != null;
+    final isLoggedIn = supabase.auth.currentSession != null && supabase.auth.currentUser != null;
+    // If user is not logged in, redirect immediately back to the public
+    // homepage. We do this with a post-frame callback to avoid building
+    // protected UI briefly while navigation occurs.
     if (!isLoggedIn) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -85,8 +98,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       return const SizedBox.shrink();
     }
 
-    final username =
-        supabase.auth.currentUser?.userMetadata?['username'] ?? 'User';
+    final username = supabase.auth.currentUser?.userMetadata?['username'] ?? 'User';
     final themeMode = ref.watch(appThemeModeProvider);
     const double topBarHeight = 150;
 
@@ -97,238 +109,180 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           constraints: const BoxConstraints(maxWidth: 470),
           child: Column(
             children: [
-                SafeArea(
-                  bottom: false,
-                  child: Container(
-                    height: topBarHeight,
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: Row(
-                      children: [
-                        _circleIconButton(
-                          icon: Icons.arrow_back_ios_new,
-                          onTap: () => Navigator.maybePop(context),
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              'Settings',
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                                fontFamily: 'Georgia',
-                              ),
+              // Top bar with back button, title and notifications icon
+              SafeArea(
+                bottom: false,
+                child: Container(
+                  height: topBarHeight,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: Row(
+                    children: [
+                      _circleIconButton(
+                        icon: Icons.arrow_back_ios_new,
+                        onTap: () => Navigator.maybePop(context),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            'Settings',
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              fontFamily: 'Georgia',
                             ),
                           ),
                         ),
-                        _circleIconButton(
-                          icon: Icons.notifications_none,
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('No notifications yet.'),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
+                      ),
+                      _circleIconButton(
+                        icon: Icons.notifications_none,
+                        onTap: () {
+                          // Simple feedback for notifications tap
+                          showAppMessage(context, 'No notifications yet.');
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                        Expanded(
-                          child: Container(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                          // Profile details section
-                          Align(
-                            alignment: Alignment.topCenter,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                MouseRegion(
-                                  onEnter: (_) {
-                                    setState(() {
-                                      _isAvatarHovered = true;
-                                    });
-                                  },
-                                  onExit: (_) {
-                                    setState(() {
-                                      _isAvatarHovered = false;
-                                    });
-                                  },
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      _avatarUrl == null
-                                          ? const CircleAvatar(
-                                              radius: 50,
-                                              backgroundColor:
-                                                  Color(0xFF2A2A2A),
-                                              child: Icon(
-                                                Icons.person,
-                                                size: 46,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(100),
-                                              child: Image.network(
-                                                _avatarUrl!,
-                                                width: 100,
-                                                height: 100,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (
-                                                  context,
-                                                  error,
-                                                  stackTrace,
-                                                ) {
-                                                  return const CircleAvatar(
-                                                    radius: 50,
-                                                    backgroundColor:
-                                                        Color(0xFF2A2A2A),
-                                                    child: Icon(
-                                                      Icons.person,
-                                                      size: 46,
-                                                      color: Colors.white,
-                                                    ),
-                                                  );
-                                                },
-                                              ),
+              ),
+
+              // Main scrollable content
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Profile details section
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Avatar with hover overlay. Hovering reveals an
+                              // edit button which launches the image picker and
+                              // uploads the selected file to the Avatars bucket.
+                              MouseRegion(
+                                onEnter: (_) {
+                                  setState(() {
+                                    _isAvatarHovered = true;
+                                  });
+                                },
+                                onExit: (_) {
+                                  setState(() {
+                                    _isAvatarHovered = false;
+                                  });
+                                },
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    _avatarUrl == null
+                                        ? const CircleAvatar(
+                                            radius: 50,
+                                            backgroundColor: Color(0xFF2A2A2A),
+                                            child: Icon(
+                                              Icons.person,
+                                              size: 46,
+                                              color: Colors.white,
                                             ),
-                                      Positioned.fill(
-                                        child: AnimatedOpacity(
-                                          opacity: _isAvatarHovered ? 1 : 0,
-                                          duration:
-                                              const Duration(milliseconds: 160),
-                                          child: Material(
-                                            color:
-                                                Colors.black.withValues(alpha: 0.45),
-                                            shape: const CircleBorder(),
-                                            child: InkWell(
-                                              customBorder:
-                                                  const CircleBorder(),
-                                              onTap: () async {
-                                                final supabase =
-                                                    Supabase.instance.client;
-                                                final userId =
-                                                    supabase.auth.currentUser?.id;
-                                                if (userId == null) {
-                                                  if (mounted) {
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      const SnackBar(
-                                                        content: Text(
-                                                          'Log in to upload an avatar',
-                                                        ),
-                                                        duration: Duration(
-                                                          milliseconds: 1000,
-                                                        ),
-                                                      ),
-                                                    );
-                                                    Navigator.pushNamed(
-                                                      context,
-                                                      '/login',
-                                                    );
-                                                  }
-                                                  return;
-                                                }
-
-                                                final ImagePicker picker =
-                                                    ImagePicker();
-                                                final XFile? image =
-                                                    await picker.pickImage(
-                                                  source: ImageSource.gallery,
+                                          )
+                                        : ClipRRect(
+                                            borderRadius: BorderRadius.circular(100),
+                                            child: Image.network(
+                                              _avatarUrl!,
+                                              width: 100,
+                                              height: 100,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return const CircleAvatar(
+                                                  radius: 50,
+                                                  backgroundColor: Color(0xFF2A2A2A),
+                                                  child: Icon(
+                                                    Icons.person,
+                                                    size: 46,
+                                                    color: Colors.white,
+                                                  ),
                                                 );
-                                                if (image == null) {
-                                                  return;
-                                                }
-
-                                                final imageBytes =
-                                                    await image.readAsBytes();
-                                                final imagePath =
-                                                    '$userId/avatar.jpg';
-
-                                                try {
-                                                  await supabase.storage
-                                                      .from('Avatars')
-                                                      .uploadBinary(
-                                                        imagePath,
-                                                        imageBytes,
-                                                        fileOptions:
-                                                            const FileOptions(
-                                                          contentType:
-                                                              'image/jpeg',
-                                                          upsert: true,
-                                                        ),
-                                                      );
-
-                                                  final imageUrl = supabase.storage
-                                                      .from('Avatars')
-                                                      .getPublicUrl(imagePath);
-
-                                                  ProfilePicture(
-                                                    onUpload: (imageUrl) async {
-                                                      await supabase
-                                                          .from('profiles')
-                                                          .update({
-                                                            'avatar_url': imageUrl,
-                                                          })
-                                                          .eq('id', userId);
-
-                                                      if (mounted) {
-                                                        ScaffoldMessenger.of(
-                                                          context,
-                                                        ).showSnackBar(
-                                                          SnackBar(
-                                                            content: Text(
-                                                              'Uploaded to Avatars/$imagePath',
-                                                            ),
-                                                          ),
-                                                        );
-                                                      }
-                                                    },
-                                                  ).onUpload(imageUrl);
-
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      _refreshAvatarUrl();
-                                                    });
-                                                  }
-                                                } catch (e) {
-                                                  if (mounted) {
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          'Upload failed: $e',
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-                                                }
                                               },
-                                              child: const Center(
-                                                child: Icon(
-                                                  Icons.edit,
-                                                  size: 24,
-                                                  color: Colors.white70,
-                                                ),
+                                            ),
+                                          ),
+                                    Positioned.fill(
+                                      child: AnimatedOpacity(
+                                        opacity: _isAvatarHovered ? 1 : 0,
+                                        duration: const Duration(milliseconds: 160),
+                                        child: Material(
+                                          color: Colors.black.withValues(alpha: 0.45),
+                                          shape: const CircleBorder(),
+                                          child: InkWell(
+                                            customBorder: const CircleBorder(),
+                                            onTap: () async {
+                                              // Avatar upload flow: check auth, open
+                                              // image picker, upload bytes to storage,
+                                              // update the profile row with the new URL
+                                              // and refresh the avatar shown here.
+                                              final supabase = Supabase.instance.client;
+                                              final userId = supabase.auth.currentUser?.id;
+                                              if (userId == null) {
+                                                if (mounted) {
+                                                  showAppMessage(context, 'Log in to upload an avatar');
+                                                  Navigator.pushNamed(context, '/login');
+                                                }
+                                                return;
+                                              }
+
+                                              final ImagePicker picker = ImagePicker();
+                                              final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                                              if (image == null) return;
+
+                                              final imageBytes = await image.readAsBytes();
+                                              final imagePath = '$userId/avatar.jpg';
+
+                                              try {
+                                                await supabase.storage.from('Avatars').uploadBinary(
+                                                  imagePath,
+                                                  imageBytes,
+                                                  fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+                                                );
+
+                                                final imageUrl = supabase.storage.from('Avatars').getPublicUrl(imagePath);
+
+                                                ProfilePicture(
+                                                  onUpload: (imageUrl) async {
+                                                    await supabase.from('profiles').update({'avatar_url': imageUrl}).eq('id', userId);
+                                                    if (mounted) {
+                                                      showAppMessage(context, 'Uploaded to Avatars/$imagePath');
+                                                    }
+                                                  },
+                                                ).onUpload(imageUrl);
+
+                                                if (mounted) {
+                                                  setState(() {
+                                                    _refreshAvatarUrl();
+                                                  });
+                                                }
+                                              } catch (e) {
+                                                if (mounted) {
+                                                  showAppMessage(context, 'Upload failed: $e', error: true);
+                                                }
+                                              }
+                                            },
+                                            child: const Center(
+                                              child: Icon(
+                                                Icons.edit,
+                                                size: 24,
+                                                color: Colors.white70,
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
+                              ),
                                 const SizedBox(height: 12),
                                 Text(
                                   '@$username',

@@ -1,3 +1,4 @@
+// Privacy policy page: static legal text outlining data usage and retention.
 import 'package:flutter/material.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {

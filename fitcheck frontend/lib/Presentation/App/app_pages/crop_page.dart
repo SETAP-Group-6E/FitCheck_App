@@ -1,3 +1,6 @@
+// Image cropper page used when the user edits an image before upload.
+// - Presents a cropping UI (square/free) using `crop_your_image`.
+// - Returns the cropped bytes via `Navigator.pop(cropped)`.
 import 'dart:typed_data';
 
 import 'package:crop_your_image/crop_your_image.dart';

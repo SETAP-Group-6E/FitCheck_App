@@ -4,7 +4,10 @@ import 'package:fitcheck/Presentation/App/app_pages/social.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/feed_post_card.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:flutter/foundation.dart';
+// Feed / Home page: loads posts from storage and displays the feed cards.
+// - Handles navigation to post creation and post detail views.
 import 'package:flutter/material.dart';
+import '../app_style/widgets/app_toast.dart';
 import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -240,14 +243,7 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () async {
                           final user = supabase.auth.currentUser;
                           if (user == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Please log in to create a post.',
-                                ),
-                                duration: Duration(milliseconds: 1000),
-                              ),
-                            );
+                            showAppMessage(context, 'Please log in to create a post.');
                             Navigator.pushNamed(context, '/login');
                             return;
                           }

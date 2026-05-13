@@ -1,3 +1,4 @@
+// Simple informational page describing the app and its goals.
 import 'package:flutter/material.dart';
 
 class AboutUsPage extends StatelessWidget {
