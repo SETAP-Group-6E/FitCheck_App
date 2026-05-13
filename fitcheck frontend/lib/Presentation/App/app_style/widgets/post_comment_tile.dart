@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 class PostCommentTile extends StatelessWidget {
-  const PostCommentTile({super.key, required this.username, required this.body, this.timeLabel});
+  const PostCommentTile({super.key, required this.username, required this.body, this.timeLabel, this.profileImageUrl});
 
   final String username;
   final String body;
   final String? timeLabel;
+  final String? profileImageUrl;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +16,9 @@ class PostCommentTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CircleAvatar(radius: 14, backgroundColor: Colors.white24, child: Icon(Icons.person, size: 16, color: Colors.white)),
+            profileImageUrl != null && profileImageUrl!.isNotEmpty
+              ? CircleAvatar(radius: 14, backgroundColor: Colors.white24, backgroundImage: NetworkImage(profileImageUrl!))
+              : const CircleAvatar(radius: 14, backgroundColor: Colors.white24, child: Icon(Icons.person, size: 16, color: Colors.white)),
           const SizedBox(width: 8),
           Expanded(
             child: Column(

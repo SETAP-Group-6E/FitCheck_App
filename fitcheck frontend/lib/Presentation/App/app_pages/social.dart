@@ -79,15 +79,27 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 			// Try to insert a posts row with caption metadata. If the table doesn't exist
 			// this will fail and be caught — upload still succeeds.
 			final caption = _captionController.text.trim();
-				try {
-				await Supabase.instance.client.from('post').insert({
-					'storage_key': postKey,
-					'user_id': user.id,
-					'media_url': imagePaths.isNotEmpty ? imagePaths.first : null,
-					'caption': caption,
-					'created_at': DateTime.fromMillisecondsSinceEpoch(now).toIso8601String(),
-				});
-			} catch (_) {}
+						try {
+							final inserted = await Supabase.instance.client.from('post').insert({
+								'storage_key': postKey,
+								'user_id': user.id,
+								'outfit_id': null,
+								'media_url': imagePaths.isNotEmpty ? imagePaths.first : null,
+								'caption': caption,
+								'created_at': DateTime.fromMillisecondsSinceEpoch(now).toIso8601String(),
+							}).select().maybeSingle();
+							// log for debugging if insertion returned nothing
+							// ignore: avoid_print
+							print('Inserted post row: $inserted');
+							if (inserted == null) {
+								if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Post metadata not saved (no DB row)')));
+							}
+						} catch (e) {
+							// surface DB errors instead of silently ignoring
+							// ignore: avoid_print
+							print('Failed to insert post row: $e');
+							if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save post metadata: $e')));
+						}
 
 			if (!mounted) {
 				return;

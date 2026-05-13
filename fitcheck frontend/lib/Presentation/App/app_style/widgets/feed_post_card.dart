@@ -1,9 +1,9 @@
 import 'dart:async';
+import 'package:flutter/gestures.dart';
 
 import 'package:fitcheck/Data/repositories/supabase_comment_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../app_pages/post_detail_page.dart';
 import '../../app_pages/post_comments_sheet.dart';
 
 class FeedPostCard extends StatefulWidget {
@@ -36,6 +36,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
   bool _loadingLikes = true;
   int _commentCount = 0;
   bool _loadingComments = true;
+  bool _captionExpanded = false;
   final _commentRepo = SupabaseCommentRepository();
   StreamSubscription<List<Map<String, dynamic>>>? _commentsSub;
   // comments removed: UI and backend calls disabled
@@ -280,7 +281,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                                 context: context,
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,
-                                builder: (_) => PostCommentsSheet(postId: widget.postId),
+                                builder: (_) => PostCommentsSheet(postId: widget.postId, caption: widget.caption, timeLabel: widget.timeLabel),
                               );
                               // refresh comments count after sheet is dismissed
                               _loadComments();
@@ -318,9 +319,50 @@ class _FeedPostCardState extends State<FeedPostCard> {
               if (widget.caption != null && widget.caption!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                  child: Text(
-                    widget.caption!,
-                    style: const TextStyle(color: Colors.white),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Builder(builder: (context) {
+                        const limit = 50;
+                        final caption = widget.caption!;
+                        final shouldCollapse = caption.length > limit;
+
+                        if (!shouldCollapse) {
+                          return Text(caption, style: const TextStyle(color: Colors.white));
+                        }
+
+                        // collapsed or expanded with inline tappable More/Less
+                        return RichText(
+                          text: TextSpan(
+                            children: [
+                              if (!_captionExpanded) ...[
+                                TextSpan(text: caption.substring(0, limit), style: const TextStyle(color: Colors.white)),
+                                const TextSpan(text: '... ', style: TextStyle(color: Colors.white)),
+                                TextSpan(
+                                  text: 'More',
+                                  style: const TextStyle(color: Color(0xFFD99C13), fontWeight: FontWeight.w600),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      setState(() => _captionExpanded = true);
+                                    },
+                                ),
+                              ] else ...[
+                                TextSpan(text: caption, style: const TextStyle(color: Colors.white)),
+                                TextSpan(
+                                  text: ' Less',
+                                  style: const TextStyle(color: Color(0xFFD99C13), fontWeight: FontWeight.w600),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      setState(() => _captionExpanded = false);
+                                    },
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 8),
+                    ],
                   ),
                 ),
             ],

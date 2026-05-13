@@ -5,8 +5,10 @@ import 'dart:async';
 import '../../../Data/repositories/supabase_comment_repository.dart';
 
 class PostCommentsSheet extends StatefulWidget {
-  const PostCommentsSheet({super.key, required this.postId});
+  const PostCommentsSheet({super.key, required this.postId, this.caption, this.timeLabel});
   final String postId;
+  final String? caption;
+  final String? timeLabel;
 
   @override
   State<PostCommentsSheet> createState() => _PostCommentsSheetState();
@@ -20,6 +22,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
   bool _submitting = false;
   StreamSubscription<List<Map<String, dynamic>>>? _commentsSub;
   ScrollController? _sheetScrollController;
+  bool _captionExpanded = false;
 
   @override
   void initState() {
@@ -32,7 +35,15 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
           .stream(primaryKey: ['comments_id'])
           .eq('storage_key', widget.postId)
           .listen((rows) {
-        if (mounted) setState(() => _comments = List<Map<String, dynamic>>.from(rows));
+        try {
+          final list = List<Map<String, dynamic>>.from(rows);
+          // ignore: avoid_print
+          print('Realtime comments for ${widget.postId}: ${list.length} rows');
+          if (mounted) setState(() => _comments = list);
+        } catch (e) {
+          // ignore: avoid_print
+          print('Error processing realtime comments: $e');
+        }
       });
     } catch (_) {}
   }
@@ -43,6 +54,9 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
       _comments = await _repo.fetchComments(widget.postId);
     } catch (e) {
       _comments = [];
+      // ignore: avoid_print
+      print('Failed to load comments for ${widget.postId}: $e');
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to load comments')));
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -74,6 +88,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
             );
           } catch (_) {}
         });
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Comment posted')));
       } else {
         // fallback optimistic append if insert returned nothing
         final newComment = {
@@ -87,7 +102,9 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
         if (mounted) setState(() => _comments.add(newComment));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to post comment.')));
+      // ignore: avoid_print
+      print('Failed to post comment: $e');
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to post comment.')));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -119,37 +136,59 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                   decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
                 ),
               ),
+              // header area for comments sheet
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                constraints: const BoxConstraints(minHeight: 64),
+                child: const Center(
+                  child: Text(
+                    'Comments',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ),
               Expanded(
                 child: _loading
                     ? const Center(child: CircularProgressIndicator())
-                    : ListView.builder(
-                      controller: scrollController,
-                        itemCount: _comments.length,
-                        itemBuilder: (context, i) {
-                          final row = _comments[i];
-                          final uid = (row['user_id'] ?? '') as String;
-                          final body = (row['body'] ?? '') as String;
-                          final createdAt = row['created_at'] != null ? DateTime.parse(row['created_at']) : null;
-                          final timeLabel = createdAt != null ? _formatTimeAgo(createdAt) : null;
-                          final username = 'user_${uid.substring(0, uid.length > 8 ? 8 : uid.length)}';
-                          return PostCommentTile(username: username, body: body, timeLabel: timeLabel);
-                        },
-                      ),
+                    : _comments.isEmpty
+                        ? const Center(child: Text('No comments yet', style: TextStyle(color: Colors.white70)))
+                        : ListView.builder(
+                            controller: scrollController,
+                            itemCount: _comments.length,
+                            itemBuilder: (context, i) {
+                              final row = _comments[i];
+                              final uid = (row['user_id'] ?? '') as String;
+                              final body = (row['body'] ?? '') as String;
+                              final createdAt = row['created_at'] != null ? DateTime.parse(row['created_at']) : null;
+                              final timeLabel = createdAt != null ? _formatTimeAgo(createdAt) : null;
+                              final username = (row['username'] ?? '') as String?;
+                              final profileImageUrl = (row['profile_image_url'] ?? '') as String?;
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                                child: PostCommentTile(username: username ?? 'user_${uid.substring(0, uid.length > 8 ? 8 : uid.length)}', body: body, timeLabel: timeLabel, profileImageUrl: profileImageUrl),
+                              );
+                            },
+                          ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          hintText: 'Write a comment...',
-                          hintStyle: TextStyle(color: Colors.white54),
-                          filled: true,
-                          fillColor: Color(0xFF1E1E1E),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: SizedBox(
+                        height: 40,
+                        child: TextField(
+                          controller: _controller,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            hintText: 'Write a comment...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                            hintStyle: TextStyle(color: Colors.white54),
+                          ),
                         ),
                       ),
                     ),
@@ -162,7 +201,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                           : IconButton(
                               key: const ValueKey('send'),
                               onPressed: _submit,
-                              icon: const Icon(Icons.send, color: Colors.white70),
+                              icon: const Icon(Icons.arrow_forward, color: Colors.white70),
                             ),
                     ),
                   ],
