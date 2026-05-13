@@ -20,6 +20,7 @@ dependencies:
   google_fonts: ^8.0.2
   google_sign_in: ^7.2.0
   image_picker: ^1.2.1
+  crop_your_image: ^0.6.0
   http: ^1.6.0
   flutter_dotenv: ^5.0.2
   state_notifier: ^1.0.0
@@ -69,3 +70,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+dependency_overrides:
+  image: 3.2.2

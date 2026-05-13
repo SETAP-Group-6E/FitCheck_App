@@ -141,16 +141,29 @@ class _HomePageState extends State<HomePage> {
     }
 
     final posts = await Future.wait(
-      grouped.values.map((group) async {
+      grouped.entries.map((entry) async {
+        final groupKey = entry.key;
+        final group = entry.value;
         group.images.sort((a, b) => a.order.compareTo(b.order));
         final userData = await _fetchPosterUser(group.author);
 
+        // Try to fetch post row (contains caption) from `post` table
+        String? caption;
+        try {
+          final row = await supabase.from('post').select('caption').eq('storage_key', groupKey).maybeSingle();
+          caption = (row?['caption'] as String?)?.trim();
+        } catch (_) {
+          caption = null;
+        }
+
         return _BucketPost(
+          id: groupKey,
           author: group.author,
           username: userData.username,
           createdAt: group.createdAt,
           imageUrls: group.images.map((img) => img.url).toList(),
           profileImageUrl: userData.profileImageUrl,
+          caption: caption,
         );
       }),
     );
@@ -355,10 +368,12 @@ class _HomePageState extends State<HomePage> {
 
                                 final post = posts[index];
                                 return FeedPostCard(
+                                  postId: post.id,
                                   username: post.username,
                                   timeLabel: _formatTimeAgo(post.createdAt),
                                   imageUrls: post.imageUrls,
                                   profileImageUrl: post.profileImageUrl,
+                                  caption: post.caption,
                                 );
                               },
                             ),
@@ -397,18 +412,22 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _BucketPost {
+  final String id;
   final String author;
   final String username;
   final DateTime createdAt;
   final List<String> imageUrls;
   final String? profileImageUrl;
+  final String? caption;
 
   const _BucketPost({
+    required this.id,
     required this.author,
     required this.username,
     required this.createdAt,
     required this.imageUrls,
     this.profileImageUrl,
+    this.caption,
   });
 }
 

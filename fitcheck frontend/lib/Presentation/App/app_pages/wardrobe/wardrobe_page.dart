@@ -31,8 +31,8 @@ class _WardrobePageState extends State<WardrobePage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
   String _searchQuery = '';
-  Set<String> _selectedWearTypes = {};
-  Set<String> _selectedLayerCategories = {};
+  final Set<String> _selectedWearTypes = {};
+  final Set<String> _selectedLayerCategories = {};
   WeatherService? _weatherService;
   Map<String, dynamic>? _currentWeather;
   List<String> _recommendedTags = [];
@@ -222,9 +222,9 @@ class _WardrobePageState extends State<WardrobePage> {
     final temp = (w['temp'] ?? 0.0) as double;
     final cond = (w['condition'] ?? '').toString().toLowerCase();
     final tags = <String>[];
-    if (temp >= 25)
+    if (temp >= 25) {
       tags.add('warm');
-    else if (temp >= 15)
+    } else if (temp >= 15)
       tags.add('mild');
     else
       tags.add('cold');
@@ -238,10 +238,11 @@ class _WardrobePageState extends State<WardrobePage> {
     final key = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
     if (key.isEmpty) {
       debugPrint('[WardrobePage] OPENWEATHER_API_KEY missing');
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Weather API key missing')),
         );
+      }
       return;
     }
     _weatherService ??= WeatherService(key);
@@ -256,16 +257,18 @@ class _WardrobePageState extends State<WardrobePage> {
         _recommendedTags = _recommendTagsFromWeather(w);
       });
       debugPrint('[WardrobePage] Weather loaded: $w');
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Weather: ${w['temp']}C ${w['condition']}')),
         );
+      }
     } catch (e) {
       debugPrint('[WardrobePage] Weather load error: $e');
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Weather fetch failed')));
+      }
     }
   }
 
@@ -363,10 +366,11 @@ class _WardrobePageState extends State<WardrobePage> {
         _items.insert(index, removed);
         if (mounted) setState(() {});
       }
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+      }
     }
   }
 
@@ -419,10 +423,11 @@ class _WardrobePageState extends State<WardrobePage> {
         _outfits.insert(index, removed);
         if (mounted) setState(() {});
       }
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+      }
     }
   }
 
@@ -660,7 +665,7 @@ class _WardrobeItemsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading)
+    if (isLoading) {
       return const Center(
         child: SizedBox(
           height: 24,
@@ -668,11 +673,13 @@ class _WardrobeItemsGrid extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
       );
-    if (error != null)
+    }
+    if (error != null) {
       return const Text(
         'Could not load items',
         style: TextStyle(color: Colors.white70, fontSize: 12),
       );
+    }
 
     final screenWidth = MediaQuery.of(context).size.width;
     final crossAxisCount = ((screenWidth - 60) / 125).floor().clamp(2, 6);
@@ -820,7 +827,7 @@ class _WardrobeOutfitsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading)
+    if (isLoading) {
       return const Center(
         child: SizedBox(
           height: 24,
@@ -828,22 +835,25 @@ class _WardrobeOutfitsList extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
       );
-    if (error != null)
+    }
+    if (error != null) {
       return const Text(
         'Could not load outfits',
         style: TextStyle(color: Colors.white70, fontSize: 12),
       );
-    if (outfits.isEmpty)
+    }
+    if (outfits.isEmpty) {
       return const Text(
         'No outfits yet',
         style: TextStyle(color: Colors.white70, fontSize: 12),
       );
+    }
 
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: outfits.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final outfit = outfits[index];
         final name = (outfit['name'] ?? 'Untitled outfit').toString();
@@ -908,7 +918,7 @@ class _WardrobeOutfitsList extends StatelessWidget {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: (outfit['items'] as List).length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
                       itemBuilder: (context, i) {
                         final it = Map<String, dynamic>.from(
                           (outfit['items'] as List)[i] as Map<String, dynamic>,

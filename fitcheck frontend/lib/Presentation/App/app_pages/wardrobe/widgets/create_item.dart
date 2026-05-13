@@ -110,6 +110,7 @@ class _CreateItemState extends State<CreateItem> {
     }
   }
 
+  @override
   void dispose() {
     _titleCtrl.dispose();
     super.dispose();
@@ -573,9 +574,9 @@ class _CheckboxRow extends StatelessWidget {
           data: Theme.of(context).copyWith(
             unselectedWidgetColor: _CreateItemTheme.border,
             checkboxTheme: CheckboxThemeData(
-              fillColor: MaterialStateProperty.resolveWith(
+              fillColor: WidgetStateProperty.resolveWith(
                 (states) =>
-                    states.contains(MaterialState.selected)
+                    states.contains(WidgetState.selected)
                         ? _CreateItemTheme.gold
                         : Colors.transparent,
               ),
@@ -586,7 +587,7 @@ class _CheckboxRow extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(4),
               ),
-              checkColor: MaterialStateProperty.all(Colors.white),
+              checkColor: WidgetStateProperty.all(Colors.white),
             ),
           ),
           child: Checkbox(
