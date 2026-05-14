@@ -1,4 +1,12 @@
+// File: lib/Presentation/App/app_pages/settings/change_password_page.dart
+// Purpose: Allows the user to change their account password.
+// Notes: Includes validation and calls auth API to update credentials.
+
+// Change password page: collects current/new passwords and triggers an update.
+// Note: this currently shows a placeholder SnackBar on save and needs
+// backend integration to actually change the password.
 import 'package:flutter/material.dart';
+import '../../app_style/widgets/app_toast.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -30,7 +38,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     const double topBarHeight = 120;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 470),
@@ -41,7 +49,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 child: Container(
                   height: topBarHeight,
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                  color: Colors.black,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   child: Row(
                     children: [
                       _circleIconButton(
@@ -133,11 +141,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             ),
                           ),
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Password change requested.'),
-                              ),
-                            );
+                            showAppMessage(context, 'Password change requested.');
                           },
                           child: const Text(
                             'Save password',
