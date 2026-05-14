@@ -1,12 +1,20 @@
+// File: lib/Presentation/App/app_pages/home_page.dart
+// Purpose: Main landing/home screen for the app feed.
+// Notes: Hosts primary feed and navigation entry points.
+
 import 'dart:async';
 
-import 'package:fitcheck/Presentation/App/app_pages/social.dart';
+import 'package:fitcheck/Presentation/App/app_pages/posts/social.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/feed_post_card.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:flutter/foundation.dart';
+// Feed / Home page: loads posts from storage and displays the feed cards.
+// - Handles navigation to post creation and post detail views.
 import 'package:flutter/material.dart';
+import '../app_style/widgets/app_toast.dart';
 import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fitcheck/Data/repositories/notification_repository.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +24,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // HomePage state holds feed data, notification counts and UI helpers.
+  // Responsibilities:
+  // - Load posts from Supabase storage buckets and map them to feed cards
+  // - Poll for unread notifications and expose a badge in the header
+  // - Provide navigation to post drafting and notifications
   final supabase = Supabase.instance.client;
+  final NotificationRepository _notifRepo = NotificationRepository();
+  int _unreadCount = 0;
+  Timer? _notifPollTimer;
   Future<List<_BucketPost>> _feedFuture = Future.value(const <_BucketPost>[]);
   bool _showNoMorePostsPrompt = false;
   bool _isScrollingDown = false;
@@ -32,13 +48,28 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // Kick off initial feed load and notification polling
     _refreshFeed();
+    _fetchUnread();
+    _notifPollTimer = Timer.periodic(const Duration(seconds: 20), (_) => _fetchUnread());
   }
 
   @override
   void dispose() {
+    // Cancel background timers when leaving the home page
     _noMorePostsTimer?.cancel();
+    _notifPollTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _fetchUnread() async {
+    try {
+      final count = await _notifRepo.fetchUnreadCount();
+      if (!mounted) return;
+      setState(() {
+        _unreadCount = count;
+      });
+    } catch (_) {}
   }
 
   void _triggerNoMorePostsPrompt() {
@@ -85,6 +116,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Reads all user post folders from Supabase storage and builds a list
+  // of posts sorted by creation time. This is a relatively expensive
+  // operation and is called on refresh or when returning from posting.
   Future<List<_BucketPost>> _fetchBucketPosts() async {
     final bucket = supabase.storage.from('User Posts');
     final rootEntries = await bucket.list(
@@ -141,16 +175,29 @@ class _HomePageState extends State<HomePage> {
     }
 
     final posts = await Future.wait(
-      grouped.values.map((group) async {
+      grouped.entries.map((entry) async {
+        final groupKey = entry.key;
+        final group = entry.value;
         group.images.sort((a, b) => a.order.compareTo(b.order));
         final userData = await _fetchPosterUser(group.author);
 
+        // Try to fetch post row (contains caption) from `post` table
+        String? caption;
+        try {
+          final row = await supabase.from('post').select('caption').eq('storage_key', groupKey).maybeSingle();
+          caption = (row?['caption'] as String?)?.trim();
+        } catch (_) {
+          caption = null;
+        }
+
         return _BucketPost(
+          id: groupKey,
           author: group.author,
           username: userData.username,
           createdAt: group.createdAt,
           imageUrls: group.images.map((img) => img.url).toList(),
           profileImageUrl: userData.profileImageUrl,
+          caption: caption,
         );
       }),
     );
@@ -202,8 +249,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Main scaffold containing the feed list, header with bell/+ buttons,
+    // and a small no-more-posts prompt overlay when the user scrolls past
+    // the end of the feed.
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           SafeArea(
@@ -223,24 +273,44 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const Spacer(),
+                      // Notification bell 
+                      Stack(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/notifications');
+                            },
+                            icon: const Icon(
+                              Icons.notifications_none,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                          ),
+                          if (_unreadCount > 0)
+                            Positioned(
+                              right: 6,
+                              top: 6,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(12)),
+                                child: Text(_unreadCount > 99 ? '99+' : '$_unreadCount', style: const TextStyle(color: Colors.white, fontSize: 11)),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
                       IconButton(
                         onPressed: () async {
                           final user = supabase.auth.currentUser;
                           if (user == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Please log in to create a post.',
-                                ),
-                                duration: Duration(milliseconds: 1000),
-                              ),
-                            );
+                            showAppMessage(context, 'Please log in to create a post.');
                             Navigator.pushNamed(context, '/login');
                             return;
                           }
 
                           final posted = await Navigator.of(context).push<bool>(
                             MaterialPageRoute(
+                              settings: const RouteSettings(name: '/post_drafting'),
                               builder: (_) => const PostDraftingPage(),
                             ),
                           );
@@ -355,10 +425,13 @@ class _HomePageState extends State<HomePage> {
 
                                 final post = posts[index];
                                 return FeedPostCard(
+                                  postId: post.id,
+                                  authorId: post.author,
                                   username: post.username,
                                   timeLabel: _formatTimeAgo(post.createdAt),
                                   imageUrls: post.imageUrls,
                                   profileImageUrl: post.profileImageUrl,
+                                  caption: post.caption,
                                 );
                               },
                             ),
@@ -397,18 +470,22 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _BucketPost {
+  final String id;
   final String author;
   final String username;
   final DateTime createdAt;
   final List<String> imageUrls;
   final String? profileImageUrl;
+  final String? caption;
 
   const _BucketPost({
+    required this.id,
     required this.author,
     required this.username,
     required this.createdAt,
     required this.imageUrls,
     this.profileImageUrl,
+    this.caption,
   });
 }
 
