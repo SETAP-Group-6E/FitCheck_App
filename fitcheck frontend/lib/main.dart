@@ -10,6 +10,7 @@ import 'package:fitcheck/Presentation/App/app_pages/profile/my_posts_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/discover/discover_page.dart';
 import 'package:fitcheck/Presentation/App/theme/app_theme_mode.dart';
 import 'package:flutter/material.dart';
+import 'package:fitcheck/Presentation/App/app_pages/notifications_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Presentation/auth/pages/register_page.dart';
 import 'Presentation/App/app_style/widgets/floating_nav_bar.dart';
@@ -245,6 +246,27 @@ class MyApp extends ConsumerWidget {
                     );
               },
             );
+              case '/notifications':
+                return PageRouteBuilder(
+                  settings: settings,
+                  transitionDuration: const Duration(milliseconds: 220),
+                  reverseTransitionDuration: const Duration(milliseconds: 180),
+                  pageBuilder: (context, animation, secondaryAnimation) => const NotificationsPage(),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    final slideTween = Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).chain(CurveTween(curve: Curves.easeOutCubic));
+                    return Stack(
+                      children: [
+                        Positioned.fill(
+                          child: FadeTransition(
+                            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                            child: ColoredBox(color: Theme.of(context).scaffoldBackgroundColor),
+                          ),
+                        ),
+                        SlideTransition(position: animation.drive(slideTween), child: child),
+                      ],
+                    );
+                  },
+                );
           case '/discover':
                   return PageRouteBuilder(
                     settings: settings,
