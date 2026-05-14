@@ -57,10 +57,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
   }
 
-  Future<void> _markAllRead() async {
-    await repo.markAllRead();
-    await _load();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,22 +64,56 @@ class _NotificationsPageState extends State<NotificationsPage> {
     final onSurface = theme.colorScheme.onSurface;
 
     if (!_isAuthenticated) {
+      // Unauthenticated: show matching header and prompt to sign in.
       return Scaffold(
-        appBar: AppBar(title: const Text('Notifications')),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Please sign in to view your notifications', style: theme.textTheme.titleMedium),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/login'),
-                  child: const Text('Sign in'),
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Container(
+                height: 120,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                color: theme.scaffoldBackgroundColor,
+                child: Row(
+                  children: [
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.onBackground.withOpacity(0.8), size: 20),
+                      onPressed: () => Navigator.maybePop(context),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          'Notifications',
+                          style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onBackground),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Please sign in to view your notifications', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onBackground)),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pushNamed(context, '/login'),
+                          child: const Text('Sign in'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -99,7 +129,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           children: [
             Icon(Icons.notifications_off, size: 56, color: theme.colorScheme.onBackground.withOpacity(0.6)),
             const SizedBox(height: 8),
-            Text("You're all caught up", style: theme.textTheme.titleMedium),
+            Text("You're all caught up", style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onBackground)),
             const SizedBox(height: 6),
             Text('No new notifications', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onBackground.withOpacity(0.7))),
           ],
@@ -117,8 +147,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
               leading: n.actorProfileUrl != null
                   ? CircleAvatar(backgroundImage: NetworkImage(n.actorProfileUrl!))
                   : const CircleAvatar(child: Icon(Icons.person)),
-              title: Text('${n.actorUsername} ${n.type == 'like' ? 'liked' : 'commented'}', style: theme.textTheme.bodyLarge),
-              subtitle: n.commentPreview != null ? Text(n.commentPreview!, style: theme.textTheme.bodyMedium) : null,
+              title: Text('${n.actorUsername} ${n.type == 'like' ? 'liked' : 'commented'}', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onBackground)),
+              subtitle: n.commentPreview != null ? Text(n.commentPreview!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onBackground.withOpacity(0.85))) : null,
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => MyPostsPage(userId: n.postKey.split('/').first)));
               },
@@ -128,20 +158,65 @@ class _NotificationsPageState extends State<NotificationsPage> {
       );
     }
 
+    // Use WillPopScope so system back (Android) also triggers mark-as-read.
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        actions: [
-          TextButton(
-            onPressed: _items.isEmpty ? null : _markAllRead,
-            child: Text('Mark all read', style: theme.textTheme.labelLarge?.copyWith(color: _items.isEmpty ? theme.disabledColor : theme.colorScheme.onPrimary)),
-          )
-        ],
-      ),
-      body: Container(
-        width: double.infinity,
-        color: theme.scaffoldBackgroundColor,
-        child: content,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // Header matching app style (back button + centered title)
+            Container(
+              height: 120,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              color: theme.scaffoldBackgroundColor,
+              child: Row(
+                children: [
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 20),
+                    onPressed: () {
+                      // When the user navigates back, assume notifications are
+                      // read and mark them on the server (fire-and-forget).
+                      if (_isAuthenticated) {
+                        repo.markAllRead();
+                      }
+                      Navigator.maybePop(context);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Notifications',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+            ),
+
+            // Content area wrapped in WillPopScope so system back marks read.
+            Expanded(
+              child: WillPopScope(
+                onWillPop: () async {
+                  if (_isAuthenticated) {
+                    // Fire-and-forget; we don't need to await completion.
+                    repo.markAllRead();
+                  }
+                  return true;
+                },
+                child: Container(
+                  width: double.infinity,
+                  color: theme.scaffoldBackgroundColor,
+                  child: content,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
