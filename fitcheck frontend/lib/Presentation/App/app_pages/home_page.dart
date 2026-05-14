@@ -24,6 +24,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // HomePage state holds feed data, notification counts and UI helpers.
+  // Responsibilities:
+  // - Load posts from Supabase storage buckets and map them to feed cards
+  // - Poll for unread notifications and expose a badge in the header
+  // - Provide navigation to post drafting and notifications
   final supabase = Supabase.instance.client;
   final NotificationRepository _notifRepo = NotificationRepository();
   int _unreadCount = 0;
@@ -43,6 +48,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // Kick off initial feed load and notification polling
     _refreshFeed();
     _fetchUnread();
     _notifPollTimer = Timer.periodic(const Duration(seconds: 20), (_) => _fetchUnread());
@@ -50,6 +56,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    // Cancel background timers when leaving the home page
     _noMorePostsTimer?.cancel();
     _notifPollTimer?.cancel();
     super.dispose();
@@ -109,6 +116,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Reads all user post folders from Supabase storage and builds a list
+  // of posts sorted by creation time. This is a relatively expensive
+  // operation and is called on refresh or when returning from posting.
   Future<List<_BucketPost>> _fetchBucketPosts() async {
     final bucket = supabase.storage.from('User Posts');
     final rootEntries = await bucket.list(
@@ -239,6 +249,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Main scaffold containing the feed list, header with bell/+ buttons,
+    // and a small no-more-posts prompt overlay when the user scrolls past
+    // the end of the feed.
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
@@ -260,7 +273,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const Spacer(),
-                      // Notification bell (left of the + button)
+                      // Notification bell 
                       Stack(
                         children: [
                           IconButton(
@@ -297,6 +310,7 @@ class _HomePageState extends State<HomePage> {
 
                           final posted = await Navigator.of(context).push<bool>(
                             MaterialPageRoute(
+                              settings: const RouteSettings(name: '/post_drafting'),
                               builder: (_) => const PostDraftingPage(),
                             ),
                           );

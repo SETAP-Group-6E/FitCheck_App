@@ -20,6 +20,9 @@ class MyPostsPage extends StatefulWidget {
 class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClientMixin<MyPostsPage> {
   @override
   bool get wantKeepAlive => true;
+  // MyPostsPage loads posts for a particular user (or the signed-in user)
+  // and supports editing or deleting posts when appropriate. It paginates
+  // results locally and preserves scroll position via a PageStorageKey.
   final supabase = Supabase.instance.client;
   final ScrollController _scrollController = ScrollController();
 
@@ -51,6 +54,7 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
   }
 
   void _appendMore() {
+    // Append the next page of posts into the visible list.
     final nextEnd = (_visiblePosts.length + _perPage).clamp(0, _allPosts.length);
     setState(() {
       _visiblePosts = _allPosts.sublist(0, nextEnd);
@@ -221,6 +225,7 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
   }
 
   Future<void> _deletePost(_BucketPost post) async {
+    // Confirm and remove a post's storage objects and DB rows.
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(

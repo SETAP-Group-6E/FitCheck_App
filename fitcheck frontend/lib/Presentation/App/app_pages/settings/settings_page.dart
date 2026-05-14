@@ -23,6 +23,7 @@ import 'package:fitcheck/Presentation/App/theme/app_theme_mode.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fitcheck/Presentation/App/app_state.dart' as app_state;
 
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -37,6 +38,11 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
+  // SettingsPage state manages avatar, preferences and navigation to
+  // settings sub-pages. Important behaviors:
+  // - Hides the global floating navbar in initState and restores it in dispose
+  // - Listens for auth state changes and navigates back to public homepage
+  //   if the user signs out elsewhere
   bool _notifications = true;
   bool _isAvatarHovered = false;
   String? _avatarUrl;
@@ -51,6 +57,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void initState() {
     super.initState();
     _refreshAvatarUrl();
+    // hide global navbar while on settings
+    app_state.navbarVisible.value = false;
     // Listen for auth state changes so we can react (for example, if the
     // user signs out from another tab). When no longer authenticated we
     // navigate back to the public homepage to avoid showing protected UI.
@@ -67,6 +75,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void dispose() {
     _authSub?.cancel();
+    // restore navbar visibility when leaving settings
+    app_state.navbarVisible.value = true;
     super.dispose();
   }
 
@@ -122,9 +132,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   color: Theme.of(context).scaffoldBackgroundColor,
                   child: Row(
                     children: [
-                      _circleIconButton(
-                        icon: Icons.arrow_back_ios_new,
-                        onTap: () => Navigator.maybePop(context),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 20),
+                        onPressed: () => Navigator.maybePop(context),
                       ),
                       Expanded(
                         child: Center(
@@ -139,13 +149,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ),
                         ),
                       ),
-                      _circleIconButton(
-                        icon: Icons.notifications_none,
-                        onTap: () {
-                          // Simple feedback for notifications tap
-                          showAppMessage(context, 'No notifications yet.');
-                        },
-                      ),
+                      const SizedBox(width: 8),
                     ],
                   ),
                 ),
@@ -341,8 +345,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ChangePasswordPage(),
+                                        settings: const RouteSettings(name: '/settings/change_password'),
+                                        builder: (context) => const ChangePasswordPage(),
                                       ),
                                     );
                                   },
@@ -354,8 +358,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            const DeleteAccountPage(),
+                                        settings: const RouteSettings(name: '/settings/delete_account'),
+                                        builder: (context) => const DeleteAccountPage(),
                                       ),
                                     );
                                   },
@@ -378,8 +382,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AboutUsPage(),
+                                        settings: const RouteSettings(name: '/settings/about'),
+                                        builder: (context) => const AboutUsPage(),
                                       ),
                                     );
                                   },
@@ -390,8 +394,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            const TermsConditionsPage(),
+                                        settings: const RouteSettings(name: '/settings/terms'),
+                                        builder: (context) => const TermsConditionsPage(),
                                       ),
                                     );
                                   },
@@ -402,8 +406,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            const PrivacyPolicyPage(),
+                                        settings: const RouteSettings(name: '/settings/privacy'),
+                                        builder: (context) => const PrivacyPolicyPage(),
                                       ),
                                     );
                                   },
@@ -414,8 +418,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ContactUsPage(),
+                                        settings: const RouteSettings(name: '/settings/contact'),
+                                        builder: (context) => const ContactUsPage(),
                                       ),
                                     );
                                   },
@@ -455,21 +459,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   trailing: _valueChip('English'),
                                 ),
                                 const SizedBox(height: 8),
-                                _preferenceRow(
-                                  title: 'Notifications',
-                                  trailing: Switch(
-                                    value: _notifications,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _notifications = value;
-                                      });
-                                    },
-                                    activeThumbColor: Colors.white,
-                                    activeTrackColor: const Color(0xFF3A3A3A),
-                                    inactiveThumbColor: const Color(0xFF8A8A8A),
-                                    inactiveTrackColor: const Color(0xFF2B2B2B),
-                                  ),
-                                ),
+                                // Notifications preference removed per UX request
                               ],
                             ),
                           ),

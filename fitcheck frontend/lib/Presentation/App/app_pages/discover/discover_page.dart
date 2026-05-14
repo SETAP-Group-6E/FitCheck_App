@@ -17,6 +17,9 @@ class DiscoverPage extends StatefulWidget {
 class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClientMixin<DiscoverPage> {
   @override
   bool get wantKeepAlive => true;
+  // Discover page loads a randomized selection of posts and exposes
+  // search/user suggestions. It keeps its state alive so users don't
+  // lose the results when switching tabs.
   final supabase = Supabase.instance.client;
   final TextEditingController _controller = TextEditingController();
 
@@ -41,6 +44,8 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     super.dispose();
   }
 
+  // Load and assemble posts from the storage bucket. Groups files by
+  // timestamp/user folder and enriches each post with author data.
   Future<void> _loadAllPosts() async {
     setState(() => _loading = true);
     try {
@@ -167,30 +172,49 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     }
   }
 
+  // Open a modal dialog showing the full post. Discover is read-only,
+  // so no edit/delete actions are presented here.
   void _openPost(_BucketPost post) {
     showDialog<void>(
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(12),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 700),
-          child: Stack(
-            children: [
-              FeedPostCard(
-                postId: post.id,
-                authorId: post.author,
-                username: post.username,
-                timeLabel: '',
-                imageUrls: post.imageUrls,
-                profileImageUrl: post.profileImageUrl,
-                caption: post.caption,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 700),
+              child: Stack(
+                children: [
+                  FeedPostCard(
+                    postId: post.id,
+                    authorId: post.author,
+                    username: post.username,
+                    timeLabel: _formatTimeAgo(post.createdAt),
+                    imageUrls: post.imageUrls,
+                    profileImageUrl: post.profileImageUrl,
+                    caption: post.caption,
+                  ),
+                  // No edit/delete buttons for discover view (read-only)
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inSeconds < 60) return '${difference.inSeconds}s ago';
+    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+    if (difference.inHours < 24) return '${difference.inHours}h ago';
+    if (difference.inDays < 7) return '${difference.inDays}d ago';
+    return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year.toString().substring(2)}';
   }
 
   @override

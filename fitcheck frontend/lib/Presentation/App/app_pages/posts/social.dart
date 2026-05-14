@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'crop_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app_style/widgets/app_toast.dart';
+import '../../app_state.dart' as app_state;
 
 class PostDraftingPage extends StatefulWidget {
 	const PostDraftingPage({super.key});
@@ -125,6 +126,13 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 	}
 
 	@override
+	void initState() {
+		super.initState();
+		// hide global navbar while drafting a post
+		app_state.navbarVisible.value = false;
+	}
+
+	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
 			appBar: AppBar(
@@ -195,9 +203,12 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 																							onTap: () async {
 																								// open crop editor for this image and replace bytes
 																								try {
-																									final cropped = await Navigator.of(context).push<Uint8List?>(
-																										MaterialPageRoute(builder: (_) => CropPage(imageBytes: _selectedBytes[imgIndex], startCropping: true)),
-																									);
+																																		final cropped = await Navigator.of(context).push<Uint8List?>(
+																																																				MaterialPageRoute(
+																																																					settings: const RouteSettings(name: '/crop'),
+																																																					builder: (_) => CropPage(imageBytes: _selectedBytes[imgIndex], startCropping: true),
+																																																				),
+																																																		);
 																									if (cropped != null) {
 																										setState(() {
 																											_selectedBytes[imgIndex] = cropped;
@@ -258,12 +269,19 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 											)
 											: const Icon(Icons.cloud_upload_outlined, color: Colors.white),
 									),
-								),
-							],
+            )],
 						),
 					],
 				),
 			),
 		);
+	}
+
+	@override
+	void dispose() {
+		// restore navbar when leaving post drafting
+		app_state.navbarVisible.value = true;
+		_captionController.dispose();
+		super.dispose();
 	}
 }

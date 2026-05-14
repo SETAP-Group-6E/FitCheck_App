@@ -73,6 +73,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   // Submit a new comment and reload comments on success
   Future<void> _submit() async {
+    // Validate auth and post a new comment using the comment repository.
+    // On success, clear the input and refresh the comment list.
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;
     if (user == null) {

@@ -29,6 +29,10 @@ class WardrobePage extends StatefulWidget {
 }
 
 class _WardrobePageState extends State<WardrobePage> {
+  // WardrobePage manages the user's items and outfits. Key features:
+  // - search/filter with debouncing
+  // - outfit creation flows
+  // - optional weather-based tag recommendations
   late final SupabaseWardrobeRepository _wardrobeRepository;
   bool _isLoading = true;
   String? _error;
@@ -143,6 +147,9 @@ class _WardrobePageState extends State<WardrobePage> {
     final wearTypeCounts = _getWearTypeCounts();
     final layerCategoryCounts = _getLayerCategoryCounts();
 
+    // Show a modal dialog that allows users to toggle wear-type and
+    // layer-category filters. The dialog updates local filter sets used
+    // by _filteredItems/_filteredOutfits.
     showDialog(
       context: context,
       builder:
@@ -464,23 +471,13 @@ class _WardrobePageState extends State<WardrobePage> {
                           padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
-                              SizedBox(
-                                
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromRGBO(0, 0, 0, 0.2),
-                                    borderRadius: BorderRadius.circular(1),
-                                  ),
-                                  child: IconButton(
-                                    icon: const Icon(
-                                      Icons.arrow_back_ios_sharp,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.arrow_back_ios_sharp,
+                                  color: Colors.white,
+                                  size: 20,
                                 ),
+                                onPressed: () => Navigator.pop(context),
                               ),
                               const Expanded(child: SizedBox()),
                               SizedBox(

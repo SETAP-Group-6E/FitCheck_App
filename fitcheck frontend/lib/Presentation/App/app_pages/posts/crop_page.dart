@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:crop_your_image/crop_your_image.dart';
 import 'package:flutter/material.dart';
+import 'package:fitcheck/Presentation/App/app_state.dart' as app_state;
 
 class CropPage extends StatefulWidget {
   const CropPage({super.key, required this.imageBytes, this.startCropping = false});
@@ -30,6 +31,15 @@ class _CropPageState extends State<CropPage> {
   void initState() {
     super.initState();
     _showCrop = widget.startCropping;
+    // hide navbar while cropping
+    app_state.navbarVisible.value = false;
+  }
+
+  @override
+  void dispose() {
+    // restore navbar when leaving crop page
+    app_state.navbarVisible.value = true;
+    super.dispose();
   }
 
   @override
