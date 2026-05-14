@@ -1,3 +1,7 @@
+// File: lib/Data/services/weather_service.dart
+// Purpose: Simple wrapper around OpenWeatherMap API for current weather.
+// Notes: Returns a minimal map with `temp` and `condition`.
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 

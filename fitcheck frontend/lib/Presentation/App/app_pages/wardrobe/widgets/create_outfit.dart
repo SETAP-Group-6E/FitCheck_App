@@ -1,4 +1,9 @@
+// Modal for creating or editing an outfit composed of wardrobe items.
+// Allows selecting items, naming the outfit and adding a description.
+// Modal for creating or editing an outfit composed of wardrobe items.
+// Allows selecting items, naming the outfit and adding a description.
 import 'package:flutter/material.dart';
+import '../../../app_style/widgets/app_toast.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
 import '../constants/wardrobe_constants.dart';
 
@@ -123,11 +128,7 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
     if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
     if (_selectedItemIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Select at least one item for this outfit'),
-        ),
-      );
+      showAppMessage(context, 'Select at least one item for this outfit', error: true);
       return;
     }
 
@@ -159,13 +160,7 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to ${_isEditMode ? 'update' : 'save'} outfit: $e',
-          ),
-        ),
-      );
+      showAppMessage(context, 'Failed to ${_isEditMode ? 'update' : 'save'} outfit: $e', error: true);
     }
   }
 

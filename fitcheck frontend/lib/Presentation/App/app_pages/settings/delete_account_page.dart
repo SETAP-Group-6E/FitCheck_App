@@ -1,4 +1,13 @@
+// File: lib/Presentation/App/app_pages/settings/delete_account_page.dart
+// Purpose: UI for account deletion flow.
+// Notes: Confirms and performs destructive account removal actions.
+
+// Delete account page: confirms destructive account deletion action.
+// WARNING: this UI currently only shows confirmation messages. Wire up
+// backend deletion logic (Supabase auth/profile cleanup) to actually
+// remove user data.
 import 'package:flutter/material.dart';
+import '../../app_style/widgets/app_toast.dart';
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({super.key});
@@ -153,21 +162,11 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                                 ),
                               ),
                               onPressed: () {
-                                if (!_confirmDelete) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Please confirm before deleting your account.',
-                                      ),
-                                    ),
-                                  );
+                                  if (!_confirmDelete) {
+                                  showAppMessage(context, 'Please confirm before deleting your account.');
                                   return;
                                 }
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Delete request submitted.'),
-                                  ),
-                                );
+                                showAppMessage(context, 'Delete request submitted.');
                               },
                               child: const Text(
                                 'Delete account',

@@ -1,4 +1,12 @@
+// File: lib/Presentation/App/app_pages/settings/contact_us_page.dart
+// Purpose: Contact form for user feedback and support messages.
+// Notes: Sends messages to configured backend endpoint.
+
+// Contact us page: simple support message form. Currently the form
+// displays a placeholder confirmation; hook up a backend endpoint to
+// actually send messages.
 import 'package:flutter/material.dart';
+import '../../app_style/widgets/app_toast.dart';
 
 class ContactUsPage extends StatefulWidget {
   const ContactUsPage({super.key});
@@ -142,11 +150,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
                                 ),
                               ),
                               onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Message sent. Thank you.'),
-                                  ),
-                                );
+                                showAppMessage(context, 'Message sent. Thank you.');
                               },
                               child: const Text(
                                 'Send message',

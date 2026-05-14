@@ -1,3 +1,8 @@
+// File: lib/Presentation/App/app_pages/settings/terms_conditions_page.dart
+// Purpose: Displays terms and conditions content.
+// Notes: Static informational page.
+
+// Terms & Conditions page: presents app terms and basic usage guidance.
 import 'package:flutter/material.dart';
 
 class TermsConditionsPage extends StatelessWidget {

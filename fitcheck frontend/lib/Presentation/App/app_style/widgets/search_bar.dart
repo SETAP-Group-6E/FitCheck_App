@@ -1,3 +1,6 @@
+// Compact search bar row: an expandable search field with a toggle.
+// Used in headers where space is limited and a minimal search control
+// is desired.
 import 'package:flutter/material.dart';
 
 class SearchBarRow extends StatefulWidget {
@@ -26,6 +29,9 @@ class _SearchBarRowState extends State<SearchBarRow> {
           width: _expanded ? 150 : 0,
           height: 40,
           curve: Curves.ease,
+          // When expanded the TextField is shown; otherwise the
+          // container collapses to zero width. The animation provides
+          // a smooth transition between states.
           child: _expanded
               ? TextField(
                   controller: widget.controller,
@@ -49,6 +55,9 @@ class _SearchBarRowState extends State<SearchBarRow> {
           child: IconButton(
             icon: Icon(Icons.search, color: Colors.white),
             onPressed: () {
+              // Toggle the expanded state. In many headers this button
+              // is used to reveal a compact search input without taking
+              // up permanent horizontal space.
               setState(() {
                 _expanded = !_expanded;
               });

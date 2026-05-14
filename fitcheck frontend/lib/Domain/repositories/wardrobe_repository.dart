@@ -1,3 +1,7 @@
+// File: lib/Domain/repositories/wardrobe_repository.dart
+// Purpose: Abstract interface for wardrobe data operations used by the app.
+// Notes: Concrete implementations (e.g., Supabase) provide data access.
+
 abstract class WardrobeRepository {
   Future<void> addClothingItem({
     required String photoUrl,

@@ -1,3 +1,11 @@
+// File: lib/Presentation/App/app_pages/wardrobe/wardrobe_page.dart
+// Purpose: Wardrobe management UI – view and manage clothing items and outfits.
+// Notes: Integrates with wardrobe repository implementations.
+
+// Wardrobe page: displays user's wardrobe items and outfits, with search
+// and filter controls and outfit creation flows. Integrates with
+// Supabase via `SupabaseWardrobeRepository` and optionally uses
+// `WeatherService` to suggest items.
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
@@ -9,6 +17,7 @@ import 'package:fitcheck/Presentation/App/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/search_bar.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/styles/wardrobe_styles.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../app_style/widgets/app_toast.dart';
 import 'package:fitcheck/Data/services/weather_service.dart';
 import 'dart:async';
 
@@ -20,6 +29,10 @@ class WardrobePage extends StatefulWidget {
 }
 
 class _WardrobePageState extends State<WardrobePage> {
+  // WardrobePage manages the user's items and outfits. Key features:
+  // - search/filter with debouncing
+  // - outfit creation flows
+  // - optional weather-based tag recommendations
   late final SupabaseWardrobeRepository _wardrobeRepository;
   bool _isLoading = true;
   String? _error;
@@ -31,8 +44,8 @@ class _WardrobePageState extends State<WardrobePage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
   String _searchQuery = '';
-  Set<String> _selectedWearTypes = {};
-  Set<String> _selectedLayerCategories = {};
+  final Set<String> _selectedWearTypes = {};
+  final Set<String> _selectedLayerCategories = {};
   WeatherService? _weatherService;
   Map<String, dynamic>? _currentWeather;
   List<String> _recommendedTags = [];
@@ -134,6 +147,9 @@ class _WardrobePageState extends State<WardrobePage> {
     final wearTypeCounts = _getWearTypeCounts();
     final layerCategoryCounts = _getLayerCategoryCounts();
 
+    // Show a modal dialog that allows users to toggle wear-type and
+    // layer-category filters. The dialog updates local filter sets used
+    // by _filteredItems/_filteredOutfits.
     showDialog(
       context: context,
       builder:
@@ -222,9 +238,9 @@ class _WardrobePageState extends State<WardrobePage> {
     final temp = (w['temp'] ?? 0.0) as double;
     final cond = (w['condition'] ?? '').toString().toLowerCase();
     final tags = <String>[];
-    if (temp >= 25)
+    if (temp >= 25) {
       tags.add('warm');
-    else if (temp >= 15)
+    } else if (temp >= 15)
       tags.add('mild');
     else
       tags.add('cold');
@@ -236,12 +252,11 @@ class _WardrobePageState extends State<WardrobePage> {
 
   Future<void> _loadWeatherAndRecommend() async {
     final key = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
-    if (key.isEmpty) {
+      if (key.isEmpty) {
       debugPrint('[WardrobePage] OPENWEATHER_API_KEY missing');
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Weather API key missing')),
-        );
+      if (mounted) {
+        showAppMessage(context, 'Weather API key missing', error: true);
+      }
       return;
     }
     _weatherService ??= WeatherService(key);
@@ -256,16 +271,14 @@ class _WardrobePageState extends State<WardrobePage> {
         _recommendedTags = _recommendTagsFromWeather(w);
       });
       debugPrint('[WardrobePage] Weather loaded: $w');
-      if (mounted)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Weather: ${w['temp']}C ${w['condition']}')),
-        );
+      if (mounted) {
+        showAppMessage(context, 'Weather: ${w['temp']}C ${w['condition']}');
+      }
     } catch (e) {
       debugPrint('[WardrobePage] Weather load error: $e');
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Weather fetch failed')));
+      if (mounted) {
+        showAppMessage(context, 'Weather fetch failed', error: true);
+      }
     }
   }
 
@@ -353,9 +366,7 @@ class _WardrobePageState extends State<WardrobePage> {
       await _wardrobeRepository.removeClothingItem(id: id);
       await _loadItems();
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Item deleted')));
+        showAppMessage(context, 'Item deleted');
       }
     } catch (e) {
       debugPrint('[WardrobePage] delete error: $e');
@@ -363,10 +374,9 @@ class _WardrobePageState extends State<WardrobePage> {
         _items.insert(index, removed);
         if (mounted) setState(() {});
       }
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+      if (mounted) {
+        showAppMessage(context, 'Delete failed: $e', error: true);
+      }
     }
   }
 
@@ -409,9 +419,7 @@ class _WardrobePageState extends State<WardrobePage> {
       await _wardrobeRepository.removeOutfit(id: id);
       await _loadOutfits();
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Outfit deleted')));
+        showAppMessage(context, 'Outfit deleted');
       }
     } catch (e) {
       debugPrint('[WardrobePage] delete outfit error: $e');
@@ -419,10 +427,9 @@ class _WardrobePageState extends State<WardrobePage> {
         _outfits.insert(index, removed);
         if (mounted) setState(() {});
       }
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+      if (mounted) {
+        showAppMessage(context, 'Delete failed: $e', error: true);
+      }
     }
   }
 
@@ -464,24 +471,13 @@ class _WardrobePageState extends State<WardrobePage> {
                           padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
-                              SizedBox(
-                                child: GlassFrame(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromRGBO(0, 0, 0, 0.2),
-                                      borderRadius: BorderRadius.circular(1),
-                                    ),
-                                    child: IconButton(
-                                      icon: const Icon(
-                                        Icons.arrow_back_ios_sharp,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      onPressed: () => Navigator.pop(context),
-                                    ),
-                                  ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.arrow_back_ios_sharp,
+                                  color: Colors.white,
+                                  size: 20,
                                 ),
+                                onPressed: () => Navigator.pop(context),
                               ),
                               const Expanded(child: SizedBox()),
                               SizedBox(
@@ -660,7 +656,7 @@ class _WardrobeItemsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading)
+    if (isLoading) {
       return const Center(
         child: SizedBox(
           height: 24,
@@ -668,11 +664,13 @@ class _WardrobeItemsGrid extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
       );
-    if (error != null)
+    }
+    if (error != null) {
       return const Text(
         'Could not load items',
         style: TextStyle(color: Colors.white70, fontSize: 12),
       );
+    }
 
     final screenWidth = MediaQuery.of(context).size.width;
     final crossAxisCount = ((screenWidth - 60) / 125).floor().clamp(2, 6);
@@ -820,7 +818,7 @@ class _WardrobeOutfitsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading)
+    if (isLoading) {
       return const Center(
         child: SizedBox(
           height: 24,
@@ -828,22 +826,25 @@ class _WardrobeOutfitsList extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
       );
-    if (error != null)
+    }
+    if (error != null) {
       return const Text(
         'Could not load outfits',
         style: TextStyle(color: Colors.white70, fontSize: 12),
       );
-    if (outfits.isEmpty)
+    }
+    if (outfits.isEmpty) {
       return const Text(
         'No outfits yet',
         style: TextStyle(color: Colors.white70, fontSize: 12),
       );
+    }
 
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: outfits.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final outfit = outfits[index];
         final name = (outfit['name'] ?? 'Untitled outfit').toString();
@@ -908,7 +909,7 @@ class _WardrobeOutfitsList extends StatelessWidget {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: (outfit['items'] as List).length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
                       itemBuilder: (context, i) {
                         final it = Map<String, dynamic>.from(
                           (outfit['items'] as List)[i] as Map<String, dynamic>,

@@ -1,4 +1,11 @@
+// Dialog for creating or editing a wardrobe item.
+// - Presents form fields (name, wear type, material, warmth, etc.) and
+//   calls the provided `WardrobeRepository` to persist changes.
+// Dialog for creating or editing a wardrobe item.
+// - Presents form fields (name, wear type, material, warmth, etc.) and
+//   calls the provided `WardrobeRepository` to persist changes.
 import 'package:flutter/material.dart';
+import '../../../app_style/widgets/app_toast.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
 import '../constants/wardrobe_constants.dart';
 
@@ -110,6 +117,7 @@ class _CreateItemState extends State<CreateItem> {
     }
   }
 
+  @override
   void dispose() {
     _titleCtrl.dispose();
     super.dispose();
@@ -123,11 +131,9 @@ class _CreateItemState extends State<CreateItem> {
     if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
 
-    if (_isEditMode && _readId().isEmpty) {
+      if (_isEditMode && _readId().isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot edit item without an id')),
-      );
+      showAppMessage(context, 'Cannot edit item without an id', error: true);
       return;
     }
 
@@ -162,9 +168,7 @@ class _CreateItemState extends State<CreateItem> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to save item: $e')));
+      showAppMessage(context, 'Failed to save item: $e', error: true);
     }
   }
 
@@ -573,9 +577,9 @@ class _CheckboxRow extends StatelessWidget {
           data: Theme.of(context).copyWith(
             unselectedWidgetColor: _CreateItemTheme.border,
             checkboxTheme: CheckboxThemeData(
-              fillColor: MaterialStateProperty.resolveWith(
+              fillColor: WidgetStateProperty.resolveWith(
                 (states) =>
-                    states.contains(MaterialState.selected)
+                    states.contains(WidgetState.selected)
                         ? _CreateItemTheme.gold
                         : Colors.transparent,
               ),
@@ -586,7 +590,7 @@ class _CheckboxRow extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(4),
               ),
-              checkColor: MaterialStateProperty.all(Colors.white),
+              checkColor: WidgetStateProperty.all(Colors.white),
             ),
           ),
           child: Checkbox(

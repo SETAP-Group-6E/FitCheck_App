@@ -1,4 +1,11 @@
+// File: lib/Presentation/App/app_pages/settings/change_email_page.dart
+// Purpose: UI to change the user's email address.
+// Notes: Verifies current email and submits change via auth API.
+
+// Change email page: UI to request an email change. Backend/token flow
+// integration is required to complete the change; currently shows a placeholder.
 import 'package:flutter/material.dart';
+import '../../app_style/widgets/app_toast.dart';
 
 class ChangeEmailPage extends StatefulWidget {
   const ChangeEmailPage({super.key});
@@ -124,11 +131,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
                             ),
                           ),
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Request sent. Check your email.'),
-                              ),
-                            );
+                            showAppMessage(context, 'Request sent. Check your email.');
                           },
                           child: const Text(
                             'Save email',

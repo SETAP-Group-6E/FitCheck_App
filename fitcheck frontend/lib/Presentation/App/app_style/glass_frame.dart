@@ -1,3 +1,6 @@
+// GlassFrame: small reusable container that provides a frosted glass
+// backdrop (blur + semi-opaque fill + border). Used to emphasize
+// interactive controls and panels throughout the app.
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
@@ -17,15 +20,24 @@ class GlassFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The ClipRRect ensures the blur effect is clipped to the rounded
+    // border. BackdropFilter applies a gaussian blur to content beneath
+    // this widget; the Container adds a semi-opaque fill and subtle
+    // border to produce the frosted 'glass' appearance.
     return ClipRRect(
       borderRadius: borderRadius,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: Container(
           decoration: BoxDecoration(
+            // Fill uses the provided opacity so callers can tune how
+            // prominent the glass effect appears against different
+            // backgrounds.
             color: const Color.fromARGB(255, 22, 22, 22).withValues(alpha: opacity),
             borderRadius: borderRadius,
             border: Border.all(
+              // Subtle border to separate the glass surface from the
+              // underlying content.
               color: const Color.fromARGB(255, 102, 102, 102).withValues(alpha: 0.3),
               width: 1.5,
             ),
