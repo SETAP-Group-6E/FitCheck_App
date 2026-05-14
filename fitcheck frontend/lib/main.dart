@@ -29,16 +29,19 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(appThemeModeProvider);
 
+    final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'FitCheck',
       theme: buildAppTheme(mode),
+      navigatorKey: appNavigatorKey,
       home: HomePage(),
       builder: (context, child) {
         return Stack(
           children: [
             if (child != null) child,
-            const FloatingNavbar(),
+            FloatingNavbar(navigatorKey: appNavigatorKey),
           ],
         );
       },

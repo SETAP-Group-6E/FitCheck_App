@@ -13,6 +13,7 @@ class FloatingNavbar extends StatefulWidget {
   final double bottomPadding;
   final BorderRadius borderRadius;
   final VoidCallback? onOutfitCreated;
+  final GlobalKey<NavigatorState>? navigatorKey;
 
   const FloatingNavbar({
     super.key,
@@ -21,6 +22,7 @@ class FloatingNavbar extends StatefulWidget {
     this.bottomPadding = 0,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
     this.onOutfitCreated,
+    this.navigatorKey,
   });
 
   @override
@@ -50,18 +52,23 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
   }
 
   void _navigateIfNotCurrent(BuildContext context, String routeName) {
-    final currentRoute = ModalRoute.of(context)?.settings.name;
-    if (currentRoute == routeName) {
-      return;
+    // Use the provided navigator key to ensure we target the app's Navigator
+    final nav = widget.navigatorKey?.currentState;
+    if (nav == null) return;
+    try {
+      nav.pushNamed(routeName);
+    } catch (_) {
+      // ignore navigation errors
     }
-    Navigator.pushNamed(context, routeName);
   }
 
   void _openSettingsOrLogin(BuildContext context) {
     final auth = Supabase.instance.client.auth;
     final isLoggedIn =
         auth.currentSession != null && auth.currentUser != null;
-    _navigateIfNotCurrent(context, isLoggedIn ? '/my-posts' : '/login');
+    final nav = widget.navigatorKey?.currentState;
+    if (nav == null) return;
+    nav.pushNamed(isLoggedIn ? '/my-posts' : '/login');
   }
 
   Widget _defaultAvatar(BuildContext context) {
@@ -73,14 +80,14 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
         borderRadius: BorderRadius.circular(5),
       ),
       child: Center(
-        child: IconButton(
-          icon: const Icon(Icons.manage_accounts),
-          color: Colors.black87,
-          iconSize: 20,
-          onPressed: () {
-            _openSettingsOrLogin(context);
-          },
-        ),
+          child: IconButton(
+            icon: const Icon(Icons.manage_accounts),
+            color: Colors.black87,
+            iconSize: 20,
+            onPressed: () {
+              _openSettingsOrLogin(context);
+            },
+          ),
       ),
     );
   }
@@ -117,7 +124,8 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
               IconButton(
                 icon: const Icon(Icons.home, size: 30, color: Colors.white),
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/homepage');
+                  final nav = widget.navigatorKey?.currentState;
+                  nav?.pushReplacementNamed('/homepage');
                 },
               ),
               const Expanded(child: SizedBox()),

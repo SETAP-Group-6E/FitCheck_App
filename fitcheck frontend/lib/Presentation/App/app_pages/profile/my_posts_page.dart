@@ -13,7 +13,7 @@ class MyPostsPage extends StatefulWidget {
   State<MyPostsPage> createState() => _MyPostsPageState();
 }
 
-class _MyPostsPageState extends State<MyPostsPage> {
+class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClientMixin<MyPostsPage> {
   final supabase = Supabase.instance.client;
   final ScrollController _scrollController = ScrollController();
 
@@ -331,6 +331,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
@@ -423,6 +424,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
                             : Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: GridView.builder(
+                                  key: PageStorageKey('my-posts-grid-${widget.userId ?? 'me'}'),
                                   padding: const EdgeInsets.fromLTRB(0, 0, 0, 140),
                                   controller: _scrollController,
                                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

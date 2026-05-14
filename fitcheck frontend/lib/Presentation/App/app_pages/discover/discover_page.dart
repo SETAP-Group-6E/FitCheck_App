@@ -14,7 +14,7 @@ class DiscoverPage extends StatefulWidget {
   State<DiscoverPage> createState() => _DiscoverPageState();
 }
 
-class _DiscoverPageState extends State<DiscoverPage> {
+class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClientMixin<DiscoverPage> {
   final supabase = Supabase.instance.client;
   final TextEditingController _controller = TextEditingController();
 
@@ -193,6 +193,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
@@ -314,6 +315,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                 return SizedBox(
                                   height: 220,
                                   child: ListView.separated(
+                                    key: const PageStorageKey('discover-users-live'),
                                     itemCount: _userSuggestions.length,
                                     separatorBuilder: (_, __) => Divider(height: 1, color: subtleDivider),
                                     itemBuilder: (context, index) {
@@ -340,6 +342,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                         padding: const EdgeInsets.all(8.0),
                                         child: GridView.builder(
                                           padding: const EdgeInsets.fromLTRB(0, 0, 0, 140),
+                                          key: const PageStorageKey('discover-grid'),
                                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                             crossAxisCount: 3,
                                             crossAxisSpacing: 8,
@@ -414,7 +417,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                     child: _resultFilter == 'users'
                                         ? (_userSuggestions.isEmpty
                                             ? const Center(child: Text('No users', style: TextStyle(color: Colors.white)))
-                                            : ListView.separated(
+                                            ? ListView.separated(
+                                              key: const PageStorageKey('discover-users-results'),
                                                 itemCount: _userSuggestions.length,
                                                 separatorBuilder: (_, __) => Divider(height: 1, color: subtleDivider),
                                                 itemBuilder: (context, index) {
