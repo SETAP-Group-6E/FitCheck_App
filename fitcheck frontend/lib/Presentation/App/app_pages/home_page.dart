@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import '../app_style/widgets/app_toast.dart';
 import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fitcheck/Data/repositories/notification_repository.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,6 +25,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final supabase = Supabase.instance.client;
+  final NotificationRepository _notifRepo = NotificationRepository();
+  int _unreadCount = 0;
+  Timer? _notifPollTimer;
   Future<List<_BucketPost>> _feedFuture = Future.value(const <_BucketPost>[]);
   bool _showNoMorePostsPrompt = false;
   bool _isScrollingDown = false;
@@ -40,12 +44,25 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _refreshFeed();
+    _fetchUnread();
+    _notifPollTimer = Timer.periodic(const Duration(seconds: 20), (_) => _fetchUnread());
   }
 
   @override
   void dispose() {
     _noMorePostsTimer?.cancel();
+    _notifPollTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _fetchUnread() async {
+    try {
+      final count = await _notifRepo.fetchUnreadCount();
+      if (!mounted) return;
+      setState(() {
+        _unreadCount = count;
+      });
+    } catch (_) {}
   }
 
   void _triggerNoMorePostsPrompt() {
@@ -243,6 +260,32 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const Spacer(),
+                      // Notification bell (left of the + button)
+                      Stack(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/notifications');
+                            },
+                            icon: const Icon(
+                              Icons.notifications_none,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                          ),
+                          if (_unreadCount > 0)
+                            Positioned(
+                              right: 6,
+                              top: 6,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(12)),
+                                child: Text(_unreadCount > 99 ? '99+' : '$_unreadCount', style: const TextStyle(color: Colors.white, fontSize: 11)),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
                       IconButton(
                         onPressed: () async {
                           final user = supabase.auth.currentUser;

@@ -6,8 +6,7 @@ import 'package:fitcheck/Data/repositories/supabase_wardrobe_repository.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outfit.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:fitcheck/Data/repositories/notification_repository.dart';
-import 'package:fitcheck/Presentation/App/app_pages/notifications_page.dart';
+// Notifications bell moved to the HomePage header; navbar no longer renders it here.
 
 class FloatingNavbar extends StatefulWidget {
   final double width;
@@ -35,9 +34,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
   final wardrobeRepository = SupabaseWardrobeRepository(
     Supabase.instance.client,
   );
-  final NotificationRepository _notifRepo = NotificationRepository();
-  int _unreadCount = 0;
-  Timer? _pollTimer;
+  // notifications are shown in the HomePage header
   StreamSubscription<AuthState>? _authSubscription;
 
   @override
@@ -48,27 +45,16 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
     ) {
       setState(() {});
     });
-    // initial fetch and periodic poll for unread notifications
-    _fetchUnread();
-    _pollTimer = Timer.periodic(const Duration(seconds: 20), (_) => _fetchUnread());
+    // navbar observes auth state for avatar updates
   }
 
   @override
   void dispose() {
     _authSubscription?.cancel();
-    _pollTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> _fetchUnread() async {
-    try {
-      final count = await _notifRepo.fetchUnreadCount();
-      if (!mounted) return;
-      setState(() {
-        _unreadCount = count;
-      });
-    } catch (_) {}
-  }
+  // notifications handled by HomePage
 
   void _navigateIfNotCurrent(BuildContext context, String routeName) {
     // Use the provided navigator key to ensure we target the app's Navigator
@@ -127,123 +113,117 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
     // user is unauthenticated we render a small default avatar that
     // links to the login/settings route.
 
+    final media = MediaQuery.of(context);
+    final insetBottom = media.padding.bottom;
+    final maxWidth = media.size.width - 24; // small margin
+    final barWidth = widget.width > maxWidth ? maxWidth : widget.width;
+
     return Positioned(
       left: 0,
-      right: 10,
-      bottom: widget.bottomPadding,
-      child: Center(
-        child: Container(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          width: widget.width,
-          height: widget.height,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(child: SizedBox()),
-              IconButton(
-                icon: const Icon(Icons.home, size: 30, color: Colors.white),
-                onPressed: () {
-                  final nav = widget.navigatorKey?.currentState;
-                  nav?.pushReplacementNamed('/homepage');
-                },
+      right: 0,
+      bottom: widget.bottomPadding + insetBottom,
+      child: SizedBox(
+        height: widget.height,
+        child: Stack(
+          children: [
+            // full-width background for the navbar
+            Positioned.fill(
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
               ),
-              const Expanded(child: SizedBox()),
-              IconButton(
-                icon: const Icon(Icons.dry_cleaning_sharp, size: 30, color: Colors.white),
-                onPressed: () {
-                  _navigateIfNotCurrent(context, '/wardrobe');
-                },
-              ),
-              const Expanded(child: SizedBox()),
-
-              // Notification bell sits to the left of the central + button.
-              Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications_none, size: 26, color: Colors.white),
-                    onPressed: () {
-                      final nav = widget.navigatorKey?.currentState;
-                      nav?.push(MaterialPageRoute(builder: (_) => const NotificationsPage()));
-                    },
-                  ),
-                  if (_unreadCount > 0)
-                    Positioned(
-                      right: 6,
-                      top: 6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(12)),
-                        child: Text(_unreadCount > 99 ? '99+' : '$_unreadCount', style: const TextStyle(color: Colors.white, fontSize: 11)),
+            ),
+            // centered icon bar (keeps same layout and width)
+            Center(
+              child: Container(
+                width: barWidth,
+                height: widget.height,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(child: SizedBox()),
+                    IconButton(
+                      icon: const Icon(Icons.home, size: 30, color: Colors.white),
+                      onPressed: () {
+                        final nav = widget.navigatorKey?.currentState;
+                        nav?.pushReplacementNamed('/homepage');
+                      },
+                    ),
+                    const Expanded(child: SizedBox()),
+                    IconButton(
+                      icon: const Icon(Icons.dry_cleaning_sharp, size: 30, color: Colors.white),
+                      onPressed: () {
+                        _navigateIfNotCurrent(context, '/wardrobe');
+                      },
+                    ),
+                    const Expanded(child: SizedBox()),
+                    Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        color: const Color.fromRGBO(217, 156, 19, 1),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.add, size: 30, color: Colors.white),
+                        onPressed: () async {
+                          final navCtx = widget.navigatorKey?.currentContext ?? context;
+                          final didSave = await CreateOutfitModal.open(
+                            navCtx,
+                            repository: wardrobeRepository,
+                          );
+                          if (didSave) {
+                            widget.onOutfitCreated?.call();
+                          }
+                        },
                       ),
                     ),
-                ],
-              ),
-              const Expanded(child: SizedBox()),
-              const Expanded(child: SizedBox()),
-              Container(
-                height: 50,
-                width: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  color: const Color.fromRGBO(217, 156, 19, 1),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.add, size: 30, color: Colors.white),
-                  onPressed: () async {
-                    final didSave = await CreateOutfitModal.open(
-                      context,
-                      repository: wardrobeRepository,
-                    );
-                    if (didSave) {
-                      widget.onOutfitCreated?.call();
-                    }
-                  },
-                ),
-              ),
-              const Expanded(child: SizedBox()),
+                    const Expanded(child: SizedBox()),
 
-              IconButton(
-                icon: const Icon(
-                  Icons.explore_rounded,
-                  size: 30,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  _navigateIfNotCurrent(context, '/discover');
-                },
-              ),
-              const Expanded(child: SizedBox()),
-              imageUrl == null
-                  ? _defaultAvatar(context)
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Stack(
-                        children: [
-                          Image.network(
-                            imageUrl,
-                            width: 35,
-                            height: 35,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return _defaultAvatar(context);
-                            },
-                          ),
-                          Positioned.fill(
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  _openSettingsOrLogin(context);
-                                },
-                              ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.explore_rounded,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        _navigateIfNotCurrent(context, '/discover');
+                      },
+                    ),
+                    const Expanded(child: SizedBox()),
+                    imageUrl == null
+                        ? _defaultAvatar(context)
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Stack(
+                              children: [
+                                Image.network(
+                                  imageUrl,
+                                  width: 35,
+                                  height: 35,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return _defaultAvatar(context);
+                                  },
+                                ),
+                                Positioned.fill(
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        _openSettingsOrLogin(context);
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-              const Expanded(child: SizedBox()),
-            ],
-          ),
+                    const Expanded(child: SizedBox()),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
