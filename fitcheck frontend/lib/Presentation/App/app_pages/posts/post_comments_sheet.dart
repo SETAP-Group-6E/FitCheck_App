@@ -166,21 +166,50 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                             itemCount: _comments.length,
                             itemBuilder: (context, i) {
                               final row = _comments[i];
-                              final uid = (row['user_id'] ?? '') as String;
-                              final body = (row['body'] ?? '') as String;
-                              final createdAt = row['created_at'] != null ? DateTime.parse(row['created_at']) : null;
+                              final uid = (row['user_id'] ?? '').toString();
+                              final body = (row['body'] ?? '').toString();
+                              final createdAt = row['created_at'] != null ? DateTime.parse(row['created_at'].toString()) : null;
                               final timeLabel = createdAt != null ? _formatTimeAgo(createdAt) : null;
-                              final username = (row['username'] ?? '') as String?;
-                              final profileImageUrl = (row['profile_image_url'] ?? '') as String?;
+                              final username = row['username'] != null ? row['username'].toString() : null;
+                              final profileImageUrl = row['profile_image_url'] != null ? row['profile_image_url'].toString() : null;
+                              final commentsId = row['comments_id'] != null ? row['comments_id'].toString() : null;
+                              final supabase = Supabase.instance.client;
+                              final currentUser = supabase.auth.currentUser;
+                              final isOwner = currentUser != null && (row['user_id'] ?? '').toString() == currentUser.id;
+
                               return Padding(
                                 padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                                child: PostCommentTile(username: username ?? 'user_${uid.substring(0, uid.length > 8 ? 8 : uid.length)}', body: body, timeLabel: timeLabel, profileImageUrl: profileImageUrl),
+                                child: PostCommentTile(
+                                  username: username ?? 'user_${uid.substring(0, uid.length > 8 ? 8 : uid.length)}',
+                                  body: body,
+                                  timeLabel: timeLabel,
+                                  profileImageUrl: profileImageUrl,
+                                  isOwn: isOwner,
+                                  onDelete: isOwner
+                                      ? () async {
+                                          // optimistic remove
+                                          final index = i;
+                                          final removed = _comments[index];
+                                          setState(() => _comments.removeAt(index));
+                                          final success = await _repo.deleteComment(commentsId ?? '', currentUser!.id);
+                                          if (!success) {
+                                            // rollback
+                                            if (mounted) {
+                                              setState(() => _comments.insert(index, removed));
+                                              showAppMessage(context, 'Failed to delete comment.', error: true);
+                                            }
+                                          } else {
+                                            if (mounted) showAppMessage(context, 'Comment deleted');
+                                          }
+                                        }
+                                      : null,
+                                ),
                               );
                             },
                           ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                padding: EdgeInsets.fromLTRB(12, 8, 12, 12 + MediaQuery.of(context).padding.bottom),
                 child: Builder(builder: (context) {
                   final supabase = Supabase.instance.client;
                   final user = supabase.auth.currentUser;
@@ -202,17 +231,23 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                     children: [
                       Expanded(
                         child: SizedBox(
-                          height: 40,
+                          height: 42,
                           child: TextField(
                             controller: _controller,
                             style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               hintText: 'Write a comment...',
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                borderRadius: BorderRadius.all(Radius.circular(8)),
                               ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                              hintStyle: TextStyle(color: Colors.white54),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                borderSide: BorderSide(color: const Color(0xFFD99C13)),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              hintStyle: const TextStyle(color: Colors.white54),
+                              filled: true,
+                              fillColor: const Color(0xFF1A1A1A),
                             ),
                           ),
                         ),
@@ -221,12 +256,18 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 220),
                         transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-                        child: _submitting
-                            ? const SizedBox(key: ValueKey('loading'), width: 36, height: 36, child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))))
-                            : IconButton(
+                            child: _submitting
+                            ? const SizedBox(key: ValueKey('loading'), width: 42, height: 42, child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))))
+                            : ElevatedButton(
                                 key: const ValueKey('send'),
                                 onPressed: _submit,
-                                icon: const Icon(Icons.arrow_forward, color: Colors.white70),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFD99C13),
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: const Size(48, 42),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                child: const Icon(Icons.keyboard_return, color: Colors.white),
                               ),
                       ),
                     ],

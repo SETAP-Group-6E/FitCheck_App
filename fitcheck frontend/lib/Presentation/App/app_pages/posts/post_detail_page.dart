@@ -123,12 +123,40 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     itemCount: _comments.length,
                     itemBuilder: (context, i) {
                       final row = _comments[i];
-                      final uid = (row['user_id'] ?? '') as String;
-                      final body = (row['body'] ?? '') as String;
-                      final createdAt = row['created_at'] != null ? DateTime.parse(row['created_at']) : null;
+                      final uid = (row['user_id'] ?? '').toString();
+                      final body = (row['body'] ?? '').toString();
+                      final createdAt = row['created_at'] != null ? DateTime.parse(row['created_at'].toString()) : null;
                       final timeLabel = createdAt != null ? _formatTimeAgo(createdAt) : null;
                       final username = 'user_${uid.substring(0, uid.length > 8 ? 8 : uid.length)}';
-                      return PostCommentTile(username: username, body: body, timeLabel: timeLabel);
+                      final commentsId = row['comments_id'] != null ? row['comments_id'].toString() : null;
+                      final supabase = Supabase.instance.client;
+                      final currentUser = supabase.auth.currentUser;
+                      final isOwner = currentUser != null && uid == currentUser.id;
+
+                      return PostCommentTile(
+                        username: username,
+                        body: body,
+                        timeLabel: timeLabel,
+                        isOwn: isOwner,
+                        onDelete: isOwner
+                            ? () async {
+                                // optimistic remove
+                                final index = i;
+                                final removed = _comments[index];
+                                setState(() => _comments.removeAt(index));
+                                final success = await _repo.deleteComment(commentsId ?? '', currentUser!.id);
+                                if (!success) {
+                                  // rollback
+                                  if (mounted) {
+                                    setState(() => _comments.insert(index, removed));
+                                    showAppMessage(context, 'Failed to delete comment.', error: true);
+                                  }
+                                } else {
+                                  if (mounted) showAppMessage(context, 'Comment deleted');
+                                }
+                              }
+                            : null,
+                      );
                     },
                   ),
           ),
@@ -139,13 +167,34 @@ class _PostDetailPageState extends State<PostDetailPage> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(hintText: 'Write a comment...', hintStyle: TextStyle(color: Colors.white54)),
+                  child: SizedBox(
+                    height: 42,
+                    child: TextField(
+                      controller: _controller,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Write a comment...',
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        filled: true,
+                        fillColor: const Color(0xFF1A1A1A),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFD99C13))),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                    ),
                   ),
                 ),
-                IconButton(onPressed: _submit, icon: const Icon(Icons.send, color: Colors.white)),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD99C13),
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(48, 42),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Icon(Icons.keyboard_return, color: Colors.white),
+                ),
               ],
             ),
           ),

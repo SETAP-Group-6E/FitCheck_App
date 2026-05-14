@@ -10,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app_pages/posts/post_comments_sheet.dart';
 import 'app_toast.dart';
 import '../../app_pages/profile/my_posts_page.dart';
+import '../../app_state.dart' as app_state;
 
 class FeedPostCard extends StatefulWidget {
   const FeedPostCard({
@@ -324,12 +325,18 @@ class _FeedPostCardState extends State<FeedPostCard> {
                             constraints: const BoxConstraints(),
                             iconSize: 22,
                             onPressed: () async {
-                              await showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (_) => PostCommentsSheet(postId: widget.postId, caption: widget.caption, timeLabel: widget.timeLabel),
-                              );
+                              try {
+                                app_state.navbarVisible.value = false;
+                                await showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  useRootNavigator: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) => PostCommentsSheet(postId: widget.postId, caption: widget.caption, timeLabel: widget.timeLabel),
+                                );
+                              } finally {
+                                app_state.navbarVisible.value = true;
+                              }
                               // refresh comments count after sheet is dismissed
                               _loadComments();
                             },

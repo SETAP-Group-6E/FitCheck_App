@@ -61,7 +61,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final onSurface = theme.colorScheme.onSurface;
+    // Use white shades for text/icons regardless of theme for high contrast
+    final textColor = Colors.white;
 
     if (!_isAuthenticated) {
       // Unauthenticated: show matching header and prompt to sign in.
@@ -79,7 +80,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     IconButton(
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                      icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.onBackground.withOpacity(0.8), size: 20),
+                      icon: Icon(Icons.arrow_back_ios_new, color: textColor.withOpacity(0.92), size: 20),
                       onPressed: () => Navigator.maybePop(context),
                     ),
                     const SizedBox(width: 8),
@@ -87,7 +88,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: Center(
                         child: Text(
                           'Notifications',
-                          style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onBackground),
+                          style: theme.textTheme.titleLarge?.copyWith(color: textColor),
                         ),
                       ),
                     ),
@@ -102,7 +103,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Please sign in to view your notifications', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onBackground)),
+                             Text('Please sign in to view your notifications', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
                         const SizedBox(height: 12),
                         ElevatedButton(
                           onPressed: () => Navigator.pushNamed(context, '/login'),
@@ -127,11 +128,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.notifications_off, size: 56, color: theme.colorScheme.onBackground.withOpacity(0.6)),
+                Icon(Icons.notifications_off, size: 56, color: textColor.withOpacity(0.88)),
             const SizedBox(height: 8),
-            Text("You're all caught up", style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onBackground)),
+            Text("You're all caught up", style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
             const SizedBox(height: 6),
-            Text('No new notifications', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onBackground.withOpacity(0.7))),
+                Text('No new notifications', style: theme.textTheme.bodyMedium?.copyWith(color: textColor.withOpacity(0.88))),
           ],
         ),
       );
@@ -147,8 +148,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
               leading: n.actorProfileUrl != null
                   ? CircleAvatar(backgroundImage: NetworkImage(n.actorProfileUrl!))
                   : const CircleAvatar(child: Icon(Icons.person)),
-              title: Text('${n.actorUsername} ${n.type == 'like' ? 'liked' : 'commented'}', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onBackground)),
-              subtitle: n.commentPreview != null ? Text(n.commentPreview!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onBackground.withOpacity(0.85))) : null,
+              title: Text('${n.actorUsername} ${n.type == 'like' ? 'liked' : 'commented'}', style: theme.textTheme.bodyLarge?.copyWith(color: textColor)),
+              subtitle: n.commentPreview != null ? Text(n.commentPreview!, style: theme.textTheme.bodyMedium?.copyWith(color: textColor.withOpacity(0.85))) : null,
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => MyPostsPage(userId: n.postKey.split('/').first)));
               },
@@ -171,11 +172,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
               color: theme.scaffoldBackgroundColor,
               child: Row(
                 children: [
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 20),
-                    onPressed: () {
+                   IconButton(
+                     padding: EdgeInsets.zero,
+                     constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                     icon: Icon(Icons.arrow_back_ios_new, color: textColor.withOpacity(0.92), size: 20),
+                     onPressed: () {
                       // When the user navigates back, assume notifications are
                       // read and mark them on the server (fire-and-forget).
                       if (_isAuthenticated) {
@@ -185,14 +186,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     },
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        'Notifications',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
-                      ),
-                    ),
-                  ),
+                   Expanded(
+                     child: Center(
+                       child: Text(
+                         'Notifications',
+                         style: theme.textTheme.titleLarge?.copyWith(color: textColor),
+                       ),
+                     ),
+                   ),
                   const SizedBox(width: 8),
                 ],
               ),

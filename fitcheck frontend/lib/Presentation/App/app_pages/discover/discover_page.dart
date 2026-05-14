@@ -120,18 +120,22 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
     try {
       final row = await supabase.from('user').select('username, profile_pic_url').eq('user_id', userId).maybeSingle();
       final username = (row?['username'] as String?)?.trim();
-      final profileImageUrl = (row?['profile_pic_url'] as String?)?.trim();
+      final profileImageUrlRaw = (row?['profile_pic_url'] as String?)?.trim();
       final shortenedUid = userId.length > 8 ? userId.substring(0, 8) : userId;
-      final fallback = 'user_\$shortenedUid';
+      final fallback = 'user_$shortenedUid';
       final cacheBuster = DateTime.now().millisecondsSinceEpoch;
+      final profileImageUrl = (profileImageUrlRaw != null && profileImageUrlRaw.isNotEmpty)
+          ? profileImageUrlRaw
+          : supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg?t=$cacheBuster');
+
       return _PosterUser(
         username: (username != null && username.isNotEmpty) ? username : fallback,
-        profileImageUrl: profileImageUrl != null && profileImageUrl.isNotEmpty ? profileImageUrl : supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg?t=$cacheBuster'),
+        profileImageUrl: profileImageUrl,
       );
     } catch (_) {
       final shortenedUid = userId.length > 8 ? userId.substring(0, 8) : userId;
       final cacheBuster = DateTime.now().millisecondsSinceEpoch;
-      return _PosterUser(username: 'user_\$shortenedUid', profileImageUrl: supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg?t=$cacheBuster'));
+      return _PosterUser(username: 'user_$shortenedUid', profileImageUrl: supabase.storage.from('Avatars').getPublicUrl('$userId/avatar.jpg?t=$cacheBuster'));
     }
   }
 
@@ -145,7 +149,14 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
       final rows = await supabase.from('user').select('user_id, username, profile_pic_url').ilike('username', '%$q%').limit(8);
       final list = List<Map<String, dynamic>>.from(rows as List? ?? []);
       setState(() {
-        _userSuggestions = list.map((r) => _UserRow(userId: r['user_id'] as String, username: r['username'] as String? ?? '', profileImageUrl: r['profile_pic_url'] as String?)).toList();
+        _userSuggestions = list.map((r) {
+          final uid = r['user_id'] as String;
+          final uname = (r['username'] as String?)?.trim() ?? '';
+          final rawPic = (r['profile_pic_url'] as String?)?.trim();
+          final cacheBuster = DateTime.now().millisecondsSinceEpoch;
+          final pic = (rawPic != null && rawPic.isNotEmpty) ? rawPic : supabase.storage.from('Avatars').getPublicUrl('$uid/avatar.jpg?t=$cacheBuster');
+          return _UserRow(userId: uid, username: uname, profileImageUrl: pic);
+        }).toList();
       });
     } catch (e) {
       // ignore errors silently
@@ -347,9 +358,24 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
                                     itemBuilder: (context, index) {
                                       final u = _userSuggestions[index];
                                       return ListTile(
-                                        leading: CircleAvatar(
-                                          backgroundImage: u.profileImageUrl != null ? NetworkImage(u.profileImageUrl!) : null,
-                                          child: u.profileImageUrl == null ? const Icon(Icons.person) : null,
+                                        leading: SizedBox(
+                                          width: 36,
+                                          height: 36,
+                                          child: ClipOval(
+                                            child: u.profileImageUrl != null
+                                                ? Image.network(
+                                                    u.profileImageUrl!,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (c, e, st) => Container(
+                                                      color: Colors.white12,
+                                                      child: const Icon(Icons.person, color: Colors.white70),
+                                                    ),
+                                                  )
+                                                : Container(
+                                                    color: Colors.white12,
+                                                    child: const Icon(Icons.person, color: Colors.white70),
+                                                  ),
+                                          ),
                                         ),
                                         title: Text(u.username, style: const TextStyle(color: Colors.white)),
                                         onTap: () {
@@ -450,9 +476,24 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
                                                 itemBuilder: (context, index) {
                                                   final u = _userSuggestions[index];
                                                   return ListTile(
-                                                    leading: CircleAvatar(
-                                                      backgroundImage: u.profileImageUrl != null ? NetworkImage(u.profileImageUrl!) : null,
-                                                      child: u.profileImageUrl == null ? const Icon(Icons.person) : null,
+                                                    leading: SizedBox(
+                                                      width: 36,
+                                                      height: 36,
+                                                      child: ClipOval(
+                                                        child: u.profileImageUrl != null
+                                                            ? Image.network(
+                                                                u.profileImageUrl!,
+                                                                fit: BoxFit.cover,
+                                                                errorBuilder: (c, e, st) => Container(
+                                                                  color: Colors.white12,
+                                                                  child: const Icon(Icons.person, color: Colors.white70),
+                                                                ),
+                                                              )
+                                                            : Container(
+                                                                color: Colors.white12,
+                                                                child: const Icon(Icons.person, color: Colors.white70),
+                                                              ),
+                                                      ),
                                                     ),
                                                     title: Text(u.username, style: const TextStyle(color: Colors.white)),
                                                     onTap: () {

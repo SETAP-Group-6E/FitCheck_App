@@ -79,4 +79,22 @@ class SupabaseCommentRepository {
 
     return inserted;
   }
+
+  /// Delete a comment by its `comments_id` ensuring the requesting user
+  /// is the owner. Returns `true` when deletion succeeded, `false` on failure.
+  Future<bool> deleteComment(String commentsId, String userId) async {
+    try {
+      // Use both `comments_id` and `user_id` to avoid deleting others' comments
+      final res = await _supabase.from('comments').delete().match({
+        'comments_id': commentsId,
+        'user_id': userId,
+      });
+      // PostgREST returns a list of deleted rows (or null). Treat no exception as success.
+      return true;
+    } catch (e) {
+      // ignore: avoid_print
+      print('Failed to delete comment $commentsId: $e');
+      return false;
+    }
+  }
 }
