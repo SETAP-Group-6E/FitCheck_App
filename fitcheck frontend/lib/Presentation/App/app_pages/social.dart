@@ -123,7 +123,12 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
-			appBar: AppBar(title: const Text('Upload Post Images')),
+			appBar: AppBar(
+				backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+				elevation: 0,
+				iconTheme: const IconThemeData(color: Colors.white),
+				title: const Text('Create New Post', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+			),
 			body: Padding(
 				padding: const EdgeInsets.all(12),
 				child: Column(
@@ -213,28 +218,44 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 							),
 						),
 						const SizedBox(height: 12),
-						TextField(
-							controller: _captionController,
-							style: const TextStyle(color: Colors.white),
-							decoration: const InputDecoration(
-								hintText: 'Write a caption...',
-								hintStyle: TextStyle(color: Colors.white54),
-								contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-								filled: true,
-								fillColor: Color(0xFF1E1E1E),
-							),
-						),
-						const SizedBox(height: 12),
-						ElevatedButton.icon(
-							onPressed: _isUploading ? null : _uploadImages,
-							icon: _isUploading
-								? const SizedBox(
-										width: 18,
-										height: 18,
-										child: CircularProgressIndicator(strokeWidth: 2),
-									)
-								: const Icon(Icons.cloud_upload_outlined),
-							label: Text(_isUploading ? 'Uploading...' : 'Upload to User Posts'),
+						Row(
+							children: [
+								Expanded(
+									child: TextField(
+										controller: _captionController,
+										style: const TextStyle(color: Colors.white),
+										decoration: InputDecoration(
+											hintText: 'Write a caption...',
+											hintStyle: const TextStyle(color: Colors.white54),
+											filled: true,
+											fillColor: const Color(0xFF2A2A2A),
+											contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+											border: OutlineInputBorder(
+												borderRadius: BorderRadius.circular(12),
+												borderSide: BorderSide.none,
+											),
+										),
+									),
+								),
+								const SizedBox(width: 8),
+								SizedBox(
+									height: 48,
+									child: ElevatedButton(
+										style: ElevatedButton.styleFrom(
+											backgroundColor: const Color(0xFFD4A017),
+											shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+										),
+										onPressed: _isUploading ? null : _uploadImages,
+										child: _isUploading
+											? const SizedBox(
+												width: 18,
+												height: 18,
+												child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+											)
+											: const Icon(Icons.cloud_upload_outlined, color: Colors.white),
+									),
+								),
+							],
 						),
 					],
 				),

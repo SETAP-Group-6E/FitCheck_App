@@ -9,11 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app_pages/post_comments_sheet.dart';
 import 'app_toast.dart';
+import '../../app_pages/profile/my_posts_page.dart';
 
 class FeedPostCard extends StatefulWidget {
   const FeedPostCard({
     super.key,
     required this.postId,
+    required this.authorId,
     required this.username,
     required this.timeLabel,
     required this.imageUrls,
@@ -21,6 +23,7 @@ class FeedPostCard extends StatefulWidget {
     this.caption,
   });
 
+  final String authorId;
   final String username;
   final String timeLabel;
   final List<String> imageUrls;
@@ -201,11 +204,26 @@ class _FeedPostCardState extends State<FeedPostCard> {
                       : null,
                 ),
                 // Poster identity block (avatar, username, time)
-                title: Text(
-                  widget.username,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                title: GestureDetector(
+                  onTap: () {
+                    // open that user's posts page with slide-from-right
+                    Navigator.of(context).push(PageRouteBuilder(
+                      pageBuilder: (ctx, anim, sec) => MyPostsPage(userId: widget.authorId),
+                      transitionDuration: const Duration(milliseconds: 280),
+                      reverseTransitionDuration: const Duration(milliseconds: 220),
+                      transitionsBuilder: (ctx, anim, sec, child) {
+                        final slideTween = Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+                            .chain(CurveTween(curve: Curves.easeOutCubic));
+                        return SlideTransition(position: anim.drive(slideTween), child: child);
+                      },
+                    ));
+                  },
+                  child: Text(
+                    widget.username,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 subtitle: Text(

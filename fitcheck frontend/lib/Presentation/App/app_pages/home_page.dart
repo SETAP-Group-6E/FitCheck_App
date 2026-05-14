@@ -365,6 +365,7 @@ class _HomePageState extends State<HomePage> {
                                 final post = posts[index];
                                 return FeedPostCard(
                                   postId: post.id,
+                                  authorId: post.author,
                                   username: post.username,
                                   timeLabel: _formatTimeAgo(post.createdAt),
                                   imageUrls: post.imageUrls,

@@ -461,10 +461,7 @@ class _WardrobePageState extends State<WardrobePage> {
                           child: Row(
                             children: [
                               SizedBox(
-                                // Removed GlassFrame wrapper: render the back
-                                // button directly with the same compact
-                                // container styling so it visually matches but
-                                // without the frosted glass effect.
+                                
                                 child: Container(
                                   padding: const EdgeInsets.all(2),
                                   decoration: BoxDecoration(

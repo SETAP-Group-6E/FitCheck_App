@@ -61,7 +61,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
     final auth = Supabase.instance.client.auth;
     final isLoggedIn =
         auth.currentSession != null && auth.currentUser != null;
-    _navigateIfNotCurrent(context, isLoggedIn ? '/settings' : '/login');
+    _navigateIfNotCurrent(context, isLoggedIn ? '/my-posts' : '/login');
   }
 
   Widget _defaultAvatar(BuildContext context) {

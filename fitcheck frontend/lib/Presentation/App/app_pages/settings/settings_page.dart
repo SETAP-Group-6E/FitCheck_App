@@ -356,6 +356,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     );
                                   },
                                 ),
+                                _settingsRow(
+                                  'My posts',
+                                  onTap: () {
+                                    Navigator.pushNamed(context, '/my-posts');
+                                  },
+                                ),
                               ],
                             ),
                           ),
