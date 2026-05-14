@@ -21,7 +21,6 @@ import 'package:fitcheck/Presentation/App/app_pages/notifications_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Presentation/auth/pages/register_page.dart';
 import 'Presentation/App/app_style/widgets/floating_nav_bar.dart';
-//import 'Presentation/app/app_pages/wardrobe_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -31,7 +30,7 @@ Future<void> main() async {
   await dotenv.load(fileName: '.env/dev.txt');
 
   // Initialize Supabase client used by the app. These are the
-  // publishable keys for development; sensitive keys should not be
+  // publishable keys for development; sensitive keys are not to be
   // committed to source in production.
   const supabaseUrl = 'https://fsjkselzckrheqtqvzze.supabase.co';
   const supabaseAnonKey = 'sb_publishable_Qt6ShYvhFsUlQ4fY_LFl6A_aRLJ4Jnr';
