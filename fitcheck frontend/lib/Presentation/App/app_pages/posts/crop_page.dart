@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/posts/crop_page.dart
+// Purpose: Image cropping UI used when preparing post images or avatars.
+// Notes: Wraps a cropping library to output bytes for upload.
+
 // Image cropper page used when the user edits an image before upload.
 // - Presents a cropping UI (square/free) using `crop_your_image`.
 // - Returns the cropped bytes via `Navigator.pop(cropped)`.

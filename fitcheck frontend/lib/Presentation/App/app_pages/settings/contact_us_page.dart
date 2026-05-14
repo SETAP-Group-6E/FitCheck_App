@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/settings/contact_us_page.dart
+// Purpose: Contact form for user feedback and support messages.
+// Notes: Sends messages to configured backend endpoint.
+
 // Contact us page: simple support message form. Currently the form
 // displays a placeholder confirmation; hook up a backend endpoint to
 // actually send messages.

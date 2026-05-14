@@ -1,3 +1,7 @@
+// File: lib/main.dart
+// Purpose: App entrypoint and route configuration for FitCheck.
+// Notes: MaterialApp is configured here; persistent UI overlays live in the app shell.
+
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/wardrobe_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
@@ -328,4 +332,4 @@ class MyApp extends ConsumerWidget {
   }
 }
 
-// flutter run -d chrome --web-port 62597
+

@@ -1,3 +1,7 @@
+// File: lib/Presentation/auth/pages/login_page.dart
+// Purpose: Login UI and authentication flow.
+// Notes: Handles sign-in via Supabase and form validation.
+
 import 'package:fitcheck/Presentation/App/app_style/widgets/signin_buttons.dart';
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:flutter/material.dart';

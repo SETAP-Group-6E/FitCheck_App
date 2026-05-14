@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/posts/post_detail_page.dart
+// Purpose: Detailed view of a single post, includes comments and interactions.
+// Notes: Shows full image, caption, likes, and comment sheet.
+
 // PostDetailPage: shows a single post's caption and full comments list.
 // - Allows authenticated users to add comments.
 // - Loads caption from `post` table and comments via repository.

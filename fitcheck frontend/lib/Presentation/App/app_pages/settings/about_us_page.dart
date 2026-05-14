@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/settings/about_us_page.dart
+// Purpose: About page describing the app and developer information.
+// Notes: Static informational content.
+
 // Simple informational page describing the app and its goals.
 import 'package:flutter/material.dart';
 

@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/theme/app_theme_mode.dart
+// Purpose: Theme mode (light/dark) provider and theme building helpers.
+// Notes: Exposes `appThemeModeProvider` used by the root app.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';

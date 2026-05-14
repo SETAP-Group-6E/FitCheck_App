@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/home_page.dart
+// Purpose: Main landing/home screen for the app feed.
+// Notes: Hosts primary feed and navigation entry points.
+
 import 'dart:async';
 
 import 'package:fitcheck/Presentation/App/app_pages/posts/social.dart';

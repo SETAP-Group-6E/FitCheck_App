@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/posts/social.dart
+// Purpose: Post creation and upload UI (social flow).
+// Notes: Handles selecting images, composing captions, and publishing posts.
+
 // Post drafting page: pick/crop images, enter caption, and upload post media.
 // - Uploads images to Supabase Storage and inserts a `post` row with metadata.
 import 'dart:typed_data';

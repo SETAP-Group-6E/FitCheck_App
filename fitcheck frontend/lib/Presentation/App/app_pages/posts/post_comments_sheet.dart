@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/posts/post_comments_sheet.dart
+// Purpose: Modal bottom sheet for viewing and adding comments on a post.
+// Notes: Integrates with comment repository for fetch/add operations.
+
 // Comments sheet: slide-up, realtime comments streamer for a post (by storage_key).
 // - Shows comments in realtime and provides an input for authenticated users.
 // - Uses `SupabaseCommentRepository` for data operations.

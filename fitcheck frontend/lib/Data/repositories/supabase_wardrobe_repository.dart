@@ -1,3 +1,7 @@
+// File: lib/Data/repositories/supabase_wardrobe_repository.dart
+// Purpose: Supabase-backed implementation of `WardrobeRepository`.
+// Notes: Performs CRUD operations for items and outfits scoped to the current user.
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../Domain/repositories/wardrobe_repository.dart';
 

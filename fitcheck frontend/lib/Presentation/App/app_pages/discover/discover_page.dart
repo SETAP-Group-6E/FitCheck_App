@@ -15,6 +15,8 @@ class DiscoverPage extends StatefulWidget {
 }
 
 class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClientMixin<DiscoverPage> {
+  @override
+  bool get wantKeepAlive => true;
   final supabase = Supabase.instance.client;
   final TextEditingController _controller = TextEditingController();
 
@@ -417,8 +419,8 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
                                     child: _resultFilter == 'users'
                                         ? (_userSuggestions.isEmpty
                                             ? const Center(child: Text('No users', style: TextStyle(color: Colors.white)))
-                                            ? ListView.separated(
-                                              key: const PageStorageKey('discover-users-results'),
+                                            : ListView.separated(
+                                                key: const PageStorageKey('discover-users-results'),
                                                 itemCount: _userSuggestions.length,
                                                 separatorBuilder: (_, __) => Divider(height: 1, color: subtleDivider),
                                                 itemBuilder: (context, index) {
@@ -440,6 +442,7 @@ class _DiscoverPageState extends State<DiscoverPage> with AutomaticKeepAliveClie
                                             : Padding(
                                                 padding: const EdgeInsets.all(8.0),
                                                 child: GridView.builder(
+                                                  key: const PageStorageKey('discover-grid'),
                                                   padding: const EdgeInsets.fromLTRB(0, 0, 0, 140),
                                                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                                     crossAxisCount: 3,

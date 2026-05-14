@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/wardrobe/wardrobe_page.dart
+// Purpose: Wardrobe management UI – view and manage clothing items and outfits.
+// Notes: Integrates with wardrobe repository implementations.
+
 // Wardrobe page: displays user's wardrobe items and outfits, with search
 // and filter controls and outfit creation flows. Integrates with
 // Supabase via `SupabaseWardrobeRepository` and optionally uses

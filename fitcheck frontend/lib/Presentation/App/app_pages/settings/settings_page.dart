@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/settings/settings_page.dart
+// Purpose: User settings page – account, preferences, and account actions.
+// Notes: Links to sub-pages like change password/email, delete account.
+
 
 // Settings page: profile + app preferences and account actions
 // - Redirects to homepage when user signs out

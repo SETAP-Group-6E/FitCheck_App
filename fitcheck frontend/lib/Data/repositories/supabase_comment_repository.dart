@@ -1,3 +1,7 @@
+// File: lib/Data/repositories/supabase_comment_repository.dart
+// Purpose: Helper for fetching and managing post comments via Supabase.
+// Notes: Normalizes commenter metadata for UI consumption.
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseCommentRepository {

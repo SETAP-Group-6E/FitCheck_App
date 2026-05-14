@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/settings/delete_account_page.dart
+// Purpose: UI for account deletion flow.
+// Notes: Confirms and performs destructive account removal actions.
+
 // Delete account page: confirms destructive account deletion action.
 // WARNING: this UI currently only shows confirmation messages. Wire up
 // backend deletion logic (Supabase auth/profile cleanup) to actually

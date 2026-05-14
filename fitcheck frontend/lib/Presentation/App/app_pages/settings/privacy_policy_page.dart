@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/settings/privacy_policy_page.dart
+// Purpose: Privacy policy static page.
+// Notes: Non-interactive informational content.
+
 // Privacy policy page: static legal text outlining data usage and retention.
 import 'package:flutter/material.dart';
 

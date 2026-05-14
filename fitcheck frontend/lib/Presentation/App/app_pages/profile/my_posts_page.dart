@@ -1,3 +1,7 @@
+// File: lib/Presentation/App/app_pages/profile/my_posts_page.dart
+// Purpose: Displays a user's posts in a grid with edit/delete actions.
+// Notes: Supports viewing other users' posts and the current user's posts.
+
 import 'dart:async';
 
 import 'package:fitcheck/Presentation/App/app_style/widgets/app_toast.dart';
@@ -14,6 +18,8 @@ class MyPostsPage extends StatefulWidget {
 }
 
 class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClientMixin<MyPostsPage> {
+  @override
+  bool get wantKeepAlive => true;
   final supabase = Supabase.instance.client;
   final ScrollController _scrollController = ScrollController();
 
