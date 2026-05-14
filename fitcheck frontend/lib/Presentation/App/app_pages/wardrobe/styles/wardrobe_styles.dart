@@ -1,3 +1,5 @@
+// Wardrobe UI styles and reusable decorations used by the wardrobe screens.
+// Centralises colors, input decorations and common button styles.
 import 'package:flutter/material.dart';
 
 class WardrobeStyles {

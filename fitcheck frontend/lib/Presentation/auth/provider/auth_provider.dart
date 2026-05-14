@@ -1,3 +1,7 @@
+// File: lib/Presentation/auth/provider/auth_provider.dart
+// Purpose: Authentication state/provider wiring for the app.
+// Notes: Exposes auth-related providers used across the UI.
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

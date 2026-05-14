@@ -1,3 +1,7 @@
+// File: lib/Presentation/auth/pages/register_page.dart
+// Purpose: UI for user registration.
+// Notes: Contains form and submit handling for new user sign-ups.
+
 
 import 'package:fitcheck/Presentation/App/app_style/widgets/password_field.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/signin_buttons.dart';
@@ -19,7 +23,7 @@ class RegisterPage extends ConsumerWidget {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Row(
           children: [
