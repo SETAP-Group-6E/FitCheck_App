@@ -230,11 +230,29 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1C1C1C),
-        title: const Text('Delete post'),
-        content: const Text('Permanently delete this post?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 6,
+        title: const Text('Delete post', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+        content: const Text('Permanently delete this post?', style: TextStyle(color: Colors.white70)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white70,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              textStyle: const TextStyle(fontSize: 14),
+            ),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.redAccent,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            child: const Text('Delete'),
+          ),
         ],
       ),
     );
@@ -266,11 +284,44 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1C1C1C),
-        title: const Text('Edit caption'),
-        content: TextField(controller: controller, maxLines: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 6,
+        title: const Text('Edit caption', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+        content: Container(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: TextField(
+            controller: controller,
+            maxLines: 4,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'Write a caption...',
+              hintStyle: const TextStyle(color: Colors.white54),
+              filled: true,
+              fillColor: const Color(0xFF1A1A1A),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            ),
+          ),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white70,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              textStyle: const TextStyle(fontSize: 14),
+            ),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Color(0xFFD99C13),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
@@ -311,18 +362,53 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
                   Positioned(
                     right: 6,
                     top: 6,
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: () => _editCaption(post),
-                          icon: const Icon(Icons.edit, color: Colors.white70),
-                        ),
-                        IconButton(
-                          onPressed: () async {
+                    child: PopupMenuButton<String>(
+                      padding: EdgeInsets.zero,
+                      color: const Color(0xFF121212),
+                      icon: const Icon(Icons.more_vert, color: Colors.white54, size: 20),
+                      onSelected: (value) async {
+                        if (value == 'edit') {
+                          _editCaption(post);
+                        } else if (value == 'delete') {
+                          final confirmed = await showDialog<bool>(
+                                context: ctx,
+                                builder: (dCtx) => AlertDialog(
+                                  backgroundColor: const Color(0xFF121212),
+                                  title: Text('Delete post', style: Theme.of(dCtx).textTheme.titleMedium?.copyWith(color: Colors.white)),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Permanently delete this post?', style: TextStyle(color: Colors.white70)),
+                                      const SizedBox(height: 12),
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(maxWidth: 420),
+                                        child: Text('This will remove the post and its associated images.', style: const TextStyle(color: Colors.white60)),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.of(dCtx).pop(false), child: const Text('Cancel')),
+                                    TextButton(onPressed: () => Navigator.of(dCtx).pop(true), child: const Text('Delete', style: TextStyle(color: Color(0xFFD99C13)))),
+                                  ],
+                                ),
+                              ) ??
+                              false;
+
+                          if (confirmed) {
                             await _deletePost(post);
                             Navigator.of(ctx).pop();
-                          },
-                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                          }
+                        }
+                      },
+                      itemBuilder: (menuCtx) => [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(children: const [Icon(Icons.edit, size: 18, color: Colors.white54), SizedBox(width: 8), Text('Edit caption', style: TextStyle(color: Colors.white))]),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(children: const [Icon(Icons.delete_outline, size: 18, color: Colors.redAccent), SizedBox(width: 8), Text('Delete', style: TextStyle(color: Colors.white))]),
                         ),
                       ],
                     ),

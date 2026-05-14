@@ -161,41 +161,47 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   ),
           ),
 
-          // New comment input
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 42,
-                    child: TextField(
-                      controller: _controller,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Write a comment...',
-                        hintStyle: const TextStyle(color: Colors.white54),
-                        filled: true,
-                        fillColor: const Color(0xFF1A1A1A),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFD99C13))),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          // New comment input — wrapped in SafeArea and given extra bottom
+          // padding so the field sits higher above the screen edge.
+          SafeArea(
+            bottom: true,
+            child: Padding(
+              // Increase bottom padding to move the field higher above the
+              // screen edge. Set to 50 as requested.
+              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 50.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 42,
+                      child: TextField(
+                        controller: _controller,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Write a comment...',
+                          hintStyle: const TextStyle(color: Colors.white54),
+                          filled: true,
+                          fillColor: const Color(0xFF1A1A1A),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFD99C13))),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD99C13),
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(48, 42),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD99C13),
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(48, 42),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: const Icon(Icons.keyboard_return, color: Colors.white),
                   ),
-                  child: const Icon(Icons.keyboard_return, color: Colors.white),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
