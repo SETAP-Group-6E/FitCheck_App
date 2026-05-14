@@ -117,7 +117,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
       if (mounted) setState(() => _submitting = false);
     }
   }
-
+// Build the UI for the comments sheet, including the header, comments list, and input area.
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
