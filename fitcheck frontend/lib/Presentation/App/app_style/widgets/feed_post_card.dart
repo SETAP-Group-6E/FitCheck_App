@@ -7,7 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:fitcheck/Data/repositories/supabase_comment_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../app_pages/post_comments_sheet.dart';
+import '../../app_pages/posts/post_comments_sheet.dart';
 import 'app_toast.dart';
 import '../../app_pages/profile/my_posts_page.dart';
 

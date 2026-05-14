@@ -152,11 +152,13 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
 
               IconButton(
                 icon: const Icon(
-                  Icons.message_rounded,
+                  Icons.explore_rounded,
                   size: 30,
                   color: Colors.white,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  _navigateIfNotCurrent(context, '/discover');
+                },
               ),
               const Expanded(child: SizedBox()),
               imageUrl == null

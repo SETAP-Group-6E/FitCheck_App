@@ -4,7 +4,7 @@
 // public URL.
 import 'dart:typed_data';
 
-import 'package:fitcheck/Presentation/App/app_pages/crop_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/posts/crop_page.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'crop_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../app_style/widgets/app_toast.dart';
+import '../../app_style/widgets/app_toast.dart';
 
 class PostDraftingPage extends StatefulWidget {
 	const PostDraftingPage({super.key});

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:fitcheck/Presentation/App/app_style/widgets/app_toast.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/feed_post_card.dart';
-import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -458,8 +457,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
                   ),
                 ),
 
-          // Floating navigation bar
-          const FloatingNavbar(),
+          // Floating navigation bar is provided by the app shell.
         ],
       ),
     );

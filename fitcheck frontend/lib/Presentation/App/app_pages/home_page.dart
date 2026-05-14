@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:fitcheck/Presentation/App/app_pages/social.dart';
+import 'package:fitcheck/Presentation/App/app_pages/posts/social.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/feed_post_card.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:flutter/foundation.dart';

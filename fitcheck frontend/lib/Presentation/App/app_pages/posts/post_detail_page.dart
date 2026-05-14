@@ -4,8 +4,8 @@
 import 'package:fitcheck/Presentation/App/app_style/widgets/post_comment_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../app_style/widgets/app_toast.dart';
-import '../../../Data/repositories/supabase_comment_repository.dart';
+import '../../app_style/widgets/app_toast.dart';
+import '../../../../Data/repositories/supabase_comment_repository.dart';
 
 // PostDetailPage
 // ----------------

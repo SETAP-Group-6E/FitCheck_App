@@ -3,10 +3,12 @@ import 'package:fitcheck/Presentation/App/app_pages/wardrobe/wardrobe_page.dart'
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/settings/settings_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/profile/my_posts_page.dart';
+import 'package:fitcheck/Presentation/App/app_pages/discover/discover_page.dart';
 import 'package:fitcheck/Presentation/App/theme/app_theme_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Presentation/auth/pages/register_page.dart';
+import 'Presentation/App/app_style/widgets/floating_nav_bar.dart';
 //import 'Presentation/app/app_pages/wardrobe_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -32,6 +34,14 @@ class MyApp extends ConsumerWidget {
       title: 'FitCheck',
       theme: buildAppTheme(mode),
       home: HomePage(),
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const FloatingNavbar(),
+          ],
+        );
+      },
 
       onGenerateRoute: (settings) {
         switch (settings.name) {
@@ -226,8 +236,46 @@ class MyApp extends ConsumerWidget {
                         ),
                       ],
                     );
-                  },
-                );
+              },
+            );
+          case '/discover':
+                  return PageRouteBuilder(
+                    settings: settings,
+                    transitionDuration: const Duration(milliseconds: 280),
+                    reverseTransitionDuration: const Duration(milliseconds: 220),
+                    pageBuilder: (context, animation, secondaryAnimation) => const DiscoverPage(),
+                    transitionsBuilder: (
+                      context,
+                      animation,
+                      secondaryAnimation,
+                      child,
+                    ) {
+                      final slideTween = Tween<Offset>(
+                        begin: const Offset(1, 0),
+                        end: Offset.zero,
+                      ).chain(CurveTween(curve: Curves.easeOutCubic));
+
+                      return Stack(
+                        children: [
+                          Positioned.fill(
+                            child: FadeTransition(
+                              opacity: CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOut,
+                              ),
+                              child: ColoredBox(
+                                color: Theme.of(context).scaffoldBackgroundColor,
+                              ),
+                            ),
+                          ),
+                          SlideTransition(
+                            position: animation.drive(slideTween),
+                            child: child,
+                          ),
+                        ],
+                      );
+                    },
+                  );
           case '/wardrobe':
             return PageRouteBuilder(
               settings: settings,

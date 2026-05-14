@@ -356,12 +356,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                     );
                                   },
                                 ),
-                                _settingsRow(
-                                  'My posts',
-                                  onTap: () {
-                                    Navigator.pushNamed(context, '/my-posts');
-                                  },
-                                ),
+                                // 'My posts' removed per design — navigation moved to avatar and profile flows
                               ],
                             ),
                           ),
