@@ -38,10 +38,7 @@ class CreateOutfitModal extends StatefulWidget {
       builder:
           (_) => Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(
-              horizontal: 18,
-              vertical: 18,
-            ),
+            insetPadding: const EdgeInsets.fromLTRB(18, 18, 18, 80),
             child: CreateOutfitModal(
               repository: repository,
               existingOutfit: existingOutfit,
@@ -427,27 +424,39 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(32, 12, 32, 20),
-                decoration: BoxDecoration(
-                  color: _CreateOutfitTheme.card,
-                  border: Border(
-                    top: BorderSide(color: _CreateOutfitTheme.border),
+              SafeArea(
+                top: false,
+                left: false,
+                right: false,
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(
+                    32,
+                    12,
+                    32,
+                    32 + MediaQuery.of(context).viewPadding.bottom,
                   ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _SecondaryButton(text: "Cancel", onPressed: _cancel),
-                    const SizedBox(width: 12),
-                    _PrimaryButton(
-                      text:
-                          _saving
-                              ? (_isEditMode ? "Updating..." : "Saving...")
-                              : (_isEditMode ? "Update outfit" : "Save outfit"),
-                      onPressed: _saving ? null : _save,
+                  decoration: BoxDecoration(
+                    color: _CreateOutfitTheme.card,
+                    border: Border(
+                      top: BorderSide(color: _CreateOutfitTheme.border),
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _SecondaryButton(text: "Cancel", onPressed: _cancel),
+                      const SizedBox(width: 12),
+                      _PrimaryButton(
+                        text:
+                            _saving
+                                ? (_isEditMode ? "Updating..." : "Saving...")
+                                : (_isEditMode
+                                    ? "Update outfit"
+                                    : "Save outfit"),
+                        onPressed: _saving ? null : _save,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
