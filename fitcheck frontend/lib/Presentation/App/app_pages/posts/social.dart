@@ -300,15 +300,18 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
                 Expanded(
                   child: TextField(
                     controller: _captionController,
+                    keyboardType: TextInputType.multiline,
+                    minLines: 1,
+                    maxLines: 6,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Write a caption...',
+                      hintText: 'Write a caption... (press Enter for new line)',
                       hintStyle: const TextStyle(color: Colors.white54),
                       filled: true,
                       fillColor: const Color(0xFF2A2A2A),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
-                        vertical: 10,
+                        vertical: 12,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),

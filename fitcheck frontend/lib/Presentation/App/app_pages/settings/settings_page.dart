@@ -22,7 +22,6 @@ import 'package:fitcheck/Presentation/App/theme/app_theme_mode.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fitcheck/Presentation/App/app_state.dart' as app_state;
 
 class SettingsPage extends ConsumerStatefulWidget {
   /// Main settings screen widget.
@@ -38,7 +37,6 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   // SettingsPage state manages avatar, preferences and navigation to
   // settings sub-pages. Important behaviors:
-  // - Hides the global floating navbar in initState and restores it in dispose
   // - Listens for auth state changes and navigates back to public homepage
   //   if the user signs out elsewhere
   bool _notifications = true;
@@ -55,8 +53,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void initState() {
     super.initState();
     _refreshAvatarUrl();
-    // hide global navbar while on settings
-    app_state.navbarVisible.value = false;
     // Listen for auth state changes so we can react (for example, if the
     // user signs out from another tab). When no longer authenticated we
     // navigate back to the public homepage to avoid showing protected UI.
@@ -78,8 +74,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void dispose() {
     _authSub?.cancel();
-    // restore navbar visibility when leaving settings
-    app_state.navbarVisible.value = true;
     super.dispose();
   }
 

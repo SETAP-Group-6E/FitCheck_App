@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fitcheck/Data/repositories/notification_repository.dart';
 import 'package:fitcheck/Presentation/App/app_pages/profile/my_posts_page.dart';
-import 'package:fitcheck/Presentation/App/app_state.dart' as app_state;
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -25,8 +24,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    // hide global navbar while notifications are visible
-    app_state.navbarVisible.value = false;
     if (_isAuthenticated) {
       _load();
     }
@@ -34,8 +31,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   void dispose() {
-    // restore navbar when leaving notifications
-    app_state.navbarVisible.value = true;
     super.dispose();
   }
 
