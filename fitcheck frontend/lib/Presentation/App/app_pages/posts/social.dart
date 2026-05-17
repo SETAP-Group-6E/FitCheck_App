@@ -5,6 +5,7 @@
 // Post drafting page: pick/crop images, enter caption, and upload post media.
 // - Uploads images to Supabase Storage and inserts a `post` row with metadata.
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -87,7 +88,8 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
 
       // Try to insert a posts row with caption metadata. If the table doesn't exist
       // this will fail and be caught — upload still succeeds.
-      final caption = _captionController.text.trim();
+      final originalCaption = _captionController.text; // preserve newlines for storage
+      final caption = originalCaption.trim();
       try {
         final inserted =
             await Supabase.instance.client
@@ -122,6 +124,25 @@ class _PostDraftingPageState extends State<PostDraftingPage> {
             'Failed to save post metadata: $e',
             error: true,
           );
+      }
+
+      // Also upload a small public caption file as a fallback for unauthenticated viewers
+      try {
+        if (originalCaption.isNotEmpty) {
+          final captionPath = '$postKey/${"caption.txt"}';
+          await bucket.uploadBinary(
+            captionPath,
+            utf8.encode(originalCaption),
+            fileOptions: const FileOptions(
+              contentType: 'text/plain; charset=utf-8',
+              upsert: true,
+            ),
+          );
+        }
+      } catch (e) {
+        // non-fatal; keep going
+        // ignore: avoid_print
+        print('Caption file upload failed: $e');
       }
 
       if (!mounted) {

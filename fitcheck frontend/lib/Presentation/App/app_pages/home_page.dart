@@ -3,6 +3,7 @@
 // Notes: Hosts primary feed and navigation entry points.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:fitcheck/Presentation/App/app_pages/posts/social.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/feed_post_card.dart';
@@ -15,6 +16,7 @@ import '../app_style/widgets/app_toast.dart';
 import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fitcheck/Data/repositories/notification_repository.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -194,10 +196,57 @@ class _HomePageState extends State<HomePage> {
         String? caption;
         try {
           final row = await supabase.from('post').select('caption').eq('storage_key', groupKey).maybeSingle();
-          caption = (row?['caption'] as String?)?.trim();
+            caption = (row?['caption'] as String?)?.trim(); 
         } catch (_) {
           caption = null;
         }
+        
+          // Fallback: if exact match returned nothing, try a broader contains search
+          if (caption == null || caption.isEmpty) {
+            try {
+              final keySuffix = groupKey.split('/').last;
+              final fallbackRows = await supabase
+                  .from('post')
+                  .select('storage_key, caption')
+                  .ilike('storage_key', '%$keySuffix%')
+                  .limit(1);
+              debugPrint('HomePage: fallback query for $groupKey -> $fallbackRows');
+              if (fallbackRows is List && fallbackRows.isNotEmpty) {
+                caption = (fallbackRows.first['caption'] as String?)?.trim();
+                debugPrint('HomePage: using fallback caption for $groupKey -> $caption');
+              }
+            } catch (e, st) {
+              debugPrint('HomePage: fallback caption query failed for $groupKey: $e\n$st');
+            }
+          }
+
+          // Storage fallback: try to read a caption file placed next to images
+          if ((caption == null || caption.isEmpty) && (group.images.isNotEmpty)) {
+            try {
+              // The caption file is uploaded at the same storage key folder as the images: '<userId>/<timestamp>/caption.txt'
+              final captionPath = '${entry.key}/caption.txt';
+              final publicUrl = supabase.storage.from('User Posts').getPublicUrl(captionPath);
+              debugPrint('HomePage: trying storage caption URL for $groupKey -> $publicUrl');
+                final res = await http.get(Uri.parse(publicUrl));
+                if (res.statusCode == 200) {
+                  try {
+                    final body = utf8.decode(res.bodyBytes);
+                    if (body.trim().isNotEmpty) {
+                      caption = body.trim();
+                      debugPrint('HomePage: loaded caption from storage for $groupKey -> $caption');
+                    }
+                  } catch (e) {
+                    final body = res.body;
+                    if (body.trim().isNotEmpty) {
+                      caption = body.trim();
+                      debugPrint('HomePage: loaded caption (fallback decode) for $groupKey -> $caption');
+                    }
+                  }
+              }
+            } catch (e, st) {
+              debugPrint('HomePage: storage caption fetch failed for $groupKey: $e\n$st');
+            }
+          }
 
         return _BucketPost(
           id: groupKey,

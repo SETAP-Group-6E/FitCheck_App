@@ -3,6 +3,7 @@
 // with Supabase for likes and realtime comment counts.
 import 'dart:async';
 import 'package:flutter/gestures.dart';
+import 'caption_utils.dart';
 
 import 'package:fitcheck/Data/repositories/supabase_comment_repository.dart';
 import 'package:flutter/material.dart';
@@ -425,67 +426,64 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     children: [
                       Builder(
                         builder: (context) {
-                          const limit = 50;
-                          final caption = widget.caption!;
-                          final shouldCollapse = caption.length > limit;
+                            const limit = 15;
+                            final caption = widget.caption!;
+                            final shouldCollapse = caption.length > limit;
 
-                          if (!shouldCollapse) {
-                            return Text(
-                              caption,
-                              style: const TextStyle(color: Colors.white),
-                            );
-                          }
+                            if (!shouldCollapse) {
+                              return Text(
+                                caption,
+                                style: const TextStyle(color: Colors.white),
+                              );
+                            }
 
-                          // collapsed or expanded with inline tappable More/Less
-                          return RichText(
-                            text: TextSpan(
-                              children: [
-                                if (!_captionExpanded) ...[
-                                  TextSpan(
-                                    text: caption.substring(0, limit),
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  const TextSpan(
-                                    text: '... ',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  TextSpan(
-                                    text: 'More',
-                                    style: const TextStyle(
-                                      color: Color(0xFFD99C13),
-                                      fontWeight: FontWeight.w600,
+                            // Use shared utility to compute smart preview
+                            final preview = makePreview(caption, limit);
+
+                            // collapsed or expanded with inline tappable More/Less
+                            return RichText(
+                              text: TextSpan(
+                                children: [
+                                  if (!_captionExpanded) ...[
+                                    TextSpan(
+                                      text: preview,
+                                      style: const TextStyle(color: Colors.white),
                                     ),
-                                    recognizer:
-                                        TapGestureRecognizer()
-                                          ..onTap = () {
-                                            setState(
-                                              () => _captionExpanded = true,
-                                            );
-                                          },
-                                  ),
-                                ] else ...[
-                                  TextSpan(
-                                    text: caption,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  TextSpan(
-                                    text: ' Less',
-                                    style: const TextStyle(
-                                      color: Color(0xFFD99C13),
-                                      fontWeight: FontWeight.w600,
+                                    const TextSpan(
+                                      text: '... ',
+                                      style: TextStyle(color: Colors.white),
                                     ),
-                                    recognizer:
-                                        TapGestureRecognizer()
-                                          ..onTap = () {
-                                            setState(
-                                              () => _captionExpanded = false,
-                                            );
-                                          },
-                                  ),
+                                    TextSpan(
+                                      text: 'More',
+                                      style: const TextStyle(
+                                        color: Color(0xFFD99C13),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          setState(() => _captionExpanded = true);
+                                        },
+                                    ),
+                                  ] else ...[
+                                    TextSpan(
+                                      text: caption,
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                    TextSpan(
+                                      text: ' Less',
+                                      style: const TextStyle(
+                                        color: Color(0xFFD99C13),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          setState(() => _captionExpanded = false);
+                                        },
+                                    ),
+                                  ],
                                 ],
-                              ],
-                            ),
-                          );
+                              ),
+                            );
                         },
                       ),
                       const SizedBox(height: 8),
