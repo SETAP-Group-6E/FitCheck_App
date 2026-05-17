@@ -224,7 +224,7 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year.toString().substring(2)}';
   }
 
-  Future<void> _deletePost(_BucketPost post) async {
+  Future<bool> _deletePost(_BucketPost post) async {
     // Confirm and remove a post's storage objects and DB rows.
     final confirm = await showDialog<bool>(
       context: context,
@@ -257,25 +257,89 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
       ),
     );
 
-    if (confirm != true) return;
+    if (confirm != true) return false;
+
+    // Optimistic UI: remove the post from local lists immediately so the
+    // user sees the change without waiting for network operations.
+    final originalAll = List<_BucketPost>.from(_allPosts);
+    final originalVisible = List<_BucketPost>.from(_visiblePosts);
+    final removedIndex = _allPosts.indexWhere((p) => p.id == post.id);
+    if (removedIndex != -1) {
+      setState(() {
+        _allPosts.removeAt(removedIndex);
+        _visiblePosts = _allPosts.sublist(0, (_visiblePosts.length).clamp(0, _allPosts.length));
+      });
+    }
 
     try {
       final bucket = supabase.storage.from('User Posts');
       // remove storage objects
       if (post.imagePaths.isNotEmpty) {
-        await bucket.remove(post.imagePaths);
+        final remRes = await bucket.remove(post.imagePaths);
+        print('Storage remove result for ${post.id}: $remRes');
+        debugPrint('Storage remove result for ${post.id}: $remRes');
       }
 
-      // delete related DB rows
-      await supabase.from('post_likes').delete().eq('storage_key', post.id);
-      await supabase.from('comments').delete().eq('storage_key', post.id);
-      await supabase.from('post').delete().eq('storage_key', post.id);
+      // delete related DB rows and log responses for diagnosis
+      try {
+        final likesRes = await supabase.from('post_likes').delete().eq('storage_key', post.id);
+        print('post_likes delete result for ${post.id}: $likesRes');
+        debugPrint('post_likes delete result for ${post.id}: $likesRes');
+      } catch (e) {
+        print('post_likes delete error for ${post.id}: $e');
+        debugPrint('post_likes delete error for ${post.id}: $e');
+      }
+
+      try {
+        final commentsRes = await supabase.from('comments').delete().eq('storage_key', post.id);
+        print('comments delete result for ${post.id}: $commentsRes');
+        debugPrint('comments delete result for ${post.id}: $commentsRes');
+      } catch (e) {
+        print('comments delete error for ${post.id}: $e');
+        debugPrint('comments delete error for ${post.id}: $e');
+      }
+
+      try {
+        final postRes = await supabase.from('post').delete().eq('storage_key', post.id);
+        print('post delete result for ${post.id}: $postRes');
+        debugPrint('post delete result for ${post.id}: $postRes');
+      } catch (e) {
+        print('post delete error for ${post.id}: $e');
+        debugPrint('post delete error for ${post.id}: $e');
+      }
+
+      // Verify deletion — if the post still exists, report error so
+      // we can diagnose row-level security or permission issues.
+      try {
+        final remaining = await supabase.from('post').select('storage_key').eq('storage_key', post.id).maybeSingle();
+        if (remaining != null) {
+          // rollback optimistic removal
+          setState(() {
+            _allPosts = originalAll;
+            _visiblePosts = originalVisible;
+          });
+          showAppMessage(context, 'Failed to delete post: database entry still present', error: true);
+          return false;
+        }
+      } catch (e) {
+        // If a verification query fails, log it but continue to inform user.
+        print('Post deletion verification query failed: $e');
+        debugPrint('Post deletion verification query failed: $e');
+      }
 
       showAppMessage(context, 'Post deleted');
       await _loadPosts();
+      return true;
     } catch (e) {
+      // rollback optimistic removal on failure
+      setState(() {
+        _allPosts = originalAll;
+        _visiblePosts = originalVisible;
+      });
       showAppMessage(context, 'Failed to delete post: $e', error: true);
     }
+
+    return false;
   }
 
   Future<void> _editCaption(_BucketPost post) async {
@@ -328,11 +392,50 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
 
     if (changed != true) return;
 
+    final newCaption = controller.text.trim();
+    final originalCaption = post.caption;
+
+    // Optimistically update local post objects so UI reflects the change immediately.
+    final updatedPost = _BucketPost(
+      id: post.id,
+      author: post.author,
+      username: post.username,
+      createdAt: post.createdAt,
+      imageUrls: post.imageUrls,
+      imagePaths: post.imagePaths,
+      profileImageUrl: post.profileImageUrl,
+      caption: newCaption,
+    );
+
+    final allIndex = _allPosts.indexWhere((p) => p.id == post.id);
+    final visibleIndex = _visiblePosts.indexWhere((p) => p.id == post.id);
+
+    setState(() {
+      if (allIndex != -1) _allPosts[allIndex] = updatedPost;
+      if (visibleIndex != -1) _visiblePosts[visibleIndex] = updatedPost;
+    });
+
     try {
-      await supabase.from('post').update({'caption': controller.text.trim()}).eq('storage_key', post.id);
+      await supabase.from('post').update({'caption': newCaption}).eq('storage_key', post.id);
       showAppMessage(context, 'Caption updated');
-      await _loadPosts();
     } catch (e) {
+      // rollback optimistic update on failure
+      final rolledBackPost = _BucketPost(
+        id: post.id,
+        author: post.author,
+        username: post.username,
+        createdAt: post.createdAt,
+        imageUrls: post.imageUrls,
+        imagePaths: post.imagePaths,
+        profileImageUrl: post.profileImageUrl,
+        caption: originalCaption,
+      );
+
+      setState(() {
+        if (allIndex != -1) _allPosts[allIndex] = rolledBackPost;
+        if (visibleIndex != -1) _visiblePosts[visibleIndex] = rolledBackPost;
+      });
+
       showAppMessage(context, 'Failed to update caption: $e', error: true);
     }
   }
@@ -370,35 +473,8 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
                         if (value == 'edit') {
                           _editCaption(post);
                         } else if (value == 'delete') {
-                          final confirmed = await showDialog<bool>(
-                                context: ctx,
-                                builder: (dCtx) => AlertDialog(
-                                  backgroundColor: const Color(0xFF121212),
-                                  title: Text('Delete post', style: Theme.of(dCtx).textTheme.titleMedium?.copyWith(color: Colors.white)),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('Permanently delete this post?', style: TextStyle(color: Colors.white70)),
-                                      const SizedBox(height: 12),
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(maxWidth: 420),
-                                        child: Text('This will remove the post and its associated images.', style: const TextStyle(color: Colors.white60)),
-                                      ),
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(onPressed: () => Navigator.of(dCtx).pop(false), child: const Text('Cancel')),
-                                    TextButton(onPressed: () => Navigator.of(dCtx).pop(true), child: const Text('Delete', style: TextStyle(color: Color(0xFFD99C13)))),
-                                  ],
-                                ),
-                              ) ??
-                              false;
-
-                          if (confirmed) {
-                            await _deletePost(post);
-                            Navigator.of(ctx).pop();
-                          }
+                          final deleted = await _deletePost(post);
+                          if (deleted) Navigator.of(ctx).pop();
                         }
                       },
                       itemBuilder: (menuCtx) => [

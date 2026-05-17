@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   final NotificationRepository _notifRepo = NotificationRepository();
   int _unreadCount = 0;
   Timer? _notifPollTimer;
+  StreamSubscription<AuthState>? _authSubscription;
   Future<List<_BucketPost>> _feedFuture = Future.value(const <_BucketPost>[]);
   bool _showNoMorePostsPrompt = false;
   bool _isScrollingDown = false;
@@ -52,6 +53,10 @@ class _HomePageState extends State<HomePage> {
     _refreshFeed();
     _fetchUnread();
     _notifPollTimer = Timer.periodic(const Duration(seconds: 20), (_) => _fetchUnread());
+    // Listen for auth state changes so we refresh unread count immediately
+    _authSubscription = supabase.auth.onAuthStateChange.listen((_) {
+      _fetchUnread();
+    });
   }
 
   @override
@@ -59,13 +64,17 @@ class _HomePageState extends State<HomePage> {
     // Cancel background timers when leaving the home page
     _noMorePostsTimer?.cancel();
     _notifPollTimer?.cancel();
+    _authSubscription?.cancel();
     super.dispose();
   }
 
   Future<void> _fetchUnread() async {
     try {
+      final user = supabase.auth.currentUser;
+      debugPrint('Fetching unread notifications; user=${user?.id}');
       final count = await _notifRepo.fetchUnreadCount();
       if (!mounted) return;
+      debugPrint('Unread count: $count');
       setState(() {
         _unreadCount = count;
       });
@@ -277,8 +286,14 @@ class _HomePageState extends State<HomePage> {
                       Stack(
                         children: [
                           IconButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/notifications');
+                            onPressed: () async {
+                              final res = await Navigator.pushNamed(context, '/notifications');
+                              if (res == true) {
+                                // Notifications were marked read by the page; refresh
+                                // the unread count immediately instead of waiting
+                                // for the next poll.
+                                _fetchUnread();
+                              }
                             },
                             icon: const Icon(
                               Icons.notifications_none,

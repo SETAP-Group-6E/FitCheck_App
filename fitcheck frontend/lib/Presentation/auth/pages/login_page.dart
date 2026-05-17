@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider/auth_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/password_field.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/app_toast.dart';
 
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
@@ -102,11 +103,7 @@ class LoginPage extends ConsumerWidget {
                               password: passwordController.text.trim(),
                             );
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Login successful!'), duration: Duration(milliseconds: 300),
-                                ),
-                              );
+                              showAppMessage(context, 'Login successful!');
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
@@ -116,9 +113,7 @@ class LoginPage extends ConsumerWidget {
                             }
                           } catch (e) {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Login failed: $e')),
-                              );
+                              showAppMessage(context, 'Login failed: $e', error: true);
                             }
                           }
                         },

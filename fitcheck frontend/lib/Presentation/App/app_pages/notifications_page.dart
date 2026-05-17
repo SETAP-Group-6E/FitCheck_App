@@ -42,7 +42,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final items = await repo.fetchNotifications(limit: 200).timeout(const Duration(seconds: 8));
+      // Fetch at least the last 25 notifications (most recent first).
+      final items = await repo.fetchNotifications(limit: 25).timeout(const Duration(seconds: 8));
       if (!mounted) return;
       setState(() {
         _items = items;
@@ -55,6 +56,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
         _loading = false;
       });
     }
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inSeconds < 60) return '${difference.inSeconds}s ago';
+    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+    if (difference.inHours < 24) return '${difference.inHours}h ago';
+    if (difference.inDays < 7) return '${difference.inDays}d ago';
+    return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year.toString().substring(2)}';
   }
 
 
@@ -142,7 +154,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         child: ListView.separated(
           itemCount: _items.length,
           separatorBuilder: (_, __) => Divider(height: 1, color: theme.dividerColor),
-          itemBuilder: (context, index) {
+            itemBuilder: (context, index) {
             final n = _items[index];
             return ListTile(
               leading: n.actorProfileUrl != null
@@ -150,6 +162,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   : const CircleAvatar(child: Icon(Icons.person)),
               title: Text('${n.actorUsername} ${n.type == 'like' ? 'liked' : 'commented'}', style: theme.textTheme.bodyLarge?.copyWith(color: textColor)),
               subtitle: n.commentPreview != null ? Text(n.commentPreview!, style: theme.textTheme.bodyMedium?.copyWith(color: textColor.withOpacity(0.85))) : null,
+              trailing: Text(_formatTimeAgo(n.createdAt), style: theme.textTheme.bodySmall?.copyWith(color: textColor.withOpacity(0.7))),
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => MyPostsPage(userId: n.postKey.split('/').first)));
               },
@@ -176,13 +189,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
                      padding: EdgeInsets.zero,
                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                      icon: Icon(Icons.arrow_back_ios_new, color: textColor.withOpacity(0.92), size: 20),
-                     onPressed: () {
-                      // When the user navigates back, assume notifications are
-                      // read and mark them on the server (fire-and-forget).
+                     onPressed: () async {
+                      // When the user navigates back, mark notifications read and
+                      // return `true` so the caller (HomePage) can refresh immediately.
                       if (_isAuthenticated) {
-                        repo.markAllRead();
+                        await repo.markAllRead();
                       }
-                      Navigator.maybePop(context);
+                      Navigator.maybePop(context, true);
                     },
                   ),
                   const SizedBox(width: 8),
@@ -204,8 +217,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
               child: WillPopScope(
                 onWillPop: () async {
                   if (_isAuthenticated) {
-                    // Fire-and-forget; we don't need to await completion.
-                    repo.markAllRead();
+                    // Mark read and return a positive result to the caller.
+                    await repo.markAllRead();
+                    Navigator.of(context).pop(true);
+                    return false; // we've already popped
                   }
                   return true;
                 },

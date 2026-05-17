@@ -396,6 +396,8 @@ class NavVisibilityObserver extends NavigatorObserver {
     '/notifications',
     '/post_drafting',
     '/crop',
+    '/login',
+    '/register',
   };
 
   void _update(Route<dynamic>? route, Route<dynamic>? previousRoute) {
