@@ -3,7 +3,6 @@
 // Notes: Handles sign-in via Supabase and form validation.
 
 import 'package:fitcheck/Presentation/App/app_style/widgets/signin_buttons.dart';
-import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider/auth_provider.dart';
@@ -39,11 +38,13 @@ class LoginPage extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(100),
                           color: Color.fromRGBO(217, 156, 19, 1),
                         ),
-                        child: Image(image: AssetImage("Assets/logo_white.png")),
+                        child: Image(
+                          image: AssetImage("Assets/logo_white.png"),
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
-        
+
                     Text(
                       "Login to your account",
                       style: GoogleFonts.dmSerifText(
@@ -84,7 +85,7 @@ class LoginPage extends ConsumerWidget {
                       child: PasswordField(passwordController),
                     ),
                     SizedBox(height: 10),
-        
+
                     SizedBox(
                       height: 40,
                       width: 350,
@@ -104,16 +105,19 @@ class LoginPage extends ConsumerWidget {
                             );
                             if (context.mounted) {
                               showAppMessage(context, 'Login successful!');
-                              Navigator.pushReplacement(
+                              Navigator.pushNamedAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => HomePage(),
-                                ),
-                                );
+                                '/homepage',
+                                (route) => false,
+                              );
                             }
                           } catch (e) {
                             if (context.mounted) {
-                              showAppMessage(context, 'Login failed: $e', error: true);
+                              showAppMessage(
+                                context,
+                                'Login failed: $e',
+                                error: true,
+                              );
                             }
                           }
                         },
@@ -138,7 +142,7 @@ class LoginPage extends ConsumerWidget {
                           ),
                           height: 35,
                           width: 35,
-                          child: GoogleSignInButton()
+                          child: GoogleSignInButton(),
                         ),
                         SizedBox(width: 25),
                         Container(
@@ -180,10 +184,7 @@ class LoginPage extends ConsumerWidget {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.popAndPushNamed(
-                              context, '/register',
-                              
-                            );
+                            Navigator.popAndPushNamed(context, '/register');
                           },
                         ),
                       ],
