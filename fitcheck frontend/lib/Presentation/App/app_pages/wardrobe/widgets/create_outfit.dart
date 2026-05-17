@@ -250,12 +250,12 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
       constraints: const BoxConstraints(maxWidth: 720),
       child: Container(
         decoration: BoxDecoration(
-          color: _CreateOutfitTheme.card,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: _CreateOutfitTheme.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
+              color: Colors.black.withOpacity(0.25),
               blurRadius: 30,
               offset: const Offset(0, 10),
             ),
@@ -436,7 +436,7 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                     32 + MediaQuery.of(context).viewPadding.bottom,
                   ),
                   decoration: BoxDecoration(
-                    color: _CreateOutfitTheme.card,
+                    color: Colors.transparent,
                     border: Border(
                       top: BorderSide(color: _CreateOutfitTheme.border),
                     ),

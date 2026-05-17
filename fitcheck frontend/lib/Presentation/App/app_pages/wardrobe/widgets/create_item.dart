@@ -33,10 +33,7 @@ class CreateItem extends StatefulWidget {
       builder:
           (_) => Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(
-              horizontal: 18,
-              vertical: 18,
-            ),
+            insetPadding: const EdgeInsets.fromLTRB(18, 18, 18, 80),
             child: CreateItem(
               repository: repository,
               existingItem: existingItem,
@@ -235,7 +232,7 @@ class _CreateItemState extends State<CreateItem> {
       constraints: const BoxConstraints(maxWidth: 720),
       child: Container(
         decoration: BoxDecoration(
-          color: _CreateItemTheme.card,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: _CreateItemTheme.border),
           boxShadow: [
@@ -332,24 +329,34 @@ class _CreateItemState extends State<CreateItem> {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(32, 12, 32, 20),
-                decoration: BoxDecoration(
-                  color: _CreateItemTheme.card,
-                  border: Border(
-                    top: BorderSide(color: _CreateItemTheme.border),
+              SafeArea(
+                top: false,
+                left: false,
+                right: false,
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(
+                    32,
+                    12,
+                    32,
+                    32 + MediaQuery.of(context).viewPadding.bottom,
                   ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _SecondaryButton(text: "Cancel", onPressed: _cancel),
-                    const SizedBox(width: 12),
-                    _PrimaryButton(
-                      text: _saveButtonText,
-                      onPressed: _saving ? null : _save,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    border: Border(
+                      top: BorderSide(color: _CreateItemTheme.border),
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _SecondaryButton(text: "Cancel", onPressed: _cancel),
+                      const SizedBox(width: 12),
+                      _PrimaryButton(
+                        text: _saveButtonText,
+                        onPressed: _saving ? null : _save,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -708,7 +715,7 @@ class _PhotoBoxUIOnly extends StatelessWidget {
           height: 312,
           width: 312,
           decoration: BoxDecoration(
-            color: _CreateItemTheme.bg,
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: _CreateItemTheme.border),
           ),

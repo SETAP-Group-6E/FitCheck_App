@@ -449,7 +449,7 @@ class _WardrobePageState extends State<WardrobePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           SafeArea(
@@ -705,7 +705,7 @@ class _WardrobeItemsGrid extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  color: Colors.black12,
+                  color: Colors.transparent,
                   child: const DashedBox(
                     color: Colors.black,
                     strokeWidth: 7.0,
@@ -731,7 +731,7 @@ class _WardrobeItemsGrid extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.04),
+              color: Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white24),
             ),
@@ -875,7 +875,7 @@ class _WardrobeOutfitsList extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
+              color: Colors.transparent,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: Colors.white24),
             ),
@@ -948,7 +948,7 @@ class _WardrobeOutfitsList extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.04),
+                            color: Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.white12),
                           ),
