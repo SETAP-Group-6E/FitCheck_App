@@ -7,6 +7,7 @@ import 'package:fitcheck/Presentation/App/app_pages/wardrobe/widgets/create_outf
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fitcheck/Presentation/App/app_state.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/app_toast.dart';
 // Notifications bell moved to the HomePage header; navbar no longer renders it here.
 
 class FloatingNavbar extends StatefulWidget {
@@ -58,11 +59,14 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
   // notifications handled by HomePage
 
   void _navigateIfNotCurrent(BuildContext context, String routeName) {
-    // Use the provided navigator key to ensure we target the app's Navigator
-    final nav = widget.navigatorKey?.currentState;
-    if (nav == null) return;
+    // Use the provided navigator key (if any) or fall back to Navigator.of(context)
     try {
-      nav.pushNamed(routeName);
+      final nav = widget.navigatorKey?.currentState;
+      if (nav != null) {
+        nav.pushNamed(routeName);
+      } else {
+        Navigator.of(context).pushNamed(routeName);
+      }
     } catch (_) {
       // ignore navigation errors
     }
@@ -71,9 +75,38 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
   void _openSettingsOrLogin(BuildContext context) {
     final auth = Supabase.instance.client.auth;
     final isLoggedIn = auth.currentSession != null && auth.currentUser != null;
-    final nav = widget.navigatorKey?.currentState;
-    if (nav == null) return;
-    nav.pushNamed(isLoggedIn ? '/my-posts' : '/login');
+    final route = isLoggedIn ? '/my-posts' : '/login';
+    try {
+      final nav = widget.navigatorKey?.currentState;
+      if (nav != null) {
+        nav.pushNamed(route);
+      } else {
+        Navigator.of(context).pushNamed(route);
+      }
+    } catch (_) {}
+  }
+
+  void _openWardrobeOrLogin(BuildContext context) {
+    final auth = Supabase.instance.client.auth;
+    final isLoggedIn = auth.currentSession != null && auth.currentUser != null;
+    final route = isLoggedIn ? '/wardrobe' : '/login';
+    final toastCtx = widget.navigatorKey?.currentContext ?? context;
+    if (!isLoggedIn) {
+      try {
+        if (Overlay.of(toastCtx) != null) {
+          showAppMessage(toastCtx, 'Login to view your wardrobe');
+        }
+      } catch (_) {}
+    }
+
+    try {
+      final nav = widget.navigatorKey?.currentState;
+      if (nav != null) {
+        nav.pushNamed(route);
+      } else {
+        Navigator.of(context).pushNamed(route);
+      }
+    } catch (_) {}
   }
 
   Widget _defaultAvatar(BuildContext context) {
@@ -152,8 +185,14 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                             color: Colors.white,
                           ),
                           onPressed: () {
-                            final nav = widget.navigatorKey?.currentState;
-                            nav?.pushReplacementNamed('/homepage');
+                            try {
+                              final nav = widget.navigatorKey?.currentState;
+                              if (nav != null) {
+                                nav.pushReplacementNamed('/homepage');
+                              } else {
+                                Navigator.of(context).pushReplacementNamed('/homepage');
+                              }
+                            } catch (_) {}
                           },
                         ),
                         const Expanded(child: SizedBox()),
@@ -164,7 +203,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                             color: Colors.white,
                           ),
                           onPressed: () {
-                            _navigateIfNotCurrent(context, '/wardrobe');
+                            _openWardrobeOrLogin(context);
                           },
                         ),
                         const Expanded(child: SizedBox()),
@@ -182,9 +221,28 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                               color: Colors.white,
                             ),
                             onPressed: () async {
-                              final navCtx =
-                                  widget.navigatorKey?.currentContext ??
-                                  context;
+                              final auth = Supabase.instance.client.auth;
+                              final isLoggedIn =
+                                  auth.currentSession != null && auth.currentUser != null;
+                              final navCtx = widget.navigatorKey?.currentContext ?? context;
+                              if (!isLoggedIn) {
+                                final toastCtx = widget.navigatorKey?.currentContext ?? context;
+                                try {
+                                  if (Overlay.of(toastCtx) != null) {
+                                    showAppMessage(toastCtx, 'Login to create a new outfit');
+                                  }
+                                } catch (_) {}
+                                try {
+                                  final nav = widget.navigatorKey?.currentState;
+                                  if (nav != null) {
+                                    nav.pushNamed('/login');
+                                  } else {
+                                    Navigator.of(context).pushNamed('/login');
+                                  }
+                                } catch (_) {}
+                                return;
+                              }
+
                               final didSave = await CreateOutfitModal.open(
                                 navCtx,
                                 repository: wardrobeRepository,
