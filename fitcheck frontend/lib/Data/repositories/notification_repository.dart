@@ -50,6 +50,11 @@ class NotificationRepository {
     metadata['last_notif_read'] = now;
     try {
       await _supabase.auth.updateUser(UserAttributes(data: metadata));
+      // Refresh cached user info so subsequent calls to
+      // `auth.currentUser.userMetadata` reflect the updated timestamp.
+      try {
+        await _supabase.auth.getUser();
+      } catch (_) {}
     } catch (_) {}
   }
 

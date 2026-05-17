@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../provider/auth_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/app_toast.dart';
+import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -124,17 +126,30 @@ class RegisterPage extends ConsumerWidget {
                               username: userNameController.text.trim(),
                             );
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Success! Check your email.'),
-                                ),
-                              );
+                              // Attempt to sign the user in immediately after sign-up.
+                              try {
+                                await authRepo.signIn(
+                                  email: emailController.text.trim(),
+                                  password: passwordController.text.trim(),
+                                );
+                                if (context.mounted) {
+                                  showAppMessage(context, 'Welcome!');
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => HomePage()),
+                                  );
+                                }
+                              } catch (e) {
+                                // If immediate sign-in fails, fall back to instructing the user
+                                // to check their email (common when email confirm is required).
+                                if (context.mounted) {
+                                  showAppMessage(context, 'Success! Check your email.',);
+                                }
+                              }
                             }
                           } catch (e) {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error: $e')),
-                              );
+                              showAppMessage(context, 'Error: $e', error: true);
                             }
                           }
                         },

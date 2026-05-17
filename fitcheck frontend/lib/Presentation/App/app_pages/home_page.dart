@@ -8,6 +8,8 @@ import 'package:fitcheck/Presentation/App/app_pages/posts/social.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/feed_post_card.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:flutter/foundation.dart';
+// Feed / Home page: loads posts from storage and displays the feed cards.
+// - Handles navigation to post creation and post detail views.
 import 'package:flutter/material.dart';
 import '../app_style/widgets/app_toast.dart';
 import 'package:flutter/rendering.dart';
@@ -31,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   final NotificationRepository _notifRepo = NotificationRepository();
   int _unreadCount = 0;
   Timer? _notifPollTimer;
+  StreamSubscription<AuthState>? _authSubscription;
   Future<List<_BucketPost>> _feedFuture = Future.value(const <_BucketPost>[]);
   bool _showNoMorePostsPrompt = false;
   bool _isScrollingDown = false;
@@ -49,10 +52,11 @@ class _HomePageState extends State<HomePage> {
     // Kick off initial feed load and notification polling
     _refreshFeed();
     _fetchUnread();
-    _notifPollTimer = Timer.periodic(
-      const Duration(seconds: 20),
-      (_) => _fetchUnread(),
-    );
+    _notifPollTimer = Timer.periodic(const Duration(seconds: 20), (_) => _fetchUnread());
+    // Listen for auth state changes so we refresh unread count immediately
+    _authSubscription = supabase.auth.onAuthStateChange.listen((_) {
+      _fetchUnread();
+    });
   }
 
   @override
@@ -60,13 +64,17 @@ class _HomePageState extends State<HomePage> {
     // Cancel background timers when leaving the home page
     _noMorePostsTimer?.cancel();
     _notifPollTimer?.cancel();
+    _authSubscription?.cancel();
     super.dispose();
   }
 
   Future<void> _fetchUnread() async {
     try {
+      final user = supabase.auth.currentUser;
+      debugPrint('Fetching unread notifications; user=${user?.id}');
       final count = await _notifRepo.fetchUnreadCount();
       if (!mounted) return;
+      debugPrint('Unread count: $count');
       setState(() {
         _unreadCount = count;
       });
@@ -185,12 +193,7 @@ class _HomePageState extends State<HomePage> {
         // Try to fetch post row (contains caption) from `post` table
         String? caption;
         try {
-          final row =
-              await supabase
-                  .from('post')
-                  .select('caption')
-                  .eq('storage_key', groupKey)
-                  .maybeSingle();
+          final row = await supabase.from('post').select('caption').eq('storage_key', groupKey).maybeSingle();
           caption = (row?['caption'] as String?)?.trim();
         } catch (_) {
           caption = null;
@@ -279,12 +282,18 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const Spacer(),
-                      // Notification bell
+                      // Notification bell 
                       Stack(
                         children: [
                           IconButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/notifications');
+                            onPressed: () async {
+                              final res = await Navigator.pushNamed(context, '/notifications');
+                              if (res == true) {
+                                // Notifications were marked read by the page; refresh
+                                // the unread count immediately instead of waiting
+                                // for the next poll.
+                                _fetchUnread();
+                              }
                             },
                             icon: const Icon(
                               Icons.notifications_none,
@@ -297,21 +306,9 @@ class _HomePageState extends State<HomePage> {
                               right: 6,
                               top: 6,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.redAccent,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  _unreadCount > 99 ? '99+' : '$_unreadCount',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                  ),
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(12)),
+                                child: Text(_unreadCount > 99 ? '99+' : '$_unreadCount', style: const TextStyle(color: Colors.white, fontSize: 11)),
                               ),
                             ),
                         ],
@@ -321,27 +318,14 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () async {
                           final user = supabase.auth.currentUser;
                           if (user == null) {
-                            showAppMessage(
-                              context,
-                              'Please log in to create a post.',
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Please log in to create a post.',
-                                ),
-                                duration: Duration(milliseconds: 1000),
-                              ),
-                            );
+                            showAppMessage(context, 'Please log in to create a post.');
                             Navigator.pushNamed(context, '/login');
                             return;
                           }
 
                           final posted = await Navigator.of(context).push<bool>(
                             MaterialPageRoute(
-                              settings: const RouteSettings(
-                                name: '/post_drafting',
-                              ),
+                              settings: const RouteSettings(name: '/post_drafting'),
                               builder: (_) => const PostDraftingPage(),
                             ),
                           );
@@ -493,7 +477,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-          FloatingNavbar(),
+          const FloatingNavbar(),
         ],
       ),
     );
@@ -508,6 +492,7 @@ class _BucketPost {
   final List<String> imageUrls;
   final String? profileImageUrl;
   final String? caption;
+
   const _BucketPost({
     required this.id,
     required this.author,

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider/auth_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/password_field.dart';
+import 'package:fitcheck/Presentation/App/app_style/widgets/app_toast.dart';
 
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
@@ -38,13 +39,11 @@ class LoginPage extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(100),
                           color: Color.fromRGBO(217, 156, 19, 1),
                         ),
-                        child: Image(
-                          image: AssetImage("Assets/logo_white.png"),
-                        ),
+                        child: Image(image: AssetImage("Assets/logo_white.png")),
                       ),
                     ),
                     SizedBox(height: 20),
-
+        
                     Text(
                       "Login to your account",
                       style: GoogleFonts.dmSerifText(
@@ -85,7 +84,7 @@ class LoginPage extends ConsumerWidget {
                       child: PasswordField(passwordController),
                     ),
                     SizedBox(height: 10),
-
+        
                     SizedBox(
                       height: 40,
                       width: 350,
@@ -104,24 +103,17 @@ class LoginPage extends ConsumerWidget {
                               password: passwordController.text.trim(),
                             );
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Login successful!'),
-                                  duration: Duration(milliseconds: 300),
-                                ),
-                              );
+                              showAppMessage(context, 'Login successful!');
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => HomePage(),
                                 ),
-                              );
+                                );
                             }
                           } catch (e) {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Login failed: $e')),
-                              );
+                              showAppMessage(context, 'Login failed: $e', error: true);
                             }
                           }
                         },
@@ -146,7 +138,7 @@ class LoginPage extends ConsumerWidget {
                           ),
                           height: 35,
                           width: 35,
-                          child: GoogleSignInButton(),
+                          child: GoogleSignInButton()
                         ),
                         SizedBox(width: 25),
                         Container(
@@ -188,7 +180,10 @@ class LoginPage extends ConsumerWidget {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.popAndPushNamed(context, '/register');
+                            Navigator.popAndPushNamed(
+                              context, '/register',
+                              
+                            );
                           },
                         ),
                       ],
