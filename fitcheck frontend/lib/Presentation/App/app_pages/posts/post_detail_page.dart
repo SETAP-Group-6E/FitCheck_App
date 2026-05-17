@@ -49,7 +49,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
   Future<void> _loadCaption() async {
     try {
       final supabase = Supabase.instance.client;
-      final row = await supabase.from('post').select('caption').eq('storage_key', widget.postId).maybeSingle();
+      final row =
+          await supabase
+              .from('post')
+              .select('caption')
+              .eq('storage_key', widget.postId)
+              .maybeSingle();
       setState(() {
         _caption = (row?['caption'] as String?)?.trim();
       });
@@ -117,48 +122,72 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
           // Comments list (or loading spinner)
           Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: _comments.length,
-                    itemBuilder: (context, i) {
-                      final row = _comments[i];
-                      final uid = (row['user_id'] ?? '').toString();
-                      final body = (row['body'] ?? '').toString();
-                      final createdAt = row['created_at'] != null ? DateTime.parse(row['created_at'].toString()) : null;
-                      final timeLabel = createdAt != null ? _formatTimeAgo(createdAt) : null;
-                      final username = 'user_${uid.substring(0, uid.length > 8 ? 8 : uid.length)}';
-                      final commentsId = row['comments_id'] != null ? row['comments_id'].toString() : null;
-                      final supabase = Supabase.instance.client;
-                      final currentUser = supabase.auth.currentUser;
-                      final isOwner = currentUser != null && uid == currentUser.id;
+            child:
+                _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                      itemCount: _comments.length,
+                      itemBuilder: (context, i) {
+                        final row = _comments[i];
+                        final uid = (row['user_id'] ?? '').toString();
+                        final body = (row['body'] ?? '').toString();
+                        final createdAt =
+                            row['created_at'] != null
+                                ? DateTime.parse(row['created_at'].toString())
+                                : null;
+                        final timeLabel =
+                            createdAt != null
+                                ? _formatTimeAgo(createdAt)
+                                : null;
+                        final username =
+                            'user_${uid.substring(0, uid.length > 8 ? 8 : uid.length)}';
+                        final commentsId = row['comments_id']?.toString();
+                        final supabase = Supabase.instance.client;
+                        final currentUser = supabase.auth.currentUser;
+                        final isOwner =
+                            currentUser != null && uid == currentUser.id;
 
-                      return PostCommentTile(
-                        username: username,
-                        body: body,
-                        timeLabel: timeLabel,
-                        isOwn: isOwner,
-                        onDelete: isOwner
-                            ? () async {
-                                // optimistic remove
-                                final index = i;
-                                final removed = _comments[index];
-                                setState(() => _comments.removeAt(index));
-                                final success = await _repo.deleteComment(commentsId ?? '', currentUser!.id);
-                                if (!success) {
-                                  // rollback
-                                  if (mounted) {
-                                    setState(() => _comments.insert(index, removed));
-                                    showAppMessage(context, 'Failed to delete comment.', error: true);
+                        return PostCommentTile(
+                          username: username,
+                          body: body,
+                          timeLabel: timeLabel,
+                          isOwn: isOwner,
+                          onDelete:
+                              isOwner
+                                  ? () async {
+                                    // optimistic remove
+                                    final index = i;
+                                    final removed = _comments[index];
+                                    setState(() => _comments.removeAt(index));
+                                    final success = await _repo.deleteComment(
+                                      commentsId ?? '',
+                                      currentUser.id,
+                                    );
+                                    if (!success) {
+                                      // rollback
+                                      if (mounted) {
+                                        setState(
+                                          () =>
+                                              _comments.insert(index, removed),
+                                        );
+                                        showAppMessage(
+                                          context,
+                                          'Failed to delete comment.',
+                                          error: true,
+                                        );
+                                      }
+                                    } else {
+                                      if (mounted)
+                                        showAppMessage(
+                                          context,
+                                          'Comment deleted',
+                                        );
+                                    }
                                   }
-                                } else {
-                                  if (mounted) showAppMessage(context, 'Comment deleted');
-                                }
-                              }
-                            : null,
-                      );
-                    },
-                  ),
+                                  : null,
+                        );
+                      },
+                    ),
           ),
 
           // New comment input — wrapped in SafeArea and given extra bottom
@@ -182,9 +211,19 @@ class _PostDetailPageState extends State<PostDetailPage> {
                           hintStyle: const TextStyle(color: Colors.white54),
                           filled: true,
                           fillColor: const Color(0xFF1A1A1A),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFD99C13))),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFD99C13),
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
                         ),
                       ),
                     ),
@@ -196,9 +235,14 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       backgroundColor: const Color(0xFFD99C13),
                       padding: EdgeInsets.zero,
                       minimumSize: const Size(48, 42),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                    child: const Icon(Icons.keyboard_return, color: Colors.white),
+                    child: const Icon(
+                      Icons.keyboard_return,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),

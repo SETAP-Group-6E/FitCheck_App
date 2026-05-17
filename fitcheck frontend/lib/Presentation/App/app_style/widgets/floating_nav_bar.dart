@@ -70,8 +70,7 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
 
   void _openSettingsOrLogin(BuildContext context) {
     final auth = Supabase.instance.client.auth;
-    final isLoggedIn =
-        auth.currentSession != null && auth.currentUser != null;
+    final isLoggedIn = auth.currentSession != null && auth.currentUser != null;
     final nav = widget.navigatorKey?.currentState;
     if (nav == null) return;
     nav.pushNamed(isLoggedIn ? '/my-posts' : '/login');
@@ -86,14 +85,14 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
         borderRadius: BorderRadius.circular(5),
       ),
       child: Center(
-          child: IconButton(
-            icon: const Icon(Icons.manage_accounts),
-            color: Colors.black87,
-            iconSize: 20,
-            onPressed: () {
-              _openSettingsOrLogin(context);
-            },
-          ),
+        child: IconButton(
+          icon: const Icon(Icons.manage_accounts),
+          color: Colors.black87,
+          iconSize: 20,
+          onPressed: () {
+            _openSettingsOrLogin(context);
+          },
+        ),
       ),
     );
   }
@@ -147,7 +146,11 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                       children: [
                         Expanded(child: SizedBox()),
                         IconButton(
-                          icon: const Icon(Icons.home, size: 30, color: Colors.white),
+                          icon: const Icon(
+                            Icons.home,
+                            size: 30,
+                            color: Colors.white,
+                          ),
                           onPressed: () {
                             final nav = widget.navigatorKey?.currentState;
                             nav?.pushReplacementNamed('/homepage');
@@ -155,7 +158,11 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                         ),
                         const Expanded(child: SizedBox()),
                         IconButton(
-                          icon: const Icon(Icons.dry_cleaning_sharp, size: 30, color: Colors.white),
+                          icon: const Icon(
+                            Icons.dry_cleaning_sharp,
+                            size: 30,
+                            color: Colors.white,
+                          ),
                           onPressed: () {
                             _navigateIfNotCurrent(context, '/wardrobe');
                           },
@@ -169,9 +176,15 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                             color: const Color.fromRGBO(217, 156, 19, 1),
                           ),
                           child: IconButton(
-                            icon: const Icon(Icons.add, size: 30, color: Colors.white),
+                            icon: const Icon(
+                              Icons.add,
+                              size: 30,
+                              color: Colors.white,
+                            ),
                             onPressed: () async {
-                              final navCtx = widget.navigatorKey?.currentContext ?? context;
+                              final navCtx =
+                                  widget.navigatorKey?.currentContext ??
+                                  context;
                               final didSave = await CreateOutfitModal.open(
                                 navCtx,
                                 repository: wardrobeRepository,
@@ -198,31 +211,31 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                         imageUrl == null
                             ? _defaultAvatar(context)
                             : ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: Stack(
-                                  children: [
-                                    Image.network(
-                                      imageUrl,
-                                      width: 35,
-                                      height: 35,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return _defaultAvatar(context);
-                                      },
-                                    ),
-                                    Positioned.fill(
-                                      child: Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          onTap: () {
-                                            _openSettingsOrLogin(context);
-                                          },
-                                        ),
+                              borderRadius: BorderRadius.circular(6),
+                              child: Stack(
+                                children: [
+                                  Image.network(
+                                    imageUrl,
+                                    width: 35,
+                                    height: 35,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return _defaultAvatar(context);
+                                    },
+                                  ),
+                                  Positioned.fill(
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          _openSettingsOrLogin(context);
+                                        },
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
+                            ),
                         const Expanded(child: SizedBox()),
                       ],
                     ),

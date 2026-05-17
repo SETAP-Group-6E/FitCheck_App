@@ -19,7 +19,6 @@ class PostCommentTile extends StatelessWidget {
   final String? profileImageUrl;
   final bool isOwn;
   final VoidCallback? onDelete;
-  
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +27,21 @@ class PostCommentTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            // Avatar: if a profile image URL is provided we show a
-            // NetworkImage; otherwise a simple placeholder avatar is
-            // displayed. Radius and sizes are small to keep list rows
-            // compact.
-            profileImageUrl != null && profileImageUrl!.isNotEmpty
-              ? CircleAvatar(radius: 14, backgroundColor: Colors.white24, backgroundImage: NetworkImage(profileImageUrl!))
-              : const CircleAvatar(radius: 14, backgroundColor: Colors.white24, child: Icon(Icons.person, size: 16, color: Colors.white)),
+          // Avatar: if a profile image URL is provided we show a
+          // NetworkImage; otherwise a simple placeholder avatar is
+          // displayed. Radius and sizes are small to keep list rows
+          // compact.
+          profileImageUrl != null && profileImageUrl!.isNotEmpty
+              ? CircleAvatar(
+                radius: 14,
+                backgroundColor: Colors.white24,
+                backgroundImage: NetworkImage(profileImageUrl!),
+              )
+              : const CircleAvatar(
+                radius: 14,
+                backgroundColor: Colors.white24,
+                child: Icon(Icons.person, size: 16, color: Colors.white),
+              ),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -42,9 +49,22 @@ class PostCommentTile extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(username, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                    Text(
+                      username,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    if (timeLabel != null) Text(timeLabel!, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                    if (timeLabel != null)
+                      Text(
+                        timeLabel!,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 12,
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -61,45 +81,90 @@ class PostCommentTile extends StatelessWidget {
             PopupMenuButton<String>(
               padding: EdgeInsets.zero,
               color: const Color(0xFF121212),
-              icon: const Icon(Icons.more_vert, color: Colors.white54, size: 18),
+              icon: const Icon(
+                Icons.more_vert,
+                color: Colors.white54,
+                size: 18,
+              ),
               onSelected: (v) async {
                 if (v == 'delete') {
-                  final confirmed = await showDialog<bool>(
+                  final confirmed =
+                      await showDialog<bool>(
                         context: context,
-                        builder: (ctx) => AlertDialog(
-                          backgroundColor: const Color(0xFF121212),
-                          title: Text('Delete comment', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(color: Colors.white)),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(isOwn ? 'Delete this comment?' : 'Delete comment from $username?', style: const TextStyle(color: Colors.white70)),
-                              const SizedBox(height: 12),
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(6)),
-                                child: Text(
-                                  body.length > 180 ? '${body.substring(0, 180)}…' : body,
-                                  style: const TextStyle(color: Colors.white70),
-                                ),
+                        builder:
+                            (ctx) => AlertDialog(
+                              backgroundColor: const Color(0xFF121212),
+                              title: Text(
+                                'Delete comment',
+                                style: Theme.of(ctx).textTheme.titleMedium
+                                    ?.copyWith(color: Colors.white),
                               ),
-                            ],
-                          ),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-                            TextButton(
-                                onPressed: () => Navigator.of(ctx).pop(true),
-                                child: const Text('Delete', style: TextStyle(color: Color(0xFFD99C13)))),
-                          ],
-                        ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    isOwn
+                                        ? 'Delete this comment?'
+                                        : 'Delete comment from $username?',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white12,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      body.length > 180
+                                          ? '${body.substring(0, 180)}…'
+                                          : body,
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(true),
+                                  child: const Text(
+                                    'Delete',
+                                    style: TextStyle(color: Color(0xFFD99C13)),
+                                  ),
+                                ),
+                              ],
+                            ),
                       ) ??
                       false;
                   if (confirmed) onDelete?.call();
                 }
               },
-              itemBuilder: (ctx) => [
-                PopupMenuItem(value: 'delete', child: Row(children: const [Icon(Icons.delete_outline, size: 18, color: Colors.white54), SizedBox(width: 8), Text('Delete', style: TextStyle(color: Colors.white))])),
-              ],
+              itemBuilder:
+                  (ctx) => [
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: const [
+                          Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: Colors.white54,
+                          ),
+                          SizedBox(width: 8),
+                          Text('Delete', style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
+                    ),
+                  ],
             ),
         ],
       ),

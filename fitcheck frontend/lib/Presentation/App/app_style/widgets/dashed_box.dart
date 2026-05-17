@@ -66,10 +66,11 @@ class DashBoxPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Configure paint for stroke-only drawing.
-    Paint dashedPaint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
+    Paint dashedPaint =
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke;
 
     final double x = size.width;
     final double y = size.height;
@@ -131,13 +132,15 @@ class DashBoxPainter extends CustomPainter {
     final num radians = math.atan(size.height / size.width);
 
     // Compute dx/dy steps based on the requested gap.
-    final num dx = math.cos(radians) * gap < 0
-        ? math.cos(radians) * gap * -1
-        : math.cos(radians) * gap;
+    final num dx =
+        math.cos(radians) * gap < 0
+            ? math.cos(radians) * gap * -1
+            : math.cos(radians) * gap;
 
-    final num dy = math.sin(radians) * gap < 0
-        ? math.sin(radians) * gap * -1
-        : math.sin(radians) * gap;
+    final num dy =
+        math.sin(radians) * gap < 0
+            ? math.sin(radians) * gap * -1
+            : math.sin(radians) * gap;
 
     // Walk along the edge until the end point is reached or exceeded.
     while (currentPoint.x <= b.x && currentPoint.y <= b.y) {
@@ -147,10 +150,7 @@ class DashBoxPainter extends CustomPainter {
         path.moveTo(currentPoint.x as double, currentPoint.y as double);
       }
       shouldDraw = !shouldDraw;
-      currentPoint = math.Point(
-        currentPoint.x + dx,
-        currentPoint.y + dy,
-      );
+      currentPoint = math.Point(currentPoint.x + dx, currentPoint.y + dy);
     }
     return path;
   }

@@ -9,10 +9,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:state_notifier/state_notifier.dart' as sn;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-enum AppThemeMode {
-  moody,
-  pale,
-}
+enum AppThemeMode { moody, pale }
 
 class AppThemeModeController extends sn.StateNotifier<AppThemeMode> {
   AppThemeModeController() : super(AppThemeMode.moody) {
@@ -76,8 +73,8 @@ class AppThemeModeController extends sn.StateNotifier<AppThemeMode> {
 
 final appThemeModeProvider =
     StateNotifierProvider<AppThemeModeController, AppThemeMode>((ref) {
-  return AppThemeModeController();
-});
+      return AppThemeModeController();
+    });
 
 ThemeData buildAppTheme(AppThemeMode mode) {
   final scaffoldColor =

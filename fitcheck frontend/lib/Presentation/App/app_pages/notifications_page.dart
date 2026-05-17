@@ -20,7 +20,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
   bool _loading = false;
   List<NotificationItem> _items = [];
 
-  bool get _isAuthenticated => Supabase.instance.client.auth.currentUser != null;
+  bool get _isAuthenticated =>
+      Supabase.instance.client.auth.currentUser != null;
 
   @override
   void initState() {
@@ -42,7 +43,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final items = await repo.fetchNotifications(limit: 200).timeout(const Duration(seconds: 8));
+      final items = await repo
+          .fetchNotifications(limit: 200)
+          .timeout(const Duration(seconds: 8));
       if (!mounted) return;
       setState(() {
         _items = items;
@@ -56,7 +59,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +81,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   children: [
                     IconButton(
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                      icon: Icon(Icons.arrow_back_ios_new, color: textColor.withOpacity(0.92), size: 20),
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                      icon: Icon(
+                        Icons.arrow_back_ios_new,
+                        color: textColor.withOpacity(0.92),
+                        size: 20,
+                      ),
                       onPressed: () => Navigator.maybePop(context),
                     ),
                     const SizedBox(width: 8),
@@ -88,7 +97,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       child: Center(
                         child: Text(
                           'Notifications',
-                          style: theme.textTheme.titleLarge?.copyWith(color: textColor),
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: textColor,
+                          ),
                         ),
                       ),
                     ),
@@ -103,10 +114,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                             Text('Please sign in to view your notifications', style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
+                        Text(
+                          'Please sign in to view your notifications',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: textColor,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         ElevatedButton(
-                          onPressed: () => Navigator.pushNamed(context, '/login'),
+                          onPressed:
+                              () => Navigator.pushNamed(context, '/login'),
                           child: const Text('Sign in'),
                         ),
                       ],
@@ -128,11 +145,23 @@ class _NotificationsPageState extends State<NotificationsPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-                Icon(Icons.notifications_off, size: 56, color: textColor.withOpacity(0.88)),
+            Icon(
+              Icons.notifications_off,
+              size: 56,
+              color: textColor.withOpacity(0.88),
+            ),
             const SizedBox(height: 8),
-            Text("You're all caught up", style: theme.textTheme.titleMedium?.copyWith(color: textColor)),
+            Text(
+              "You're all caught up",
+              style: theme.textTheme.titleMedium?.copyWith(color: textColor),
+            ),
             const SizedBox(height: 6),
-                Text('No new notifications', style: theme.textTheme.bodyMedium?.copyWith(color: textColor.withOpacity(0.88))),
+            Text(
+              'No new notifications',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: textColor.withOpacity(0.88),
+              ),
+            ),
           ],
         ),
       );
@@ -141,17 +170,37 @@ class _NotificationsPageState extends State<NotificationsPage> {
         onRefresh: _load,
         child: ListView.separated(
           itemCount: _items.length,
-          separatorBuilder: (_, __) => Divider(height: 1, color: theme.dividerColor),
+          separatorBuilder:
+              (_, _) => Divider(height: 1, color: theme.dividerColor),
           itemBuilder: (context, index) {
             final n = _items[index];
             return ListTile(
-              leading: n.actorProfileUrl != null
-                  ? CircleAvatar(backgroundImage: NetworkImage(n.actorProfileUrl!))
-                  : const CircleAvatar(child: Icon(Icons.person)),
-              title: Text('${n.actorUsername} ${n.type == 'like' ? 'liked' : 'commented'}', style: theme.textTheme.bodyLarge?.copyWith(color: textColor)),
-              subtitle: n.commentPreview != null ? Text(n.commentPreview!, style: theme.textTheme.bodyMedium?.copyWith(color: textColor.withOpacity(0.85))) : null,
+              leading:
+                  n.actorProfileUrl != null
+                      ? CircleAvatar(
+                        backgroundImage: NetworkImage(n.actorProfileUrl!),
+                      )
+                      : const CircleAvatar(child: Icon(Icons.person)),
+              title: Text(
+                '${n.actorUsername} ${n.type == 'like' ? 'liked' : 'commented'}',
+                style: theme.textTheme.bodyLarge?.copyWith(color: textColor),
+              ),
+              subtitle:
+                  n.commentPreview != null
+                      ? Text(
+                        n.commentPreview!,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: textColor.withOpacity(0.85),
+                        ),
+                      )
+                      : null,
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => MyPostsPage(userId: n.postKey.split('/').first)));
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder:
+                        (_) => MyPostsPage(userId: n.postKey.split('/').first),
+                  ),
+                );
               },
             );
           },
@@ -172,11 +221,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
               color: theme.scaffoldBackgroundColor,
               child: Row(
                 children: [
-                   IconButton(
-                     padding: EdgeInsets.zero,
-                     constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                     icon: Icon(Icons.arrow_back_ios_new, color: textColor.withOpacity(0.92), size: 20),
-                     onPressed: () {
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                    icon: Icon(
+                      Icons.arrow_back_ios_new,
+                      color: textColor.withOpacity(0.92),
+                      size: 20,
+                    ),
+                    onPressed: () {
                       // When the user navigates back, assume notifications are
                       // read and mark them on the server (fire-and-forget).
                       if (_isAuthenticated) {
@@ -186,14 +242,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     },
                   ),
                   const SizedBox(width: 8),
-                   Expanded(
-                     child: Center(
-                       child: Text(
-                         'Notifications',
-                         style: theme.textTheme.titleLarge?.copyWith(color: textColor),
-                       ),
-                     ),
-                   ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Notifications',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 8),
                 ],
               ),

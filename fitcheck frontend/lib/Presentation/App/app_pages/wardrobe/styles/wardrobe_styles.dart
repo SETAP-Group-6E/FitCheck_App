@@ -120,7 +120,6 @@ class WardrobeStyles {
     checkColor: WidgetStateProperty.all(Colors.white),
   );
 
-
   static ButtonStyle dialogCancelButtonStyle = TextButton.styleFrom(
     backgroundColor: gold,
     foregroundColor: Colors.white,
@@ -130,5 +129,4 @@ class WardrobeStyles {
     backgroundColor: Colors.redAccent,
     foregroundColor: Colors.white,
   );
-
 }

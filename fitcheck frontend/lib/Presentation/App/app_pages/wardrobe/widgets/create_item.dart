@@ -1,11 +1,6 @@
-// Dialog for creating or editing a wardrobe item.
-// - Presents form fields (name, wear type, material, warmth, etc.) and
-//   calls the provided `WardrobeRepository` to persist changes.
-// Dialog for creating or editing a wardrobe item.
-// - Presents form fields (name, wear type, material, warmth, etc.) and
-//   calls the provided `WardrobeRepository` to persist changes.
 import 'package:flutter/material.dart';
-import '../../../app_style/widgets/app_toast.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
 import '../constants/wardrobe_constants.dart';
 
@@ -66,6 +61,8 @@ class _CreateItemState extends State<CreateItem> {
   bool _waterResistant = false;
 
   bool _hasPhoto = false;
+  String? _photoUrl;
+  bool _isUploadingPhoto = false;
   bool _saving = false;
 
   bool get _isEditMode => widget.existingItem != null;
@@ -113,7 +110,9 @@ class _CreateItemState extends State<CreateItem> {
       );
       _warmthRating = _readInt('warmth_rating', 3);
       _waterResistant = _readBool('water_resistant', false);
-      _hasPhoto = _readString('photo_url', '').isNotEmpty;
+      final existingPhoto = _readString('item_photo_url', '');
+      _hasPhoto = existingPhoto.isNotEmpty;
+      if (_hasPhoto) _photoUrl = existingPhoto;
     }
   }
 
@@ -125,25 +124,81 @@ class _CreateItemState extends State<CreateItem> {
 
   void _cancel() => Navigator.of(context).pop(false);
 
-  void _fakePickImage() => setState(() => _hasPhoto = true);
+  Future<void> _pickAndUploadImage() async {
+    final supabase = Supabase.instance.client;
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Log in to upload an image')),
+      );
+      Navigator.pushNamed(context, '/login');
+      return;
+    }
+
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image == null) return;
+
+    try {
+      setState(() {
+        _isUploadingPhoto = true;
+      });
+
+      final bytes = await image.readAsBytes();
+      final fileName =
+          '$userId/items/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      await supabase.storage
+          .from('Wardrobe Items')
+          .uploadBinary(
+            fileName,
+            bytes,
+            fileOptions: const FileOptions(
+              contentType: 'image/jpeg',
+              upsert: true,
+            ),
+          );
+
+      final url = supabase.storage
+          .from('Wardrobe Items')
+          .getPublicUrl(fileName);
+      if (!mounted) return;
+      setState(() {
+        _photoUrl = url;
+        _hasPhoto = true;
+        _isUploadingPhoto = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isUploadingPhoto = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+      }
+    }
+  }
 
   Future<void> _save() async {
     if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
 
-      if (_isEditMode && _readId().isEmpty) {
+    if (_isEditMode && _readId().isEmpty) {
       if (!mounted) return;
-      showAppMessage(context, 'Cannot edit item without an id', error: true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot edit item without an id')),
+      );
       return;
     }
 
     setState(() => _saving = true);
 
     try {
+      final photoUrl = _hasPhoto ? _photoUrl : null;
       if (_isEditMode) {
         await widget.repository.updateClothingItem(
           id: _readId(),
-          photoUrl: _hasPhoto ? 'local-upload-pending' : null,
+          photoUrl: photoUrl,
           title: _titleCtrl.text.trim(),
           wearType: _wearType,
           fabricMaterial: _fabricMaterial,
@@ -153,7 +208,7 @@ class _CreateItemState extends State<CreateItem> {
         );
       } else {
         await widget.repository.addClothingItem(
-          photoUrl: _hasPhoto ? 'local-upload-pending' : '',
+          photoUrl: photoUrl ?? '',
           title: _titleCtrl.text.trim(),
           wearType: _wearType,
           fabricMaterial: _fabricMaterial,
@@ -168,7 +223,9 @@ class _CreateItemState extends State<CreateItem> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      showAppMessage(context, 'Failed to save item: $e', error: true);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save item: $e')));
     }
   }
 
@@ -208,7 +265,9 @@ class _CreateItemState extends State<CreateItem> {
                         const SizedBox(height: 12),
                         _PhotoBoxUIOnly(
                           hasPhoto: _hasPhoto,
-                          onUpload: _fakePickImage,
+                          photoUrl: _photoUrl,
+                          isUploading: _isUploadingPhoto,
+                          onUpload: _pickAndUploadImage,
                         ),
                         const SizedBox(height: 24),
                         _Field(
@@ -577,9 +636,9 @@ class _CheckboxRow extends StatelessWidget {
           data: Theme.of(context).copyWith(
             unselectedWidgetColor: _CreateItemTheme.border,
             checkboxTheme: CheckboxThemeData(
-              fillColor: WidgetStateProperty.resolveWith(
+              fillColor: MaterialStateProperty.resolveWith(
                 (states) =>
-                    states.contains(WidgetState.selected)
+                    states.contains(MaterialState.selected)
                         ? _CreateItemTheme.gold
                         : Colors.transparent,
               ),
@@ -590,7 +649,7 @@ class _CheckboxRow extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(4),
               ),
-              checkColor: WidgetStateProperty.all(Colors.white),
+              checkColor: MaterialStateProperty.all(Colors.white),
             ),
           ),
           child: Checkbox(
@@ -629,9 +688,16 @@ class _CheckboxRow extends StatelessWidget {
 
 class _PhotoBoxUIOnly extends StatelessWidget {
   final bool hasPhoto;
+  final String? photoUrl;
+  final bool isUploading;
   final VoidCallback onUpload;
 
-  const _PhotoBoxUIOnly({required this.hasPhoto, required this.onUpload});
+  const _PhotoBoxUIOnly({
+    required this.hasPhoto,
+    this.photoUrl,
+    this.isUploading = false,
+    required this.onUpload,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -646,24 +712,44 @@ class _PhotoBoxUIOnly extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: _CreateItemTheme.border),
           ),
-          child:
-              hasPhoto
-                  ? const Center(
-                    child: Icon(
-                      Icons.image,
-                      size: 64,
-                      color: _CreateItemTheme.muted,
-                    ),
-                  )
-                  : const Center(
-                    child: Text(
-                      "Upload item photo",
-                      style: TextStyle(
-                        color: _CreateItemTheme.muted,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
+          child: Center(
+            child:
+                isUploading
+                    ? const SizedBox(
+                      height: 48,
+                      width: 48,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : (hasPhoto
+                        ? (photoUrl != null && photoUrl!.isNotEmpty)
+                            ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                photoUrl!,
+                                width: 312,
+                                height: 312,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (context, error, stack) => const Icon(
+                                      Icons.image,
+                                      size: 64,
+                                      color: _CreateItemTheme.muted,
+                                    ),
+                              ),
+                            )
+                            : const Icon(
+                              Icons.image,
+                              size: 64,
+                              color: _CreateItemTheme.muted,
+                            )
+                        : const Text(
+                          "Upload item photo",
+                          style: TextStyle(
+                            color: _CreateItemTheme.muted,
+                            fontSize: 13,
+                          ),
+                        )),
+          ),
         ),
         const SizedBox(height: 16),
         SizedBox(

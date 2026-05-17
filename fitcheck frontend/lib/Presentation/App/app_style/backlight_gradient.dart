@@ -20,7 +20,6 @@ class BacklightGradient extends StatelessWidget {
   final Alignment light2Alignment;
   final double light2Radius;
 
-  
   final double blur;
 
   const BacklightGradient({
@@ -32,9 +31,9 @@ class BacklightGradient extends StatelessWidget {
 
     // light 1 (center → edge)
     this.light1 = const [
-      Color.fromARGB(255, 38, 38, 38), 
-      Color.fromARGB(255, 76, 71, 65), 
-      Color.fromARGB(0, 255, 152, 0), 
+      Color.fromARGB(255, 38, 38, 38),
+      Color.fromARGB(255, 76, 71, 65),
+      Color.fromARGB(0, 255, 152, 0),
     ],
     this.light1Alignment = const Alignment(-0.5, -0.5),
     this.light1Radius = 1.2,
@@ -57,13 +56,15 @@ class BacklightGradient extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-
         // Base
         // Solid background layer sits below the radial lights.
         Container(color: colorBg),
 
         // First radial light: typically used as the main vignette
         // contributing the primary coloration behind the UI.
+        Container(color: colorBg),
+
+        // light 1
         _buildBacklight(
           colors: light1,
           alignment: light1Alignment,
@@ -71,6 +72,7 @@ class BacklightGradient extends StatelessWidget {
         ),
 
         // Secondary radial light: adds depth and a secondary tint.
+        // light 2
         _buildBacklight(
           colors: light2,
           alignment: light2Alignment,
@@ -79,18 +81,15 @@ class BacklightGradient extends StatelessWidget {
 
         // Soft blur overlay: subtle backdrop blur to blend the lights
         // and reduce contrast for foreground content.
+        // Blur
         BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: blur,
-            sigmaY: blur,
-          ),
-          child: Container(
-            color: Colors.black.withValues(alpha: 0.04),
-          ),
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: Container(color: Colors.black.withValues(alpha: 0.04)),
         ),
 
         // Foreground UI: the provided child is rendered on top of the
         // decorative backlight layers.
+        // UI
         child,
       ],
     );
@@ -105,11 +104,8 @@ class BacklightGradient extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: RadialGradient(
           center: alignment,
-          radius: radius,
-
-          // Important: multi-stop gradient
+          radius: radius, // Important: multi-stop gradient
           stops: const [0.0, 0.6, 1.0],
-
           colors: colors,
         ),
       ),

@@ -15,9 +15,7 @@ class GoogleAuth {
   /// handles after the OAuth callback.
   static Future<void> signInWithGoogle(BuildContext context) async {
     if (kIsWeb) {
-      await _supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-      );
+      await _supabase.auth.signInWithOAuth(OAuthProvider.google);
     } else {
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.google,
@@ -28,7 +26,6 @@ class GoogleAuth {
     }
   }
 }
-
 
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({super.key});

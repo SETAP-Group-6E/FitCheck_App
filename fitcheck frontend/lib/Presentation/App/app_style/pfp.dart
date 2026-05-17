@@ -31,9 +31,10 @@ class _ProfilePictureState extends State<ProfilePicture> {
     final bytes = await file.readAsBytes();
     if (!mounted) return;
 
-    // Open crop page and get cropped bytes
     final cropped = await Navigator.of(context).push<Uint8List?>(
-      MaterialPageRoute(builder: (_) => CropPage(imageBytes: bytes, startCropping: true)),
+      MaterialPageRoute(
+        builder: (_) => CropPage(imageBytes: bytes, startCropping: true),
+      ),
     );
     if (cropped == null) return;
 
@@ -47,7 +48,11 @@ class _ProfilePictureState extends State<ProfilePicture> {
     try {
       final bucket = Supabase.instance.client.storage.from('Avatars');
       final path = '${user.id}/avatar.jpg';
-      await bucket.uploadBinary(path, cropped, fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true));
+      await bucket.uploadBinary(
+        path,
+        cropped,
+        fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+      );
       final publicUrl = bucket.getPublicUrl(path);
       widget.onUpload(publicUrl);
       showAppMessage(context, 'Profile picture updated');
@@ -70,21 +75,42 @@ class _ProfilePictureState extends State<ProfilePicture> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: widget.imageUrl != null
-                  ? Image.network(widget.imageUrl!, fit: BoxFit.cover, width: 40, height: 40)
-                  : Container(
-                      width: 40,
-                      height: 40,
-                      color: Colors.grey[300],
-                      child: const Center(child: Icon(Icons.person, color: Colors.black54, size: 18)),
-                    ),
+              child:
+                  widget.imageUrl != null
+                      ? Image.network(
+                        widget.imageUrl!,
+                        fit: BoxFit.cover,
+                        width: 40,
+                        height: 40,
+                      )
+                      : Container(
+                        width: 40,
+                        height: 40,
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: Icon(
+                            Icons.person,
+                            color: Colors.black54,
+                            size: 18,
+                          ),
+                        ),
+                      ),
             ),
             if (_uploading)
               Container(
                 width: 40,
                 height: 40,
                 color: Colors.black45,
-                child: const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))),
+                child: const Center(
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
           ],
         ),

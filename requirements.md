@@ -143,3 +143,4 @@ Code-quality checklist
   - Add concise inline comments to clarify non-obvious logic.
   - Run `flutter analyze` and `flutter test` before merging changes.
 
+Implement all required files and edits step by step, verifying there are no errors.

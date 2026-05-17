@@ -13,7 +13,12 @@ import '../../../../Data/repositories/supabase_comment_repository.dart';
 import '../../app_style/widgets/app_toast.dart';
 
 class PostCommentsSheet extends StatefulWidget {
-  const PostCommentsSheet({super.key, required this.postId, this.caption, this.timeLabel});
+  const PostCommentsSheet({
+    super.key,
+    required this.postId,
+    this.caption,
+    this.timeLabel,
+  });
   final String postId;
   final String? caption;
   final String? timeLabel;
@@ -30,7 +35,7 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
   bool _submitting = false;
   StreamSubscription<List<Map<String, dynamic>>>? _commentsSub;
   ScrollController? _sheetScrollController;
-  bool _captionExpanded = false;
+  final bool _captionExpanded = false;
 
   @override
   void initState() {
@@ -43,16 +48,18 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
           .stream(primaryKey: ['comments_id'])
           .eq('storage_key', widget.postId)
           .listen((rows) {
-        try {
-          final list = List<Map<String, dynamic>>.from(rows);
-          // ignore: avoid_print
-          print('Realtime comments for ${widget.postId}: ${list.length} rows');
-          if (mounted) setState(() => _comments = list);
-        } catch (e) {
-          // ignore: avoid_print
-          print('Error processing realtime comments: $e');
-        }
-      });
+            try {
+              final list = List<Map<String, dynamic>>.from(rows);
+              // ignore: avoid_print
+              print(
+                'Realtime comments for ${widget.postId}: ${list.length} rows',
+              );
+              if (mounted) setState(() => _comments = list);
+            } catch (e) {
+              // ignore: avoid_print
+              print('Error processing realtime comments: $e');
+            }
+          });
     } catch (_) {}
   }
 
@@ -64,7 +71,8 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
       _comments = [];
       // ignore: avoid_print
       print('Failed to load comments for ${widget.postId}: $e');
-      if (mounted) showAppMessage(context, 'Failed to load comments', error: true);
+      if (mounted)
+        showAppMessage(context, 'Failed to load comments', error: true);
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -112,12 +120,14 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
     } catch (e) {
       // ignore: avoid_print
       print('Failed to post comment: $e');
-      if (mounted) showAppMessage(context, 'Failed to post comment.', error: true);
+      if (mounted)
+        showAppMessage(context, 'Failed to post comment.', error: true);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
   }
-// Build the UI for the comments sheet, including the header, comments list, and input area.
+
+  // Build the UI for the comments sheet, including the header, comments list, and input area.
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
@@ -141,7 +151,10 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                 child: Container(
                   width: 48,
                   height: 4,
-                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
               // header area for comments sheet
@@ -152,127 +165,217 @@ class _PostCommentsSheetState extends State<PostCommentsSheet> {
                 child: const Center(
                   child: Text(
                     'Comments',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),
               Expanded(
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _comments.isEmpty
-                        ? const Center(child: Text('No comments yet', style: TextStyle(color: Colors.white70)))
+                child:
+                    _loading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _comments.isEmpty
+                        ? const Center(
+                          child: Text(
+                            'No comments yet',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        )
                         : ListView.builder(
-                            controller: scrollController,
-                            itemCount: _comments.length,
-                            itemBuilder: (context, i) {
-                              final row = _comments[i];
-                              final uid = (row['user_id'] ?? '').toString();
-                              final body = (row['body'] ?? '').toString();
-                              final createdAt = row['created_at'] != null ? DateTime.parse(row['created_at'].toString()) : null;
-                              final timeLabel = createdAt != null ? _formatTimeAgo(createdAt) : null;
-                              final username = row['username'] != null ? row['username'].toString() : null;
-                              final profileImageUrl = row['profile_image_url'] != null ? row['profile_image_url'].toString() : null;
-                              final commentsId = row['comments_id'] != null ? row['comments_id'].toString() : null;
-                              final supabase = Supabase.instance.client;
-                              final currentUser = supabase.auth.currentUser;
-                              final isOwner = currentUser != null && (row['user_id'] ?? '').toString() == currentUser.id;
+                          controller: scrollController,
+                          itemCount: _comments.length,
+                          itemBuilder: (context, i) {
+                            final row = _comments[i];
+                            final uid = (row['user_id'] ?? '').toString();
+                            final body = (row['body'] ?? '').toString();
+                            final createdAt =
+                                row['created_at'] != null
+                                    ? DateTime.parse(
+                                      row['created_at'].toString(),
+                                    )
+                                    : null;
+                            final timeLabel =
+                                createdAt != null
+                                    ? _formatTimeAgo(createdAt)
+                                    : null;
+                            final username = row['username']?.toString();
+                            final profileImageUrl =
+                                row['profile_image_url']?.toString();
+                            final commentsId = row['comments_id']?.toString();
+                            final supabase = Supabase.instance.client;
+                            final currentUser = supabase.auth.currentUser;
+                            final isOwner =
+                                currentUser != null &&
+                                (row['user_id'] ?? '').toString() ==
+                                    currentUser.id;
 
-                              return Padding(
-                                padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                                child: PostCommentTile(
-                                  username: username ?? 'user_${uid.substring(0, uid.length > 8 ? 8 : uid.length)}',
-                                  body: body,
-                                  timeLabel: timeLabel,
-                                  profileImageUrl: profileImageUrl,
-                                  isOwn: isOwner,
-                                  onDelete: isOwner
-                                      ? () async {
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                              child: PostCommentTile(
+                                username:
+                                    username ??
+                                    'user_${uid.substring(0, uid.length > 8 ? 8 : uid.length)}',
+                                body: body,
+                                timeLabel: timeLabel,
+                                profileImageUrl: profileImageUrl,
+                                isOwn: isOwner,
+                                onDelete:
+                                    isOwner
+                                        ? () async {
                                           // optimistic remove
                                           final index = i;
                                           final removed = _comments[index];
-                                          setState(() => _comments.removeAt(index));
-                                          final success = await _repo.deleteComment(commentsId ?? '', currentUser!.id);
+                                          setState(
+                                            () => _comments.removeAt(index),
+                                          );
+                                          final success = await _repo
+                                              .deleteComment(
+                                                commentsId ?? '',
+                                                currentUser.id,
+                                              );
                                           if (!success) {
                                             // rollback
                                             if (mounted) {
-                                              setState(() => _comments.insert(index, removed));
-                                              showAppMessage(context, 'Failed to delete comment.', error: true);
+                                              setState(
+                                                () => _comments.insert(
+                                                  index,
+                                                  removed,
+                                                ),
+                                              );
+                                              showAppMessage(
+                                                context,
+                                                'Failed to delete comment.',
+                                                error: true,
+                                              );
                                             }
                                           } else {
-                                            if (mounted) showAppMessage(context, 'Comment deleted');
+                                            if (mounted)
+                                              showAppMessage(
+                                                context,
+                                                'Comment deleted',
+                                              );
                                           }
                                         }
-                                      : null,
-                                ),
-                              );
-                            },
-                          ),
+                                        : null,
+                              ),
+                            );
+                          },
+                        ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(12, 8, 12, 12 + MediaQuery.of(context).padding.bottom),
-                child: Builder(builder: (context) {
-                  final supabase = Supabase.instance.client;
-                  final user = supabase.auth.currentUser;
-                  if (user == null) {
+                padding: EdgeInsets.fromLTRB(
+                  12,
+                  8,
+                  12,
+                  12 + MediaQuery.of(context).padding.bottom,
+                ),
+                child: Builder(
+                  builder: (context) {
+                    final supabase = Supabase.instance.client;
+                    final user = supabase.auth.currentUser;
+                    if (user == null) {
+                      return Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'Sign in to post comments',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed:
+                                () => Navigator.pushNamed(context, '/login'),
+                            child: const Text(
+                              'Sign in',
+                              style: TextStyle(color: Color(0xFFD99C13)),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
                     return Row(
                       children: [
-                        const Expanded(
-                          child: Text('Sign in to post comments', style: TextStyle(color: Colors.white70)),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pushNamed(context, '/login'),
-                          child: const Text('Sign in', style: TextStyle(color: Color(0xFFD99C13))),
-                        ),
-                      ],
-                    );
-                  }
-
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 42,
-                          child: TextField(
-                            controller: _controller,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              hintText: 'Write a comment...',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                        Expanded(
+                          child: SizedBox(
+                            height: 42,
+                            child: TextField(
+                              controller: _controller,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: 'Write a comment...',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(8),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(8),
+                                  ),
+                                  borderSide: BorderSide(
+                                    color: const Color(0xFFD99C13),
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                hintStyle: const TextStyle(
+                                  color: Colors.white54,
+                                ),
+                                filled: true,
+                                fillColor: const Color(0xFF1A1A1A),
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                borderSide: BorderSide(color: const Color(0xFFD99C13)),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              hintStyle: const TextStyle(color: Colors.white54),
-                              filled: true,
-                              fillColor: const Color(0xFF1A1A1A),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 220),
-                        transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-                            child: _submitting
-                            ? const SizedBox(key: ValueKey('loading'), width: 42, height: 42, child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))))
-                            : ElevatedButton(
-                                key: const ValueKey('send'),
-                                onPressed: _submit,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFD99C13),
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: const Size(48, 42),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                                child: const Icon(Icons.keyboard_return, color: Colors.white),
-                              ),
-                      ),
-                    ],
-                  );
-                }),
+                        const SizedBox(width: 8),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 220),
+                          transitionBuilder:
+                              (child, anim) =>
+                                  ScaleTransition(scale: anim, child: child),
+                          child:
+                              _submitting
+                                  ? const SizedBox(
+                                    key: ValueKey('loading'),
+                                    width: 42,
+                                    height: 42,
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  : ElevatedButton(
+                                    key: const ValueKey('send'),
+                                    onPressed: _submit,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFD99C13),
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: const Size(48, 42),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.keyboard_return,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ],
           ),

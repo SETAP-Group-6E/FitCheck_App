@@ -69,10 +69,18 @@ class AboutUsPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 14),
                             _sectionTitle('What you can do'),
-                            _bullet('Create and save outfits in your wardrobe.'),
-                            _bullet('Post outfits to share your style with others.'),
-                            _bullet('Browse looks from the community for inspiration.'),
-                            _bullet('Build confidence by trying new combinations.'),
+                            _bullet(
+                              'Create and save outfits in your wardrobe.',
+                            ),
+                            _bullet(
+                              'Post outfits to share your style with others.',
+                            ),
+                            _bullet(
+                              'Browse looks from the community for inspiration.',
+                            ),
+                            _bullet(
+                              'Build confidence by trying new combinations.',
+                            ),
                             const SizedBox(height: 14),
                             _sectionTitle('Our goal'),
                             _bodyText(
@@ -103,11 +111,7 @@ class AboutUsPage extends StatelessWidget {
         shape: BoxShape.circle,
         color: _iconButtonBg,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
+          BoxShadow(color: Colors.black38, blurRadius: 6, offset: Offset(0, 3)),
         ],
       ),
       child: IconButton(
@@ -124,10 +128,7 @@ class AboutUsPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: _surfaceBorder,
-          width: 1,
-        ),
+        border: Border.all(color: _surfaceBorder, width: 1),
         boxShadow: const [
           BoxShadow(
             color: Colors.black54,

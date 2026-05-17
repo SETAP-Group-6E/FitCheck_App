@@ -74,8 +74,12 @@ class NotificationRepository {
         .order('created_at', ascending: false)
         .limit(limit);
 
-    final List<Map<String, dynamic>> comments = List<Map<String, dynamic>>.from(commentsRows as List? ?? []);
-    final List<Map<String, dynamic>> likes = List<Map<String, dynamic>>.from(likesRows as List? ?? []);
+    final List<Map<String, dynamic>> comments = List<Map<String, dynamic>>.from(
+      commentsRows as List? ?? [],
+    );
+    final List<Map<String, dynamic>> likes = List<Map<String, dynamic>>.from(
+      likesRows as List? ?? [],
+    );
 
     // Collect actor ids to fetch usernames
     final actorIds = <String>{};
@@ -90,7 +94,14 @@ class NotificationRepository {
 
     final actorMap = <String, Map<String, dynamic>>{};
     if (actorIds.isNotEmpty) {
-      final futures = actorIds.map((id) => _supabase.from('user').select('user_id, username, profile_pic_url').eq('user_id', id).maybeSingle());
+      final futures = actorIds.map(
+        (id) =>
+            _supabase
+                .from('user')
+                .select('user_id, username, profile_pic_url')
+                .eq('user_id', id)
+                .maybeSingle(),
+      );
       final rows = await Future.wait(futures);
       for (final r in rows) {
         if (r == null) continue;
@@ -104,7 +115,8 @@ class NotificationRepository {
 
     for (final c in comments) {
       final actorId = (c['user_id'] ?? '') as String;
-      if (actorId.isEmpty || actorId == userId) continue; // skip self interactions
+      if (actorId.isEmpty || actorId == userId)
+        continue; // skip self interactions
       final createdAtStr = (c['created_at'] ?? '') as String;
       DateTime createdAt;
       try {
@@ -113,20 +125,24 @@ class NotificationRepository {
         createdAt = DateTime.now();
       }
       final actor = actorMap[actorId];
-      final username = (actor?['username'] as String?) ?? ('user_' + actorId.substring(0, actorId.length > 8 ? 8 : actorId.length));
+      final username =
+          (actor?['username'] as String?) ??
+          ('user_${actorId.substring(0, actorId.length > 8 ? 8 : actorId.length)}');
       final profile = (actor?['profile_pic_url'] as String?);
       final body = (c['body'] as String?) ?? '';
-      final preview = body.length > 15 ? body.substring(0, 15) + '…' : body;
-      items.add(NotificationItem(
-        id: 'comment_${c['comments_id'] ?? ''}',
-        type: 'comment',
-        actorId: actorId,
-        actorUsername: username,
-        actorProfileUrl: profile,
-        postKey: (c['storage_key'] ?? '') as String,
-        commentPreview: preview,
-        createdAt: createdAt,
-      ));
+      final preview = body.length > 15 ? '${body.substring(0, 15)}…' : body;
+      items.add(
+        NotificationItem(
+          id: 'comment_${c['comments_id'] ?? ''}',
+          type: 'comment',
+          actorId: actorId,
+          actorUsername: username,
+          actorProfileUrl: profile,
+          postKey: (c['storage_key'] ?? '') as String,
+          commentPreview: preview,
+          createdAt: createdAt,
+        ),
+      );
     }
 
     for (final l in likes) {
@@ -140,18 +156,22 @@ class NotificationRepository {
         createdAt = DateTime.now();
       }
       final actor = actorMap[actorId];
-      final username = (actor?['username'] as String?) ?? ('user_' + actorId.substring(0, actorId.length > 8 ? 8 : actorId.length));
+      final username =
+          (actor?['username'] as String?) ??
+          ('user_${actorId.substring(0, actorId.length > 8 ? 8 : actorId.length)}');
       final profile = (actor?['profile_pic_url'] as String?);
-      items.add(NotificationItem(
-        id: 'like_${l['post_like_id'] ?? ''}',
-        type: 'like',
-        actorId: actorId,
-        actorUsername: username,
-        actorProfileUrl: profile,
-        postKey: (l['storage_key'] ?? '') as String,
-        commentPreview: null,
-        createdAt: createdAt,
-      ));
+      items.add(
+        NotificationItem(
+          id: 'like_${l['post_like_id'] ?? ''}',
+          type: 'like',
+          actorId: actorId,
+          actorUsername: username,
+          actorProfileUrl: profile,
+          postKey: (l['storage_key'] ?? '') as String,
+          commentPreview: null,
+          createdAt: createdAt,
+        ),
+      );
     }
 
     items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -162,7 +182,10 @@ class NotificationRepository {
   Future<int> fetchUnreadCount() async {
     final lastRead = await _getLastReadMillis();
     final items = await fetchNotifications(limit: 100);
-    final unread = items.where((i) => i.createdAt.millisecondsSinceEpoch > lastRead).length;
+    final unread =
+        items
+            .where((i) => i.createdAt.millisecondsSinceEpoch > lastRead)
+            .length;
     return unread;
   }
 }

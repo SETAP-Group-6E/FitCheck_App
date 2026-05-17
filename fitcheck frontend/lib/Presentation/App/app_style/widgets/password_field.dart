@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
-  
+
   const PasswordField(this.controller, {super.key});
 
   @override
@@ -13,7 +13,7 @@ class PasswordField extends StatefulWidget {
 
 class _PasswordFieldState extends State<PasswordField> {
   bool _obscureText = true;
-  
+
   @override
   Widget build(BuildContext context) {
     return TextField(

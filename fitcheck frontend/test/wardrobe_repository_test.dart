@@ -17,7 +17,11 @@ void main() {
         capturedRequest = request;
 
         // Fake successful database insert response.
-        return http.Response('', 201, request: request); // 201 Created status code.
+        return http.Response(
+          '',
+          201,
+          request: request,
+        ); // 201 Created status code.
       });
 
       final supabase = await _createSignedInSupabase(mockHttpClient);
@@ -57,7 +61,11 @@ void main() {
         capturedRequest = request;
 
         // Fake successful database insert response.
-        return http.Response('', 201, request: request); // 201 Created status code.
+        return http.Response(
+          '',
+          201,
+          request: request,
+        ); // 201 Created status code.
       });
 
       final supabase = await _createSignedInSupabase(mockHttpClient);
@@ -92,7 +100,11 @@ void main() {
         capturedRequests.add(request);
 
         // Fake successful database insert response.
-        return http.Response('', 201, request: request); // 201 Created status code.
+        return http.Response(
+          '',
+          201,
+          request: request,
+        ); // 201 Created status code.
       });
 
       final supabase = await _createSignedInSupabase(mockHttpClient);
@@ -216,7 +228,11 @@ void main() {
         capturedRequest = request;
 
         // Fake successful database update response.
-        return http.Response('', 204, request: request); // 204 No Content status code.
+        return http.Response(
+          '',
+          204,
+          request: request,
+        ); // 204 No Content status code.
       });
 
       final supabase = await _createSignedInSupabase(mockHttpClient);
@@ -306,7 +322,11 @@ void main() {
         capturedRequest = request;
 
         // Fake successful database delete response.
-        return http.Response('', 204, request: request); // 204 No Content status code for successful delete.
+        return http.Response(
+          '',
+          204,
+          request: request,
+        ); // 204 No Content status code for successful delete.
       });
 
       final supabase = await _createSignedInSupabase(mockHttpClient);

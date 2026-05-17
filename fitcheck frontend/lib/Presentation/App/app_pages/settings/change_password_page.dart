@@ -141,7 +141,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             ),
                           ),
                           onPressed: () {
-                            showAppMessage(context, 'Password change requested.');
+                            showAppMessage(
+                              context,
+                              'Password change requested.',
+                            );
                           },
                           child: const Text(
                             'Save password',
@@ -175,11 +178,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         shape: BoxShape.circle,
         color: _iconButtonBg,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
+          BoxShadow(color: Colors.black38, blurRadius: 6, offset: Offset(0, 3)),
         ],
       ),
       child: IconButton(
@@ -196,10 +195,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: _surfaceBorder,
-          width: 1,
-        ),
+        border: Border.all(color: _surfaceBorder, width: 1),
         boxShadow: const [
           BoxShadow(
             color: Colors.black54,
@@ -234,10 +230,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         TextField(
           controller: controller,
           obscureText: obscureText,
-          style: const TextStyle(
-            color: Colors.white,
-            fontFamily: 'Georgia',
-          ),
+          style: const TextStyle(color: Colors.white, fontFamily: 'Georgia'),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.white54),

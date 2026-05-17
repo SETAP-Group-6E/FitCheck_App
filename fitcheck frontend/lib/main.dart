@@ -1,31 +1,28 @@
 // File: lib/main.dart
 // Purpose: App entrypoint and route configuration for FitCheck.
-// Notes: MaterialApp is configured here; persistent UI overlays live in the app shell.
-//
-// High-level responsibilities in this file:
-// - Initialize runtime (env, Supabase)
-// - Create the top-level `MaterialApp` and routing logic
-// - Provide a small `NavigatorObserver` that toggles the floating
-//   navigation bar visibility for specific routes
+// Responsibilities: initialize env & Supabase, provide top-level
+// MaterialApp with route transitions, and overlay FloatingNavbar.
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:fitcheck/Presentation/App/app_pages/home_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/wardrobe_page.dart';
 import 'package:fitcheck/Presentation/auth/pages/login_page.dart';
+import 'package:fitcheck/Presentation/auth/pages/register_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/settings/settings_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/profile/my_posts_page.dart';
 import 'package:fitcheck/Presentation/App/app_pages/discover/discover_page.dart';
-import 'package:fitcheck/Presentation/App/theme/app_theme_mode.dart';
-import 'package:flutter/material.dart';
-import 'package:fitcheck/Presentation/App/app_state.dart' as app_state;
 import 'package:fitcheck/Presentation/App/app_pages/notifications_page.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'Presentation/auth/pages/register_page.dart';
-import 'Presentation/App/app_style/widgets/floating_nav_bar.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:fitcheck/Presentation/App/theme/app_theme_mode.dart';
+import 'package:fitcheck/Presentation/App/app_state.dart' as app_state;
+import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   // Load environment variables (development file)
   await dotenv.load(fileName: '.env/dev.txt');
 
@@ -45,7 +42,8 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(appThemeModeProvider);
 
-    final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> appNavigatorKey =
+        GlobalKey<NavigatorState>();
 
     // Top-level MaterialApp. We attach a `navigatorKey` so the overlay
     // `FloatingNavbar` can use the same navigator to push routes when tapped.
@@ -54,9 +52,7 @@ class MyApp extends ConsumerWidget {
       title: 'FitCheck',
       theme: buildAppTheme(mode),
       navigatorKey: appNavigatorKey,
-      navigatorObservers: [
-        NavVisibilityObserver(),
-      ],
+      navigatorObservers: [NavVisibilityObserver()],
       home: HomePage(),
       builder: (context, child) {
         // The `builder` wraps every route's content in a Stack so we can
@@ -236,103 +232,128 @@ class MyApp extends ConsumerWidget {
                 );
               },
             );
-            case '/my-posts':
-                return PageRouteBuilder(
-                  settings: settings,
-                  transitionDuration: const Duration(milliseconds: 280),
-                  reverseTransitionDuration: const Duration(milliseconds: 220),
-                  pageBuilder: (context, animation, secondaryAnimation) => const MyPostsPage(),
-                  transitionsBuilder: (
-                    context,
-                    animation,
-                    secondaryAnimation,
-                    child,
-                  ) {
-                    final slideTween = Tween<Offset>(
-                      begin: const Offset(1, 0),
-                      end: Offset.zero,
-                    ).chain(CurveTween(curve: Curves.easeOutCubic));
 
-                    return Stack(
-                      children: [
-                        Positioned.fill(
-                          child: FadeTransition(
-                            opacity: CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOut,
-                            ),
-                            child: ColoredBox(
-                              color: Theme.of(context).scaffoldBackgroundColor,
-                            ),
-                          ),
+          case '/my-posts':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 280),
+              reverseTransitionDuration: const Duration(milliseconds: 220),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) =>
+                      const MyPostsPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutCubic));
+
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
                         ),
-                        SlideTransition(
-                          position: animation.drive(slideTween),
-                          child: child,
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
                         ),
-                      ],
-                    );
+                      ),
+                    ),
+                    SlideTransition(
+                      position: animation.drive(slideTween),
+                      child: child,
+                    ),
+                  ],
+                );
               },
             );
-              case '/notifications':
-                return PageRouteBuilder(
-                  settings: settings,
-                  transitionDuration: const Duration(milliseconds: 220),
-                  reverseTransitionDuration: const Duration(milliseconds: 180),
-                  pageBuilder: (context, animation, secondaryAnimation) => const NotificationsPage(),
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    final slideTween = Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).chain(CurveTween(curve: Curves.easeOutCubic));
-                    return Stack(
-                      children: [
-                        Positioned.fill(
-                          child: FadeTransition(
-                            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-                            child: ColoredBox(color: Theme.of(context).scaffoldBackgroundColor),
-                          ),
-                        ),
-                        SlideTransition(position: animation.drive(slideTween), child: child),
-                      ],
-                    );
-                  },
-                );
-          case '/discover':
-                  return PageRouteBuilder(
-                    settings: settings,
-                    transitionDuration: const Duration(milliseconds: 280),
-                    reverseTransitionDuration: const Duration(milliseconds: 220),
-                    pageBuilder: (context, animation, secondaryAnimation) => const DiscoverPage(),
-                    transitionsBuilder: (
-                      context,
-                      animation,
-                      secondaryAnimation,
-                      child,
-                    ) {
-                      final slideTween = Tween<Offset>(
-                        begin: const Offset(1, 0),
-                        end: Offset.zero,
-                      ).chain(CurveTween(curve: Curves.easeOutCubic));
 
-                      return Stack(
-                        children: [
-                          Positioned.fill(
-                            child: FadeTransition(
-                              opacity: CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOut,
-                              ),
-                              child: ColoredBox(
-                                color: Theme.of(context).scaffoldBackgroundColor,
-                              ),
-                            ),
-                          ),
-                          SlideTransition(
-                            position: animation.drive(slideTween),
-                            child: child,
-                          ),
-                        ],
-                      );
-                    },
-                  );
+          case '/notifications':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 220),
+              reverseTransitionDuration: const Duration(milliseconds: 180),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) =>
+                      const NotificationsPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutCubic));
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    ),
+                    SlideTransition(
+                      position: animation.drive(slideTween),
+                      child: child,
+                    ),
+                  ],
+                );
+              },
+            );
+
+          case '/discover':
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: const Duration(milliseconds: 280),
+              reverseTransitionDuration: const Duration(milliseconds: 220),
+              pageBuilder:
+                  (context, animation, secondaryAnimation) =>
+                      const DiscoverPage(),
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) {
+                final slideTween = Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutCubic));
+
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                        child: ColoredBox(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                    ),
+                    SlideTransition(
+                      position: animation.drive(slideTween),
+                      child: child,
+                    ),
+                  ],
+                );
+              },
+            );
           case '/wardrobe':
             return PageRouteBuilder(
               settings: settings,
@@ -442,4 +463,4 @@ class NavVisibilityObserver extends NavigatorObserver {
   }
 }
 
-
+// flutter run -d chrome --web-port 62597

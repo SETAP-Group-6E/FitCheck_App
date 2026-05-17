@@ -75,7 +75,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                             const SizedBox(height: 10),
                             _bullet('Account details like email and username.'),
                             _bullet('Profile information you add.'),
-                            _bullet('Outfits, images and captions you upload or share.'),
+                            _bullet(
+                              'Outfits, images and captions you upload or share.',
+                            ),
                             const SizedBox(height: 14),
                             _sectionTitle('How We Use Your Information'),
                             _bodyText(
@@ -131,11 +133,7 @@ class PrivacyPolicyPage extends StatelessWidget {
         shape: BoxShape.circle,
         color: _iconButtonBg,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
+          BoxShadow(color: Colors.black38, blurRadius: 6, offset: Offset(0, 3)),
         ],
       ),
       child: IconButton(
@@ -152,10 +150,7 @@ class PrivacyPolicyPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: _surfaceBorder,
-          width: 1,
-        ),
+        border: Border.all(color: _surfaceBorder, width: 1),
         boxShadow: const [
           BoxShadow(
             color: Colors.black54,

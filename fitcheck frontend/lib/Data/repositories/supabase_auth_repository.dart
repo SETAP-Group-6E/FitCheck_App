@@ -1,7 +1,6 @@
 // File: lib/Data/repositories/supabase_auth_repository.dart
 // Purpose: Supabase implementation of the authentication repository.
 // Notes: Wraps Supabase auth API for sign-in/sign-up operations.
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../Domain/repositories/auth_repository.dart';
 

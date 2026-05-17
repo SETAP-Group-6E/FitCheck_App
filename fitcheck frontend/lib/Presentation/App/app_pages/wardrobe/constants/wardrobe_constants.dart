@@ -1,11 +1,7 @@
 // Common wardrobe constants used across the wardrobe pages and widgets.
 // Groups together static lists and default hints to keep views consistent.
 class WardrobeConstants {
-  static const List<String> wearTypes = [
-    "Smart",
-    "Casual",
-    "Formal",
-  ];
+  static const List<String> wearTypes = ["Smart", "Casual", "Formal"];
 
   static const List<String> fabricMaterials = [
     "Cotton",

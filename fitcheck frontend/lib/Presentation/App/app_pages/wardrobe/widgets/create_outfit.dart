@@ -4,6 +4,8 @@
 // Allows selecting items, naming the outfit and adding a description.
 import 'package:flutter/material.dart';
 import '../../../app_style/widgets/app_toast.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fitcheck/Domain/repositories/wardrobe_repository.dart';
 import '../constants/wardrobe_constants.dart';
 
@@ -59,6 +61,9 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
   final _descCtrl = TextEditingController();
   List<Map<String, dynamic>> _items = [];
   Set<String> _selectedItemIds = {};
+  String? _photoUrl;
+  bool _hasPhoto = false;
+  bool _isUploadingPhoto = false;
   bool _loadingItems = true;
 
   bool _saving = false;
@@ -78,6 +83,9 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
     final outfit = widget.existingOutfit!;
     _nameCtrl.text = (outfit['name'] ?? '').toString();
     _descCtrl.text = (outfit['description'] ?? '').toString();
+    final existingPhoto = (outfit['outfit_photo_url'] ?? '').toString();
+    _hasPhoto = existingPhoto.isNotEmpty;
+    if (_hasPhoto) _photoUrl = existingPhoto;
     // Prefill selected items - items should be an array or comma-separated string
     final items = outfit['items'] ?? [];
     if (items is List) {
@@ -113,6 +121,58 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
 
   void _cancel() => Navigator.of(context).pop(false);
 
+  Future<void> _pickAndUploadImage() async {
+    final supabase = Supabase.instance.client;
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Log in to upload an outfit image')),
+      );
+      Navigator.pushNamed(context, '/login');
+      return;
+    }
+
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image == null) return;
+
+    try {
+      setState(() => _isUploadingPhoto = true);
+
+      final bytes = await image.readAsBytes();
+      final fileName =
+          '$userId/outfits/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      await supabase.storage
+          .from('Wardrobe Outfits')
+          .uploadBinary(
+            fileName,
+            bytes,
+            fileOptions: const FileOptions(
+              contentType: 'image/jpeg',
+              upsert: true,
+            ),
+          );
+
+      final url = supabase.storage
+          .from('Wardrobe Outfits')
+          .getPublicUrl(fileName);
+      if (!mounted) return;
+      setState(() {
+        _photoUrl = url;
+        _hasPhoto = true;
+        _isUploadingPhoto = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isUploadingPhoto = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Outfit image upload failed: $e')));
+    }
+  }
+
   void _toggleItemSelection(String itemId) {
     if (itemId.isEmpty) return;
     setState(() {
@@ -128,12 +188,22 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
     if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
     if (_selectedItemIds.isEmpty) {
-      showAppMessage(context, 'Select at least one item for this outfit', error: true);
+      showAppMessage(
+        context,
+        'Select at least one item for this outfit',
+        error: true,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Select at least one item for this outfit'),
+        ),
+      );
       return;
     }
 
     setState(() => _saving = true);
     try {
+      final photoUrl = _hasPhoto ? _photoUrl : null;
       if (_isEditMode) {
         final outfitId =
             (widget.existingOutfit!['outfit_id'] ??
@@ -144,6 +214,7 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
           id: outfitId,
           name: _nameCtrl.text.trim(),
           description: _descCtrl.text.trim(),
+          photoUrl: photoUrl,
           clothingItemIds: _selectedItemIds.toList(),
         );
       } else {
@@ -151,6 +222,7 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
           name: _nameCtrl.text.trim(),
           description: _descCtrl.text.trim(),
           isOwned: true,
+          photoUrl: photoUrl,
           clothingItemIds: _selectedItemIds.toList(),
         );
       }
@@ -160,7 +232,18 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      showAppMessage(context, 'Failed to ${_isEditMode ? 'update' : 'save'} outfit: $e', error: true);
+      showAppMessage(
+        context,
+        'Failed to ${_isEditMode ? 'update' : 'save'} outfit: $e',
+        error: true,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to ${_isEditMode ? 'update' : 'save'} outfit: $e',
+          ),
+        ),
+      );
     }
   }
 
@@ -199,6 +282,16 @@ class _CreateOutfitModalState extends State<CreateOutfitModal> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        _Field(
+                          label: 'Outfit image',
+                          child: _OutfitPhotoBox(
+                            hasPhoto: _hasPhoto,
+                            photoUrl: _photoUrl,
+                            isUploading: _isUploadingPhoto,
+                            onUpload: _pickAndUploadImage,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         _Field(
                           label: "Outfit name",
                           child: _PillTextField(
@@ -527,6 +620,83 @@ class _TextArea extends StatelessWidget {
           borderSide: const BorderSide(color: gold, width: 2),
         ),
       ),
+    );
+  }
+}
+
+class _OutfitPhotoBox extends StatelessWidget {
+  final bool hasPhoto;
+  final String? photoUrl;
+  final bool isUploading;
+  final VoidCallback onUpload;
+
+  const _OutfitPhotoBox({
+    required this.hasPhoto,
+    required this.photoUrl,
+    required this.isUploading,
+    required this.onUpload,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 220,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: _CreateOutfitTheme.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _CreateOutfitTheme.border),
+          ),
+          child: Center(
+            child:
+                isUploading
+                    ? const SizedBox(
+                      height: 44,
+                      width: 44,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : hasPhoto && photoUrl != null && photoUrl!.isNotEmpty
+                    ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        photoUrl!,
+                        width: double.infinity,
+                        height: 220,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (_, _, _) => const Icon(
+                              Icons.image,
+                              size: 56,
+                              color: _CreateOutfitTheme.muted,
+                            ),
+                      ),
+                    )
+                    : const Icon(
+                      Icons.image_outlined,
+                      size: 56,
+                      color: _CreateOutfitTheme.muted,
+                    ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _CreateOutfitTheme.gold,
+              foregroundColor: Colors.white,
+              shape: const StadiumBorder(),
+              elevation: 0,
+            ),
+            onPressed: onUpload,
+            child: Text(hasPhoto ? 'Change image' : 'Upload image'),
+          ),
+        ),
+      ],
     );
   }
 }

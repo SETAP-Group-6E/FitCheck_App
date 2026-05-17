@@ -33,12 +33,22 @@ class GlassFrame extends StatelessWidget {
             // Fill uses the provided opacity so callers can tune how
             // prominent the glass effect appears against different
             // backgrounds.
-            color: const Color.fromARGB(255, 22, 22, 22).withValues(alpha: opacity),
+            color: const Color.fromARGB(
+              255,
+              22,
+              22,
+              22,
+            ).withValues(alpha: opacity),
             borderRadius: borderRadius,
             border: Border.all(
               // Subtle border to separate the glass surface from the
               // underlying content.
-              color: const Color.fromARGB(255, 102, 102, 102).withValues(alpha: 0.3),
+              color: const Color.fromARGB(
+                255,
+                102,
+                102,
+                102,
+              ).withValues(alpha: 0.3),
               width: 1.5,
             ),
           ),

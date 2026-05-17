@@ -12,7 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:fitcheck/Presentation/App/app_state.dart' as app_state;
 
 class CropPage extends StatefulWidget {
-  const CropPage({super.key, required this.imageBytes, this.startCropping = false});
+  const CropPage({
+    super.key,
+    required this.imageBytes,
+    this.startCropping = false,
+  });
 
   final Uint8List imageBytes;
   final bool startCropping;
@@ -57,12 +61,13 @@ class _CropPageState extends State<CropPage> {
           if (_showCrop) ...[
             IconButton(
               icon: const Icon(Icons.check),
-              onPressed: _isCropping
-                  ? null
-                  : () {
-                      setState(() => _isCropping = true);
-                      _controller.crop();
-                    },
+              onPressed:
+                  _isCropping
+                      ? null
+                      : () {
+                        setState(() => _isCropping = true);
+                        _controller.crop();
+                      },
             ),
             IconButton(
               icon: const Icon(Icons.close),
@@ -72,59 +77,58 @@ class _CropPageState extends State<CropPage> {
           ],
         ],
       ),
-      body: _showCrop
-          ? Column(
-              children: [
-                Expanded(
-                  child: Crop(
-                    controller: _controller,
-                    image: widget.imageBytes,
-                    aspectRatio: _aspectRatio,
-                    onCropped: (cropped) {
-                      Navigator.of(context).pop(cropped);
-                    },
-                    withCircleUi: false,
-                    baseColor: Colors.black,
-                    maskColor: Colors.black.withOpacity(0.5),
-                    cornerDotBuilder: (size, edgeAlignment) => const DotControl(),
+      body:
+          _showCrop
+              ? Column(
+                children: [
+                  Expanded(
+                    child: Crop(
+                      controller: _controller,
+                      image: widget.imageBytes,
+                      aspectRatio: _aspectRatio,
+                      onCropped: (cropped) {
+                        Navigator.of(context).pop(cropped);
+                      },
+                      withCircleUi: false,
+                      baseColor: Colors.black,
+                      maskColor: Colors.black.withOpacity(0.5),
+                      cornerDotBuilder:
+                          (size, edgeAlignment) => const DotControl(),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        tooltip: 'Square',
-                        icon: const Icon(Icons.crop_square),
-                        onPressed: () => setState(() => _aspectRatio = 1),
-                      ),
-                      IconButton(
-                        tooltip: 'Free',
-                        icon: const Icon(Icons.crop_free),
-                        onPressed: () => setState(() => _aspectRatio = null),
-                      ),
-                      IconButton(
-                        tooltip: 'Reset',
-                        icon: const Icon(Icons.refresh),
-                        onPressed: () {
-                          setState(() {
-                            _aspectRatio = null;
-                            _controller = CropController();
-                          });
-                        },
-                      ),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          tooltip: 'Square',
+                          icon: const Icon(Icons.crop_square),
+                          onPressed: () => setState(() => _aspectRatio = 1),
+                        ),
+                        IconButton(
+                          tooltip: 'Free',
+                          icon: const Icon(Icons.crop_free),
+                          onPressed: () => setState(() => _aspectRatio = null),
+                        ),
+                        IconButton(
+                          tooltip: 'Reset',
+                          icon: const Icon(Icons.refresh),
+                          onPressed: () {
+                            setState(() {
+                              _aspectRatio = null;
+                              _controller = CropController();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            )
-          : Center(
-              child: Image.memory(
-                widget.imageBytes,
-                fit: BoxFit.contain,
+                ],
+              )
+              : Center(
+                child: Image.memory(widget.imageBytes, fit: BoxFit.contain),
               ),
-            ),
     );
   }
 }

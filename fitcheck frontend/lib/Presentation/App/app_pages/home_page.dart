@@ -8,8 +8,6 @@ import 'package:fitcheck/Presentation/App/app_pages/posts/social.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/feed_post_card.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dart';
 import 'package:flutter/foundation.dart';
-// Feed / Home page: loads posts from storage and displays the feed cards.
-// - Handles navigation to post creation and post detail views.
 import 'package:flutter/material.dart';
 import '../app_style/widgets/app_toast.dart';
 import 'package:flutter/rendering.dart';
@@ -51,7 +49,10 @@ class _HomePageState extends State<HomePage> {
     // Kick off initial feed load and notification polling
     _refreshFeed();
     _fetchUnread();
-    _notifPollTimer = Timer.periodic(const Duration(seconds: 20), (_) => _fetchUnread());
+    _notifPollTimer = Timer.periodic(
+      const Duration(seconds: 20),
+      (_) => _fetchUnread(),
+    );
   }
 
   @override
@@ -184,7 +185,12 @@ class _HomePageState extends State<HomePage> {
         // Try to fetch post row (contains caption) from `post` table
         String? caption;
         try {
-          final row = await supabase.from('post').select('caption').eq('storage_key', groupKey).maybeSingle();
+          final row =
+              await supabase
+                  .from('post')
+                  .select('caption')
+                  .eq('storage_key', groupKey)
+                  .maybeSingle();
           caption = (row?['caption'] as String?)?.trim();
         } catch (_) {
           caption = null;
@@ -273,7 +279,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const Spacer(),
-                      // Notification bell 
+                      // Notification bell
                       Stack(
                         children: [
                           IconButton(
@@ -291,9 +297,21 @@ class _HomePageState extends State<HomePage> {
                               right: 6,
                               top: 6,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(12)),
-                                child: Text(_unreadCount > 99 ? '99+' : '$_unreadCount', style: const TextStyle(color: Colors.white, fontSize: 11)),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.redAccent,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  _unreadCount > 99 ? '99+' : '$_unreadCount',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                  ),
+                                ),
                               ),
                             ),
                         ],
@@ -303,14 +321,27 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () async {
                           final user = supabase.auth.currentUser;
                           if (user == null) {
-                            showAppMessage(context, 'Please log in to create a post.');
+                            showAppMessage(
+                              context,
+                              'Please log in to create a post.',
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Please log in to create a post.',
+                                ),
+                                duration: Duration(milliseconds: 1000),
+                              ),
+                            );
                             Navigator.pushNamed(context, '/login');
                             return;
                           }
 
                           final posted = await Navigator.of(context).push<bool>(
                             MaterialPageRoute(
-                              settings: const RouteSettings(name: '/post_drafting'),
+                              settings: const RouteSettings(
+                                name: '/post_drafting',
+                              ),
                               builder: (_) => const PostDraftingPage(),
                             ),
                           );
@@ -462,7 +493,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-          const FloatingNavbar(),
+          FloatingNavbar(),
         ],
       ),
     );
@@ -477,7 +508,6 @@ class _BucketPost {
   final List<String> imageUrls;
   final String? profileImageUrl;
   final String? caption;
-
   const _BucketPost({
     required this.id,
     required this.author,

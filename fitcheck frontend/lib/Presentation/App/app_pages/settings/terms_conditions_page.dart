@@ -134,11 +134,7 @@ class TermsConditionsPage extends StatelessWidget {
         shape: BoxShape.circle,
         color: _iconButtonBg,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
+          BoxShadow(color: Colors.black38, blurRadius: 6, offset: Offset(0, 3)),
         ],
       ),
       child: IconButton(
@@ -155,10 +151,7 @@ class TermsConditionsPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: _surfaceBorder,
-          width: 1,
-        ),
+        border: Border.all(color: _surfaceBorder, width: 1),
         boxShadow: const [
           BoxShadow(
             color: Colors.black54,

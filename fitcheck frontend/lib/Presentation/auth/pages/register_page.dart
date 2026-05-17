@@ -2,7 +2,6 @@
 // Purpose: UI for user registration.
 // Notes: Contains form and submit handling for new user sign-ups.
 
-
 import 'package:fitcheck/Presentation/App/app_style/widgets/password_field.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/signin_buttons.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,6 @@ final supabase = Supabase.instance.client;
 
 class RegisterPage extends ConsumerWidget {
   const RegisterPage({super.key});
-
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,11 +40,13 @@ class RegisterPage extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(100),
                           color: Color.fromRGBO(217, 156, 19, 1),
                         ),
-                        child: Image(image: AssetImage("Assets/logo_white.png")),
+                        child: Image(
+                          image: AssetImage("Assets/logo_white.png"),
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
-        
+
                     Text(
                       "Join the Community",
                       style: GoogleFonts.dmSerifText(
@@ -104,7 +104,7 @@ class RegisterPage extends ConsumerWidget {
                       child: PasswordField(passwordController),
                     ),
                     SizedBox(height: 10),
-        
+
                     SizedBox(
                       height: 40,
                       width: 350,
@@ -195,12 +195,7 @@ class RegisterPage extends ConsumerWidget {
                         ),
                         TextButton(
                           onPressed: () {
-                            
-                            Navigator.popAndPushNamed(
-                              context,
-                              '/login',
-                            );
-
+                            Navigator.popAndPushNamed(context, '/login');
                           },
                           child: Text(
                             "Login",
