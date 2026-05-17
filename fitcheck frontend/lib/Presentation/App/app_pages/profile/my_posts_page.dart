@@ -446,53 +446,53 @@ class _MyPostsPageState extends State<MyPostsPage> with AutomaticKeepAliveClient
       builder: (ctx) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 700),
-              child: Stack(
-                children: [
-                  FeedPostCard(
-                    postId: post.id,
-                    authorId: post.author,
-                    username: post.username,
-                    timeLabel: _formatTimeAgo(post.createdAt),
-                    imageUrls: post.imageUrls,
-                    profileImageUrl: post.profileImageUrl,
-                    caption: post.caption,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 700,
+            maxHeight: MediaQuery.of(ctx).size.height * 0.88,
+          ),
+          child: SingleChildScrollView(
+            child: Stack(
+              children: [
+                FeedPostCard(
+                  postId: post.id,
+                  authorId: post.author,
+                  username: post.username,
+                  timeLabel: _formatTimeAgo(post.createdAt),
+                  imageUrls: post.imageUrls,
+                  profileImageUrl: post.profileImageUrl,
+                  caption: post.caption,
+                ),
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: PopupMenuButton<String>(
+                    padding: EdgeInsets.zero,
+                    color: const Color(0xFF121212),
+                    icon: const Icon(Icons.more_vert, color: Colors.white54, size: 20),
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        _editCaption(post);
+                      } else if (value == 'delete') {
+                        final deleted = await _deletePost(post);
+                        if (deleted) Navigator.of(ctx).pop();
+                      }
+                    },
+                    itemBuilder: (menuCtx) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(children: const [Icon(Icons.edit, size: 18, color: Colors.white54), SizedBox(width: 8), Text('Edit caption', style: TextStyle(color: Colors.white))]),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(children: const [Icon(Icons.delete_outline, size: 18, color: Colors.redAccent), SizedBox(width: 8), Text('Delete', style: TextStyle(color: Colors.white))]),
+                      ),
+                    ],
                   ),
-                  Positioned(
-                    right: 6,
-                    top: 6,
-                    child: PopupMenuButton<String>(
-                      padding: EdgeInsets.zero,
-                      color: const Color(0xFF121212),
-                      icon: const Icon(Icons.more_vert, color: Colors.white54, size: 20),
-                      onSelected: (value) async {
-                        if (value == 'edit') {
-                          _editCaption(post);
-                        } else if (value == 'delete') {
-                          final deleted = await _deletePost(post);
-                          if (deleted) Navigator.of(ctx).pop();
-                        }
-                      },
-                      itemBuilder: (menuCtx) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(children: const [Icon(Icons.edit, size: 18, color: Colors.white54), SizedBox(width: 8), Text('Edit caption', style: TextStyle(color: Colors.white))]),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(children: const [Icon(Icons.delete_outline, size: 18, color: Colors.redAccent), SizedBox(width: 8), Text('Delete', style: TextStyle(color: Colors.white))]),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

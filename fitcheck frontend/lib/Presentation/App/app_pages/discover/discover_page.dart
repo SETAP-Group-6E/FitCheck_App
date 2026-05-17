@@ -255,27 +255,27 @@ class _DiscoverPageState extends State<DiscoverPage>
           (ctx) => Dialog(
             backgroundColor: Colors.transparent,
             insetPadding: const EdgeInsets.all(12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 700),
-                  child: Stack(
-                    children: [
-                      FeedPostCard(
-                        postId: post.id,
-                        authorId: post.author,
-                        username: post.username,
-                        timeLabel: _formatTimeAgo(post.createdAt),
-                        imageUrls: post.imageUrls,
-                        profileImageUrl: post.profileImageUrl,
-                        caption: post.caption,
-                      ),
-                      // No edit/delete buttons for discover view (read-only)
-                    ],
-                  ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 700,
+                maxHeight: MediaQuery.of(ctx).size.height * 0.88,
+              ),
+              child: SingleChildScrollView(
+                child: Stack(
+                  children: [
+                    FeedPostCard(
+                      postId: post.id,
+                      authorId: post.author,
+                      username: post.username,
+                      timeLabel: _formatTimeAgo(post.createdAt),
+                      imageUrls: post.imageUrls,
+                      profileImageUrl: post.profileImageUrl,
+                      caption: post.caption,
+                    ),
+                    // No edit/delete buttons for discover view (read-only)
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
     );
