@@ -134,9 +134,10 @@ class RegisterPage extends ConsumerWidget {
                                 );
                                 if (context.mounted) {
                                   showAppMessage(context, 'Welcome!');
-                                  Navigator.pushReplacement(
+                                  Navigator.pushNamedAndRemoveUntil(
                                     context,
-                                    MaterialPageRoute(builder: (context) => HomePage()),
+                                    '/homepage',
+                                    (route) => false,
                                   );
                                 }
                               } catch (e) {
