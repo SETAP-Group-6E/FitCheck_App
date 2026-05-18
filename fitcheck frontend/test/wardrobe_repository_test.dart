@@ -47,13 +47,13 @@ void main() {
       expect(body['warmth_rating'], 3);
       expect(body['water_resistant'], true);
       expect(body['layer_category'], 'Outer layer');
-      expect(body['photo_url'], 'https://example.com/coat.jpg');
+      expect(body['item_photo_url'], 'https://example.com/coat.jpg');
 
       await supabase.dispose();
     });
 
     // Test Plan row 17: optional photo missing.
-    // Checks that an item can be saved without sending a photo_url field.
+    // Checks that an item can be saved without sending an item_photo_url field.
     test('does not send photoUrl when no photo is provided', () async {
       http.Request? capturedRequest;
 
@@ -86,7 +86,7 @@ void main() {
       final body = jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
       expect(body['user_id'], 'user-123');
       expect(body['title'], 'White t-shirt');
-      expect(body.containsKey('photo_url'), false);
+      expect(body.containsKey('item_photo_url'), false);
 
       await supabase.dispose();
     });
@@ -250,7 +250,7 @@ void main() {
       expect(capturedRequest, isNotNull);
 
       final body = jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
-      expect(body['photo_url'], 'https://example.com/updated.jpg');
+      expect(body['item_photo_url'], 'https://example.com/updated.jpg');
       expect(body['wear_type'], 'Smart');
       expect(body['fabric_material'], 'Denim');
       expect(body['water_resistant'], true);
