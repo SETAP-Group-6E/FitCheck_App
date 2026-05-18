@@ -8,6 +8,7 @@ import 'package:fitcheck/Presentation/App/app_style/widgets/floating_nav_bar.dar
 import 'package:fitcheck/Presentation/App/app_style/glass_frame.dart';
 import 'package:fitcheck/Presentation/App/app_style/widgets/search_bar.dart';
 import 'package:fitcheck/Presentation/App/app_pages/wardrobe/styles/wardrobe_styles.dart';
+import 'package:fitcheck/Presentation/App/app_state.dart' as app_state;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fitcheck/Data/services/weather_service.dart';
 import 'dart:async';
@@ -33,6 +34,7 @@ class _WardrobePageState extends State<WardrobePage> {
   String _searchQuery = '';
   Set<String> _selectedWearTypes = {};
   Set<String> _selectedLayerCategories = {};
+  late final VoidCallback _wardrobeOutfitsListener;
   WeatherService? _weatherService;
   Map<String, dynamic>? _currentWeather;
   List<String> _recommendedTags = [];
@@ -58,6 +60,7 @@ class _WardrobePageState extends State<WardrobePage> {
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    app_state.wardrobeOutfitsVersion.removeListener(_wardrobeOutfitsListener);
     _searchController.dispose();
     super.dispose();
   }
@@ -273,6 +276,12 @@ class _WardrobePageState extends State<WardrobePage> {
   void initState() {
     super.initState();
     _wardrobeRepository = SupabaseWardrobeRepository(Supabase.instance.client);
+    _wardrobeOutfitsListener = () {
+      if (!mounted) return;
+      setState(() => _showOutfits = true);
+      _loadOutfits();
+    };
+    app_state.wardrobeOutfitsVersion.addListener(_wardrobeOutfitsListener);
     _loadItems();
     _loadOutfits();
     _loadWeatherAndRecommend();
@@ -437,13 +446,16 @@ class _WardrobePageState extends State<WardrobePage> {
   }
 
   void _openEditOutfit(Map<String, dynamic> outfit) {
-    CreateOutfitModal.open(
-      context,
-      repository: _wardrobeRepository,
-      existingOutfit: outfit,
-    ).then((didSave) {
-      if (didSave) _loadOutfits();
-    });
+    () async {
+      final didSave = await CreateOutfitModal.open(
+        context,
+        repository: _wardrobeRepository,
+        existingOutfit: outfit,
+      );
+      if (didSave) {
+        await _loadOutfits();
+      }
+    }();
   }
 
   @override
@@ -634,7 +646,11 @@ class _WardrobePageState extends State<WardrobePage> {
               ],
             ),
           ),
-          FloatingNavbar(onOutfitCreated: _loadOutfits),
+          FloatingNavbar(
+            onOutfitCreated: () async {
+              await _loadOutfits();
+            },
+          ),
         ],
       ),
     );
