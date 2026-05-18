@@ -106,6 +106,41 @@ void main() {
       await supabase.dispose();
     });
 
+    // Checks that the outfit photo url is sent when provided.
+    test('sends photoUrl when an outfit photo is provided', () async {
+      http.Request? capturedRequest;
+
+      final mockHttpClient = MockClient((request) async {
+        capturedRequest = request;
+
+        return http.Response(
+          jsonEncode({'outfit_id': 'outfit1'}),
+          201,
+          headers: {'content-type': 'application/json'},
+          request: request,
+        );
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      await repository.addOutfit(
+        name: 'Photo fit',
+        description: 'Outfit with an image',
+        isOwned: true,
+        photoUrl: 'https://example.com/outfit.jpg',
+        clothingItemIds: <String>[],
+      );
+
+      expect(capturedRequest, isNotNull);
+
+      final outfitBody =
+          jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
+      expect(outfitBody['outfit_photo_url'], 'https://example.com/outfit.jpg');
+
+      await supabase.dispose();
+    });
+
     // Test Plan row 54: missing outfit id.
     // Checks that outfit creation fails safely if Supabase returns no outfit_id.
     test('throws an Exception when no outfit id is returned', () async {
@@ -249,6 +284,36 @@ void main() {
         'eq.outfit-owned-by-someone-else',
       );
       expect(capturedRequest!.url.queryParameters['user_id'], 'eq.user-123');
+
+      await supabase.dispose();
+    });
+
+    // Checks that the outfit photo url can be updated by itself.
+    test('updates outfit photoUrl when provided', () async {
+      http.Request? capturedRequest;
+
+      final mockHttpClient = MockClient((request) async {
+        capturedRequest = request;
+
+        return http.Response('', 204, request: request);
+      });
+
+      final supabase = await _createSignedInSupabase(mockHttpClient);
+      final repository = SupabaseWardrobeRepository(supabase);
+
+      await repository.updateOutfit(
+        id: 'outfit1',
+        photoUrl: 'https://example.com/updated-outfit.jpg',
+      );
+
+      expect(capturedRequest, isNotNull);
+
+      final outfitBody =
+          jsonDecode(capturedRequest!.body) as Map<String, dynamic>;
+      expect(
+        outfitBody['outfit_photo_url'],
+        'https://example.com/updated-outfit.jpg',
+      );
 
       await supabase.dispose();
     });
