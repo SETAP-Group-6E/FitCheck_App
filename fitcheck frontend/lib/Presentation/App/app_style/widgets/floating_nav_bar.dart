@@ -14,7 +14,7 @@ class FloatingNavbar extends StatefulWidget {
   final double height;
   final double bottomPadding;
   final BorderRadius borderRadius;
-  final VoidCallback? onOutfitCreated;
+  final Future<void> Function()? onOutfitCreated;
   final GlobalKey<NavigatorState>? navigatorKey;
 
   const FloatingNavbar({
@@ -190,7 +190,8 @@ class _FloatingNavbarState extends State<FloatingNavbar> {
                                 repository: wardrobeRepository,
                               );
                               if (didSave) {
-                                widget.onOutfitCreated?.call();
+                                wardrobeOutfitsVersion.value++;
+                                await widget.onOutfitCreated?.call();
                               }
                             },
                           ),

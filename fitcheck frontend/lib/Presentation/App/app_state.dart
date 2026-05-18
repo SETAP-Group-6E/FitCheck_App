@@ -4,3 +4,4 @@ import 'package:flutter/foundation.dart';
 /// Only include very small, low-risk flags here; prefer providers for
 /// larger application state.
 final ValueNotifier<bool> navbarVisible = ValueNotifier<bool>(true);
+final ValueNotifier<int> wardrobeOutfitsVersion = ValueNotifier<int>(0);
